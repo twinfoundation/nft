@@ -29,15 +29,24 @@
 	},
 	"dependencies": {
 		"@gtsc/core": "next",
+		"@gtsc/crypto": "next",
 		"@gtsc/nameof": "^0.0.4",
 		"@gtsc/nft-models": "0.0.3-next.1",
-		"@gtsc/services": "next"
+		"@gtsc/services": "next",
+		"@iota/sdk-wasm": "^1.1.3",
+		"@gtsc/vault-models": "next",
+		"@gtsc/wallet-models": "next"
 	},
 	"devDependencies": {
 		"@gtsc/nameof-transformer": "^0.0.4",
+		"@gtsc/entity": "next",
+		"@gtsc/entity-storage-connector-memory": "next",
+		"@gtsc/vault-connector-entity-storage": "next",
+		"@gtsc/wallet-connector-iota": "next",
 		"@vitest/coverage-v8": "^1.6.0",
 		"@types/node": "^20.12.12",
 		"copyfiles": "^2.4.1",
+		"dotenv": "^16.4.5",
 		"replace-in-files-cli": "^2.2.0",
 		"rimraf": "^5.0.7",
 		"rollup": "^4.17.2",

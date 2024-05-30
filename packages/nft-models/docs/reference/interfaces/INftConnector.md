@@ -6,7 +6,7 @@ Interface describing an NFT connector.
 
 ### mint()
 
-> **mint**\<`T`, `U`\>(`requestContext`, `tag`, `metadata`, `immutableMetadata`): `Promise`\<`string`\>
+> **mint**\<`T`, `U`\>(`requestContext`, `tag`, `immutableMetadata`, `metadata`): `Promise`\<`string`\>
 
 Mint an NFT.
 
@@ -26,16 +26,68 @@ The context for the request.
 
 The tag for the NFT.
 
-• **metadata**: `undefined` \| `T`
-
-The metadata for the NFT.
-
-• **immutableMetadata**: `undefined` \| `U`
+• **immutableMetadata**: `undefined` \| `T`
 
 The immutable metadata for the NFT.
+
+• **metadata**: `undefined` \| `U`
+
+The metadata for the NFT.
 
 #### Returns
 
 `Promise`\<`string`\>
 
-The id of the created NFT.
+The id of the created NFT in urn format.
+
+***
+
+### burn()
+
+> **burn**(`requestContext`, `id`): `Promise`\<`void`\>
+
+Burn an NFT.
+
+#### Parameters
+
+• **requestContext**: `IRequestContext`
+
+The context for the request.
+
+• **id**: `string`
+
+The id of the NFT to burn in urn format.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+Nothing.
+
+***
+
+### transfer()
+
+> **transfer**(`requestContext`, `id`, `recipient`): `Promise`\<`void`\>
+
+Transfer an NFT.
+
+#### Parameters
+
+• **requestContext**: `IRequestContext`
+
+The context for the request.
+
+• **id**: `string`
+
+The id of the NFT to transfer in urn format.
+
+• **recipient**: `string`
+
+The recipient identity of the NFT.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+Nothing.

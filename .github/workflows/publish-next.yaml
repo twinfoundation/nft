@@ -10,6 +10,7 @@ on:
         options:
           - nft-models
           - nft-connector-iota
+          - nft-connector-entity-storage
 
 jobs:
   publish:

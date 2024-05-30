@@ -40,7 +40,8 @@
 	},
 	"workspaces": [
 		"packages/nft-models",
-		"packages/nft-connector-iota"
+		"packages/nft-connector-iota",
+		"packages/nft-connector-entity-storage"
 	],
 	"type": "module"
 }

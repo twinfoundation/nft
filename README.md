@@ -6,6 +6,7 @@ This mono-repository contains packages which are used when creating and interact
 
 - [nft-models](packages/nft-models/README.md) - Contains models and classes for use with NFTs.
 - [nft-connector-iota](packages/nft-connector-iota/README.md) - Implementation of the NFT connector using IOTA.
+- [nft-connector-entity-storage](packages/nft-connector-entity-storage/README.md) - Implementation of the NFT connector using entity storage.
 
 ## Contributing
 
