@@ -6,12 +6,16 @@ jobs:
   publish:
     runs-on: ubuntu-latest
 
+    env:
+      TEST_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
+      TEST_MNEMONIC_2: ${{ secrets.TEST_MNEMONIC_2 }}
+
     if: github.ref == 'refs/heads/main'
 
     strategy:
       max-parallel: 1
       matrix:
-        package: [nft-models, nft-connector-iota]
+        package: [nft-models, nft-connector-iota, nft-connector-entity-storage]
 
     steps:
       - name: Checkout

@@ -1,11 +1,11 @@
 {
-	"name": "@gtsc/nft-connector-iota",
+	"name": "@gtsc/nft-connector-entity-storage",
 	"version": "0.0.3-next.2",
-	"description": "Implementation of the NFT connector using IOTA",
+	"description": "Implementation of the NFT connector using entity storage",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/gtscio/nft.git",
-		"directory": "packages/nft-connector-iota"
+		"directory": "packages/nft-connector-entity-storage"
 	},
 	"author": "martyn.janes@iota.org",
 	"license": "Apache-2.0",
@@ -30,19 +30,18 @@
 	"dependencies": {
 		"@gtsc/core": "next",
 		"@gtsc/crypto": "next",
+		"@gtsc/entity": "next",
+		"@gtsc/entity-storage-models": "next",
 		"@gtsc/nameof": "^0.0.4",
 		"@gtsc/nft-models": "0.0.3-next.2",
 		"@gtsc/services": "next",
-		"@iota/sdk-wasm": "^1.1.3",
 		"@gtsc/vault-models": "next",
 		"@gtsc/wallet-models": "next"
 	},
 	"devDependencies": {
 		"@gtsc/nameof-transformer": "^0.0.4",
-		"@gtsc/entity": "next",
 		"@gtsc/entity-storage-connector-memory": "next",
 		"@gtsc/vault-connector-entity-storage": "next",
-		"@gtsc/wallet-connector-iota": "next",
 		"@vitest/coverage-v8": "^1.6.0",
 		"@types/node": "^20.12.12",
 		"copyfiles": "^2.4.1",

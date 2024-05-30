@@ -1,6 +1,6 @@
-# Class: IotaNftConnector
+# Class: EntityStorageNftConnector
 
-Class for performing NFT operations on IOTA.
+Class for performing NFT operations on entity storage.
 
 ## Implements
 
@@ -8,11 +8,11 @@ Class for performing NFT operations on IOTA.
 
 ## Constructors
 
-### new IotaNftConnector()
+### new EntityStorageNftConnector()
 
-> **new IotaNftConnector**(`dependencies`, `config`): [`IotaNftConnector`](IotaNftConnector.md)
+> **new EntityStorageNftConnector**(`dependencies`, `config`?): [`EntityStorageNftConnector`](EntityStorageNftConnector.md)
 
-Create a new instance of IotaNftConnector.
+Create a new instance of EntityStorageNftConnector.
 
 #### Parameters
 
@@ -24,23 +24,23 @@ The dependencies for the class.
 
 The vault connector.
 
-• **dependencies.walletConnector**: `IWalletConnector`
+• **dependencies.nftEntityStorage?**: `IEntityStorageConnector`\<[`Nft`](Nft.md)\>
 
-The wallet connector.
+The entity storage for nfts.
 
-• **config**: [`IIotaNftConnectorConfig`](../interfaces/IIotaNftConnectorConfig.md)
+• **config?**: [`IEntityStorageNftConnectorConfig`](../interfaces/IEntityStorageNftConnectorConfig.md)
 
 The configuration for the connector.
 
 #### Returns
 
-[`IotaNftConnector`](IotaNftConnector.md)
+[`EntityStorageNftConnector`](EntityStorageNftConnector.md)
 
 ## Properties
 
 ### NAMESPACE
 
-> `static` **NAMESPACE**: `string` = `"iota-nft"`
+> `static` **NAMESPACE**: `string` = `"entity-storage-nft"`
 
 The namespace supported by the wallet connector.
 
