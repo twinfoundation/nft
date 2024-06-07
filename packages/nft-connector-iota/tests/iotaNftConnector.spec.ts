@@ -51,8 +51,8 @@ describe("IotaNftConnector", () => {
 		const urn = Urn.fromValidString(idUrn);
 
 		const nftAddress = Utils.nftIdToBech32(urn.namespaceSpecific(), "tst");
-		console.log("Minted NFT Id", idUrn.toString());
-		console.log("Minted NFT", `${process.env.TEST_EXPLORER_URL}addr/${nftAddress}`);
+		process.stdout.write(`Minted NFT Id: ${idUrn.toString()}\n`);
+		process.stdout.write(`Minted NFT: ${process.env.TEST_EXPLORER_URL}addr/${nftAddress}\n`);
 		expect(urn.namespaceIdentifier()).toEqual("iota-nft");
 		expect(urn.namespaceSpecific().length).toEqual(66);
 

@@ -17,7 +17,7 @@ import { IotaFaucetConnector, IotaWalletConnector } from "@gtsc/wallet-connector
 import type { IClientOptions } from "@iota/sdk-wasm/node/lib/index.js";
 import * as dotenv from "dotenv";
 
-console.log("Setting up test environment from .env and .env.dev files");
+process.stdout.write("Setting up test environment from .env and .env.dev files\n");
 
 dotenv.config({ path: [path.join(__dirname, ".env"), path.join(__dirname, ".env.dev")] });
 
@@ -123,7 +123,7 @@ export const TEST_NFT_ADDRESS_2_BECH32 = addresses2[0];
  * Setup the test environment.
  */
 export async function setupTestEnv(): Promise<void> {
-	console.log("NFT Address", `${process.env.TEST_EXPLORER_URL}addr/${TEST_NFT_ADDRESS_BECH32}`);
-	console.log("NFT Address 2", `${process.env.TEST_EXPLORER_URL}addr/${TEST_NFT_ADDRESS_2_BECH32}`);
+	process.stdout.write(`NFT Address: ${process.env.TEST_EXPLORER_URL}addr/${TEST_NFT_ADDRESS_BECH32}\n`);
+	process.stdout.write(`NFT Address 2: ${process.env.TEST_EXPLORER_URL}addr/${TEST_NFT_ADDRESS_2_BECH32}\n`);
 	await TEST_WALLET_CONNECTOR.ensureBalance(TEST_CONTEXT, TEST_NFT_ADDRESS_BECH32, 1000000000n);
 }

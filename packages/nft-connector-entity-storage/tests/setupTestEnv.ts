@@ -14,7 +14,7 @@ import type { IVaultConnector } from "@gtsc/vault-models";
 import * as dotenv from "dotenv";
 import { Nft } from "../src/entities/nft";
 
-console.log("Setting up test environment from .env and .env.dev files");
+process.stdout.write("Setting up test environment from .env and .env.dev files\n");
 
 dotenv.config({ path: [path.join(__dirname, ".env"), path.join(__dirname, ".env.dev")] });
 
