@@ -6,7 +6,7 @@ Interface describing an NFT connector.
 
 ### mint()
 
-> **mint**\<`T`, `U`\>(`requestContext`, `tag`, `immutableMetadata`, `metadata`): `Promise`\<`string`\>
+> **mint**\<`T`, `U`\>(`requestContext`, `issuer`, `tag`, `immutableMetadata`, `metadata`): `Promise`\<`string`\>
 
 Mint an NFT.
 
@@ -21,6 +21,10 @@ Mint an NFT.
 • **requestContext**: `IRequestContext`
 
 The context for the request.
+
+• **issuer**: `string`
+
+The issuer for the NFT.
 
 • **tag**: `string`
 
@@ -44,7 +48,7 @@ The id of the created NFT in urn format.
 
 ### burn()
 
-> **burn**(`requestContext`, `id`): `Promise`\<`void`\>
+> **burn**(`requestContext`, `issuer`, `id`): `Promise`\<`void`\>
 
 Burn an NFT.
 
@@ -53,6 +57,10 @@ Burn an NFT.
 • **requestContext**: `IRequestContext`
 
 The context for the request.
+
+• **issuer**: `string`
+
+The issuer for the NFT to return the funds to.
 
 • **id**: `string`
 
@@ -84,7 +92,7 @@ The id of the NFT to transfer in urn format.
 
 • **recipient**: `string`
 
-The recipient identity of the NFT.
+The recipient of the NFT.
 
 #### Returns
 

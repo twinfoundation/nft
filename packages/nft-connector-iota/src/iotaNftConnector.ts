@@ -1,11 +1,20 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { Converter, GeneralError, Guards, Is, ObjectHelper, Urn } from "@gtsc/core";
+import {
+	BaseError,
+	Converter,
+	GeneralError,
+	Guards,
+	type IError,
+	Is,
+	ObjectHelper,
+	Urn
+} from "@gtsc/core";
+import { Bip39 } from "@gtsc/crypto";
 import { nameof } from "@gtsc/nameof";
 import type { INftConnector } from "@gtsc/nft-models";
 import type { IRequestContext } from "@gtsc/services";
 import type { IVaultConnector } from "@gtsc/vault-models";
-import type { IWalletConnector } from "@gtsc/wallet-models";
 import {
 	AddressUnlockCondition,
 	BasicOutput,
@@ -23,7 +32,7 @@ import {
 	type NftOutput,
 	type NftOutputBuilderParams,
 	type TransactionPayload
-} from "@iota/sdk-wasm/node";
+} from "@iota/sdk-wasm/node/lib/index.js";
 import type { IIotaNftConnectorConfig } from "./models/IIotaNftConnectorConfig";
 
 /**
@@ -42,22 +51,21 @@ export class IotaNftConnector implements INftConnector {
 	private static readonly _CLASS_NAME: string = nameof<IotaNftConnector>();
 
 	/**
+	 * Default name for the seed secret.
+	 */
+	private static readonly _DEFAULT_SEED_SECRET_NAME: string = "seed";
+
+	/**
 	 * Default name for the mnemonic secret.
 	 * @internal
 	 */
-	private static readonly _DEFAULT_MNEMONIC_SECRET_NAME: string = "wallet-mnemonic";
+	private static readonly _DEFAULT_MNEMONIC_SECRET_NAME: string = "mnemonic";
 
 	/**
 	 * The default length of time to wait for the inclusion of a transaction in seconds.
 	 * @internal
 	 */
 	private static readonly _DEFAULT_INCLUSION_TIMEOUT: number = 60;
-
-	/**
-	 * The default index to use for storing nfts.
-	 * @internal
-	 */
-	private static readonly _DEFAULT_ADDRESS_INDEX = 2;
 
 	/**
 	 * Default coin type.
@@ -70,12 +78,6 @@ export class IotaNftConnector implements INftConnector {
 	 * @internal
 	 */
 	private readonly _vaultConnector: IVaultConnector;
-
-	/**
-	 * Connector for wallet operations.
-	 * @internal
-	 */
-	private readonly _walletConnector: IWalletConnector;
 
 	/**
 	 * The configuration for the connector.
@@ -93,13 +95,11 @@ export class IotaNftConnector implements INftConnector {
 	 * Create a new instance of IotaNftConnector.
 	 * @param dependencies The dependencies for the class.
 	 * @param dependencies.vaultConnector The vault connector.
-	 * @param dependencies.walletConnector The wallet connector.
 	 * @param config The configuration for the connector.
 	 */
 	constructor(
 		dependencies: {
 			vaultConnector: IVaultConnector;
-			walletConnector: IWalletConnector;
 		},
 		config: IIotaNftConnectorConfig
 	) {
@@ -109,11 +109,6 @@ export class IotaNftConnector implements INftConnector {
 			nameof(dependencies.vaultConnector),
 			dependencies.vaultConnector
 		);
-		Guards.object<IWalletConnector>(
-			IotaNftConnector._CLASS_NAME,
-			nameof(dependencies.walletConnector),
-			dependencies.walletConnector
-		);
 		Guards.object<IIotaNftConnectorConfig>(IotaNftConnector._CLASS_NAME, nameof(config), config);
 		Guards.object<IIotaNftConnectorConfig["clientOptions"]>(
 			IotaNftConnector._CLASS_NAME,
@@ -121,10 +116,9 @@ export class IotaNftConnector implements INftConnector {
 			config.clientOptions
 		);
 		this._vaultConnector = dependencies.vaultConnector;
-		this._walletConnector = dependencies.walletConnector;
 		this._config = config;
-		this._config.walletMnemonicId ??= IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME;
-		this._config.addressIndex ??= IotaNftConnector._DEFAULT_ADDRESS_INDEX;
+		this._config.vaultMnemonicId ??= IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME;
+		this._config.vaultSeedId ??= IotaNftConnector._DEFAULT_SEED_SECRET_NAME;
 		this._config.coinType ??= IotaNftConnector._DEFAULT_COIN_TYPE;
 		this._config.inclusionTimeoutSeconds ??= IotaNftConnector._DEFAULT_INCLUSION_TIMEOUT;
 	}
@@ -132,6 +126,7 @@ export class IotaNftConnector implements INftConnector {
 	/**
 	 * Mint an NFT.
 	 * @param requestContext The context for the request.
+	 * @param issuer The issuer for the NFT.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
@@ -139,6 +134,7 @@ export class IotaNftConnector implements INftConnector {
 	 */
 	public async mint<T = unknown, U = unknown>(
 		requestContext: IRequestContext,
+		issuer: string,
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U
@@ -158,26 +154,18 @@ export class IotaNftConnector implements INftConnector {
 			nameof(requestContext.identity),
 			requestContext.identity
 		);
+		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(tag), tag);
 
 		try {
-			const nftAddressIndex = this._config.addressIndex ?? IotaNftConnector._DEFAULT_ADDRESS_INDEX;
-			const addresses = await this._walletConnector.getAddresses(
-				requestContext,
-				nftAddressIndex,
-				1
-			);
-
-			const nftAddress = addresses[0];
-
 			const buildParams: NftOutputBuilderParams = {
 				nftId: "0x0000000000000000000000000000000000000000000000000000000000000000",
 				unlockConditions: [
-					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(nftAddress)))
+					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(issuer)))
 				],
-				immutableFeatures: [new IssuerFeature(new Ed25519Address(Utils.bech32ToHex(nftAddress)))],
+				immutableFeatures: [new IssuerFeature(new Ed25519Address(Utils.bech32ToHex(issuer)))],
 				features: [
-					new SenderFeature(new Ed25519Address(Utils.bech32ToHex(nftAddress))),
+					new SenderFeature(new Ed25519Address(Utils.bech32ToHex(issuer))),
 					new TagFeature(Converter.utf8ToHex(tag, true))
 				]
 			};
@@ -194,34 +182,39 @@ export class IotaNftConnector implements INftConnector {
 				);
 			}
 
-			const mnemonic = await this._vaultConnector.getSecret<string>(
-				requestContext,
-				this._config.walletMnemonicId ?? IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME
-			);
-
 			const client = await this.createClient();
+
 			const nftOutput = await client.buildNftOutput(buildParams);
 
-			const blockDetails = await this.prepareAndPostTransaction(client, mnemonic, {
+			const blockDetails = await this.prepareAndPostTransaction(requestContext, client, {
 				outputs: [nftOutput]
 			});
 
 			const transactionId = Utils.transactionId(blockDetails.block.payload as TransactionPayload);
 			const outputId = Utils.computeOutputId(transactionId, 0);
 			const nftId = Utils.computeNftId(outputId);
-			return new Urn(IotaNftConnector.NAMESPACE, nftId).toString();
+
+			const hrp = await client.getBech32Hrp();
+
+			return new Urn(IotaNftConnector.NAMESPACE, `${hrp}:${nftId}`).toString();
 		} catch (error) {
-			throw new GeneralError(IotaNftConnector._CLASS_NAME, "mintingFailed", undefined, error);
+			throw new GeneralError(
+				IotaNftConnector._CLASS_NAME,
+				"mintingFailed",
+				undefined,
+				this.extractPayloadError(error)
+			);
 		}
 	}
 
 	/**
 	 * Burn an NFT.
 	 * @param requestContext The context for the request.
+	 * @param issuer The issuer for the NFT to return the funds to.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @returns Nothing.
 	 */
-	public async burn(requestContext: IRequestContext, id: string): Promise<void> {
+	public async burn(requestContext: IRequestContext, issuer: string, id: string): Promise<void> {
 		Guards.object<IRequestContext>(
 			IotaNftConnector._CLASS_NAME,
 			nameof(requestContext),
@@ -237,6 +230,8 @@ export class IotaNftConnector implements INftConnector {
 			nameof(requestContext.identity),
 			requestContext.identity
 		);
+		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(issuer), issuer);
+
 		Urn.guard(IotaNftConnector._CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
@@ -249,27 +244,17 @@ export class IotaNftConnector implements INftConnector {
 
 		try {
 			const client = await this.createClient();
+			const nftParts = urnParsed.namespaceSpecific().split(":");
 
-			const mnemonic = await this._vaultConnector.getSecret<string>(
-				requestContext,
-				this._config.walletMnemonicId ?? IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME
-			);
+			const nftId = nftParts[1];
+			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
 
-			const nftAddressIndex = this._config.addressIndex ?? IotaNftConnector._DEFAULT_ADDRESS_INDEX;
-			const addresses = await this._walletConnector.getAddresses(
-				requestContext,
-				nftAddressIndex,
-				1
-			);
-
-			const nftAddress = addresses[0];
-
-			const nftOutputId = await client.nftOutputId(urnParsed.namespaceSpecific());
+			const nftOutputId = await client.nftOutputId(nftId);
 			const nftOutputResponse = await client.getOutput(nftOutputId);
 
-			await this.prepareAndPostTransaction(client, mnemonic, {
+			await this.prepareAndPostTransaction(requestContext, client, {
 				burn: {
-					nfts: [urnParsed.namespaceSpecific()]
+					nfts: [nftId]
 				},
 				inputs: [
 					new UTXOInput(
@@ -279,12 +264,17 @@ export class IotaNftConnector implements INftConnector {
 				],
 				outputs: [
 					new BasicOutput(nftOutputResponse.output.getAmount(), [
-						new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(nftAddress)))
+						new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(issuer)))
 					])
 				]
 			});
 		} catch (error) {
-			throw new GeneralError(IotaNftConnector._CLASS_NAME, "burningFailed", undefined, error);
+			throw new GeneralError(
+				IotaNftConnector._CLASS_NAME,
+				"burningFailed",
+				undefined,
+				this.extractPayloadError(error)
+			);
 		}
 	}
 
@@ -292,7 +282,7 @@ export class IotaNftConnector implements INftConnector {
 	 * Transfer an NFT.
 	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to transfer in urn format.
-	 * @param recipient The recipient identity of the NFT.
+	 * @param recipient The recipient of the NFT.
 	 * @returns Nothing.
 	 */
 	public async transfer(
@@ -329,37 +319,24 @@ export class IotaNftConnector implements INftConnector {
 		try {
 			const client = await this.createClient();
 
-			const nftAddressIndex = this._config.addressIndex ?? IotaNftConnector._DEFAULT_ADDRESS_INDEX;
-			const recipientAddresses = await this._walletConnector.getAddresses(
-				{
-					...requestContext,
-					identity: recipient
-				},
-				nftAddressIndex,
-				1
-			);
+			const nftParts = urnParsed.namespaceSpecific().split(":");
+			const nftId = nftParts[1];
+			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
 
-			const recipientAddress = recipientAddresses[0];
-
-			const nftOutputId = await client.nftOutputId(urnParsed.namespaceSpecific());
+			const nftOutputId = await client.nftOutputId(nftId);
 			const nftOutputResponse = await client.getOutput(nftOutputId);
 			const nftOutput = nftOutputResponse.output as NftOutput;
 
 			const recipientNftOutput = await client.buildNftOutput({
-				nftId: urnParsed.namespaceSpecific(),
+				nftId,
 				unlockConditions: [
-					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(recipientAddress)))
+					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(recipient)))
 				],
 				immutableFeatures: nftOutput.immutableFeatures,
 				features: nftOutput.features
 			});
 
-			const mnemonic = await this._vaultConnector.getSecret<string>(
-				requestContext,
-				this._config.walletMnemonicId ?? IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME
-			);
-
-			await this.prepareAndPostTransaction(client, mnemonic, {
+			await this.prepareAndPostTransaction(requestContext, client, {
 				inputs: [
 					new UTXOInput(
 						nftOutputResponse.metadata.transactionId,
@@ -369,7 +346,12 @@ export class IotaNftConnector implements INftConnector {
 				outputs: [recipientNftOutput]
 			});
 		} catch (error) {
-			throw new GeneralError(IotaNftConnector._CLASS_NAME, "transferFailed", undefined, error);
+			throw new GeneralError(
+				IotaNftConnector._CLASS_NAME,
+				"transferFailed",
+				undefined,
+				this.extractPayloadError(error)
+			);
 		}
 	}
 
@@ -387,26 +369,26 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Prepare a transaction for sending, post and wait for inclusion.
+	 * @param requestContext The context for the request.
 	 * @param client The client to use.
-	 * @param mnemonic The mnemonic to use.
 	 * @param options The options for the transaction.
 	 * @returns The block id and block.
 	 * @internal
 	 */
 	private async prepareAndPostTransaction(
+		requestContext: IRequestContext,
 		client: Client,
-		mnemonic: string,
 		options: IBuildBlockOptions
 	): Promise<{ blockId: string; block: Block }> {
-		const prepared = await client.prepareTransaction(
-			{ mnemonic },
-			{
-				coinType: this._config.coinType ?? IotaNftConnector._DEFAULT_COIN_TYPE,
-				...options
-			}
-		);
+		const seed = await this.getSeed(requestContext);
+		const secretManager = { hexSeed: Converter.bytesToHex(seed, true) };
 
-		const signed = await client.signTransaction({ mnemonic }, prepared);
+		const prepared = await client.prepareTransaction(secretManager, {
+			coinType: this._config.coinType ?? IotaNftConnector._DEFAULT_COIN_TYPE,
+			...options
+		});
+
+		const signed = await client.signTransaction(secretManager, prepared);
 
 		const blockIdAndBlock = await client.postBlockPayload(signed);
 
@@ -416,12 +398,57 @@ export class IotaNftConnector implements INftConnector {
 
 			await client.retryUntilIncluded(blockIdAndBlock[0], 2, Math.ceil(timeoutSeconds / 2));
 		} catch (error) {
-			throw new GeneralError(IotaNftConnector._CLASS_NAME, "inclusionFailed", undefined, error);
+			throw new GeneralError(
+				IotaNftConnector._CLASS_NAME,
+				"inclusionFailed",
+				undefined,
+				this.extractPayloadError(error)
+			);
 		}
 
 		return {
 			blockId: blockIdAndBlock[0],
 			block: blockIdAndBlock[1]
 		};
+	}
+
+	/**
+	 * Get the seed from the vault.
+	 * @param requestContext The context for the request.
+	 * @returns The seed.
+	 * @internal
+	 */
+	private async getSeed(requestContext: IRequestContext): Promise<Uint8Array> {
+		try {
+			const seedBase64 = await this._vaultConnector.getSecret<string>(
+				requestContext,
+				this._config.vaultSeedId ?? IotaNftConnector._DEFAULT_SEED_SECRET_NAME
+			);
+			return Converter.base64ToBytes(seedBase64);
+		} catch {}
+
+		const mnemonic = await this._vaultConnector.getSecret<string>(
+			requestContext,
+			this._config.vaultMnemonicId ?? IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME
+		);
+
+		return Bip39.mnemonicToSeed(mnemonic);
+	}
+
+	/**
+	 * Extract error from SDK payload.
+	 * @param error The error to extract.
+	 * @returns The extracted error.
+	 */
+	private extractPayloadError(error: unknown): IError {
+		if (Is.json(error)) {
+			const obj = JSON.parse(error);
+			return {
+				name: "IOTA",
+				message: obj.payload?.error
+			};
+		}
+
+		return BaseError.fromError(error);
 	}
 }

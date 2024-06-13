@@ -59,11 +59,3 @@ The JSON stringified version of the immutable metadata.
 > **metadata**: `string`
 
 The JSON stringified version of the mutable metadata.
-
-***
-
-### signature?
-
-> `optional` **signature**: `string`
-
-The signature of the nft.
