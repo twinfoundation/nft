@@ -12,16 +12,16 @@ export interface IIotaNftConnectorConfig {
 	clientOptions: IClientOptions;
 
 	/**
-	 * The id of the entry in the vault containing the wallet mnemonic.
-	 * @default wallet-mnemonic
+	 * The id of the entry in the vault containing the seed.
+	 * @default seed
 	 */
-	walletMnemonicId?: string;
+	vaultSeedId?: string;
 
 	/**
-	 * The address index of the account to use for storing identities.
-	 * @default 2
+	 * The id of the entry in the vault containing the mnemonic.
+	 * @default mnemonic
 	 */
-	addressIndex?: number;
+	vaultMnemonicId?: string;
 
 	/**
 	 * The coin type.

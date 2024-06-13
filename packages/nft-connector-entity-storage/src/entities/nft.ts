@@ -43,10 +43,4 @@ export class Nft {
 	 */
 	@property({ type: "string" })
 	public metadata!: string;
-
-	/**
-	 * The signature of the nft.
-	 */
-	@property({ type: "string" })
-	public signature?: string;
 }

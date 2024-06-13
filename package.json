@@ -1,6 +1,6 @@
 {
 	"name": "@gtsc/nft",
-	"version": "0.0.3-next.3",
+	"version": "0.0.3-next.4",
 	"description": "NFT",
 	"repository": {
 		"type": "git",
@@ -41,7 +41,8 @@
 	"workspaces": [
 		"packages/nft-models",
 		"packages/nft-connector-iota",
-		"packages/nft-connector-entity-storage"
+		"packages/nft-connector-entity-storage",
+		"packages/nft-cli"
 	],
 	"type": "module"
 }

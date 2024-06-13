@@ -10,7 +10,7 @@ Class for performing NFT operations on entity storage.
 
 ### new EntityStorageNftConnector()
 
-> **new EntityStorageNftConnector**(`dependencies`, `config`?): [`EntityStorageNftConnector`](EntityStorageNftConnector.md)
+> **new EntityStorageNftConnector**(`dependencies`): [`EntityStorageNftConnector`](EntityStorageNftConnector.md)
 
 Create a new instance of EntityStorageNftConnector.
 
@@ -20,17 +20,9 @@ Create a new instance of EntityStorageNftConnector.
 
 The dependencies for the class.
 
-• **dependencies.vaultConnector**: `IVaultConnector`
-
-The vault connector.
-
-• **dependencies.nftEntityStorage?**: `IEntityStorageConnector`\<[`Nft`](Nft.md)\>
+• **dependencies.nftEntityStorage**: `IEntityStorageConnector`\<[`Nft`](Nft.md)\>
 
 The entity storage for nfts.
-
-• **config?**: [`IEntityStorageNftConnectorConfig`](../interfaces/IEntityStorageNftConnectorConfig.md)
-
-The configuration for the connector.
 
 #### Returns
 
@@ -48,7 +40,7 @@ The namespace supported by the wallet connector.
 
 ### mint()
 
-> **mint**\<`T`, `U`\>(`requestContext`, `tag`, `immutableMetadata`?, `metadata`?): `Promise`\<`string`\>
+> **mint**\<`T`, `U`\>(`requestContext`, `issuer`, `tag`, `immutableMetadata`?, `metadata`?): `Promise`\<`string`\>
 
 Mint an NFT.
 
@@ -63,6 +55,10 @@ Mint an NFT.
 • **requestContext**: `IRequestContext`
 
 The context for the request.
+
+• **issuer**: `string`
+
+The issuer for the NFT.
 
 • **tag**: `string`
 
@@ -90,7 +86,7 @@ The id of the created NFT in urn format.
 
 ### burn()
 
-> **burn**(`requestContext`, `id`): `Promise`\<`void`\>
+> **burn**(`requestContext`, `issuer`, `id`): `Promise`\<`void`\>
 
 Burn an NFT.
 
@@ -99,6 +95,10 @@ Burn an NFT.
 • **requestContext**: `IRequestContext`
 
 The context for the request.
+
+• **issuer**: `string`
+
+The issuer for the NFT to return the funds to.
 
 • **id**: `string`
 
@@ -134,7 +134,7 @@ The id of the NFT to transfer in urn format.
 
 • **recipient**: `string`
 
-The recipient identity of the NFT.
+The recipient of the NFT.
 
 #### Returns
 

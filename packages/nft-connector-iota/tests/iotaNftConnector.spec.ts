@@ -2,19 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { Urn } from "@gtsc/core";
 import type { IIrc27Metadata } from "@gtsc/nft-models";
-import { Utils } from "@iota/sdk-wasm/node";
 import {
+	TEST_BECH32_HRP,
 	TEST_CLIENT_OPTIONS,
 	TEST_COIN_TYPE,
 	TEST_CONTEXT,
 	TEST_IDENTITY_ID_2,
 	TEST_MNEMONIC_NAME,
-	TEST_NFT_ADDRESS_INDEX,
+	TEST_NFT_ADDRESS_2_BECH32,
+	TEST_NFT_ADDRESS_BECH32,
 	TEST_VAULT_CONNECTOR,
-	TEST_WALLET_CONNECTOR,
 	setupTestEnv
 } from "./setupTestEnv";
 import { IotaNftConnector } from "../src/iotaNftConnector";
+import { IotaNftUtils } from "../src/iotaNftUtils";
 
 let nftId: string;
 
@@ -26,14 +27,12 @@ describe("IotaNftConnector", () => {
 	test("Can mint an NFT", async () => {
 		const connector = new IotaNftConnector(
 			{
-				vaultConnector: TEST_VAULT_CONNECTOR,
-				walletConnector: TEST_WALLET_CONNECTOR
+				vaultConnector: TEST_VAULT_CONNECTOR
 			},
 			{
 				clientOptions: TEST_CLIENT_OPTIONS,
-				walletMnemonicId: TEST_MNEMONIC_NAME,
-				coinType: TEST_COIN_TYPE,
-				addressIndex: TEST_NFT_ADDRESS_INDEX
+				vaultMnemonicId: TEST_MNEMONIC_NAME,
+				coinType: TEST_COIN_TYPE
 			}
 		);
 		const immutableMetadata: IIrc27Metadata = {
@@ -47,14 +46,23 @@ describe("IotaNftConnector", () => {
 			description:
 				"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network."
 		};
-		const idUrn = await connector.mint(TEST_CONTEXT, "footag", immutableMetadata, { bar: "foo" });
+		const idUrn = await connector.mint(
+			TEST_CONTEXT,
+			TEST_NFT_ADDRESS_BECH32,
+			"footag",
+			immutableMetadata,
+			{ bar: "foo" }
+		);
 		const urn = Urn.fromValidString(idUrn);
 
-		const nftAddress = Utils.nftIdToBech32(urn.namespaceSpecific(), "tst");
-		process.stdout.write(`Minted NFT Id: ${idUrn.toString()}\n`);
-		process.stdout.write(`Minted NFT: ${process.env.TEST_EXPLORER_URL}addr/${nftAddress}\n`);
+		const nftAddress = IotaNftUtils.nftIdToAddress(idUrn);
+		console.debug("Minted NFT Id", idUrn.toString());
+		console.debug("Minted NFT", `${process.env.TEST_EXPLORER_URL}addr/${nftAddress}`);
 		expect(urn.namespaceIdentifier()).toEqual("iota-nft");
-		expect(urn.namespaceSpecific().length).toEqual(66);
+
+		const specificParts = urn.namespaceSpecific().split(":");
+		expect(specificParts[0]).toEqual(TEST_BECH32_HRP);
+		expect(specificParts[1].length).toEqual(66);
 
 		nftId = idUrn;
 	});
@@ -62,34 +70,32 @@ describe("IotaNftConnector", () => {
 	test("Can transfer an NFT", async () => {
 		const connector = new IotaNftConnector(
 			{
-				vaultConnector: TEST_VAULT_CONNECTOR,
-				walletConnector: TEST_WALLET_CONNECTOR
+				vaultConnector: TEST_VAULT_CONNECTOR
 			},
 			{
 				clientOptions: TEST_CLIENT_OPTIONS,
-				walletMnemonicId: TEST_MNEMONIC_NAME,
-				coinType: TEST_COIN_TYPE,
-				addressIndex: TEST_NFT_ADDRESS_INDEX
+				vaultMnemonicId: TEST_MNEMONIC_NAME,
+				coinType: TEST_COIN_TYPE
 			}
 		);
 
-		await connector.transfer(TEST_CONTEXT, nftId, TEST_IDENTITY_ID_2);
+		await connector.transfer(TEST_CONTEXT, nftId, TEST_NFT_ADDRESS_2_BECH32);
 	});
 
 	test("Can fail to burn an NFT that has been transferred", async () => {
 		const connector = new IotaNftConnector(
 			{
-				vaultConnector: TEST_VAULT_CONNECTOR,
-				walletConnector: TEST_WALLET_CONNECTOR
+				vaultConnector: TEST_VAULT_CONNECTOR
 			},
 			{
 				clientOptions: TEST_CLIENT_OPTIONS,
-				walletMnemonicId: TEST_MNEMONIC_NAME,
-				coinType: TEST_COIN_TYPE,
-				addressIndex: TEST_NFT_ADDRESS_INDEX
+				vaultMnemonicId: TEST_MNEMONIC_NAME,
+				coinType: TEST_COIN_TYPE
 			}
 		);
-		await expect(connector.burn(TEST_CONTEXT, nftId)).rejects.toMatchObject({
+		await expect(
+			connector.burn(TEST_CONTEXT, TEST_NFT_ADDRESS_BECH32, nftId)
+		).rejects.toMatchObject({
 			name: "GeneralError",
 			message: "iotaNftConnector.burningFailed"
 		});
@@ -98,14 +104,12 @@ describe("IotaNftConnector", () => {
 	test("Can burn an NFT", async () => {
 		const connector = new IotaNftConnector(
 			{
-				vaultConnector: TEST_VAULT_CONNECTOR,
-				walletConnector: TEST_WALLET_CONNECTOR
+				vaultConnector: TEST_VAULT_CONNECTOR
 			},
 			{
 				clientOptions: TEST_CLIENT_OPTIONS,
-				walletMnemonicId: TEST_MNEMONIC_NAME,
-				coinType: TEST_COIN_TYPE,
-				addressIndex: TEST_NFT_ADDRESS_INDEX
+				vaultMnemonicId: TEST_MNEMONIC_NAME,
+				coinType: TEST_COIN_TYPE
 			}
 		);
 		await connector.burn(
@@ -113,6 +117,7 @@ describe("IotaNftConnector", () => {
 				tenantId: TEST_CONTEXT.tenantId,
 				identity: TEST_IDENTITY_ID_2
 			},
+			TEST_NFT_ADDRESS_2_BECH32,
 			nftId
 		);
 	});
