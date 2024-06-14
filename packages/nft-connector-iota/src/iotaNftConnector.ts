@@ -122,7 +122,7 @@ export class IotaNftConnector implements INftConnector {
 	/**
 	 * Mint an NFT.
 	 * @param requestContext The context for the request.
-	 * @param issuer The issuer for the NFT.
+	 * @param issuerAddress The issuer address for the NFT, will also be the owner address.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
@@ -130,7 +130,7 @@ export class IotaNftConnector implements INftConnector {
 	 */
 	public async mint<T = unknown, U = unknown>(
 		requestContext: IRequestContext,
-		issuer: string,
+		issuerAddress: string,
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U
@@ -150,18 +150,20 @@ export class IotaNftConnector implements INftConnector {
 			nameof(requestContext.identity),
 			requestContext.identity
 		);
-		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(issuer), issuer);
+		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(issuerAddress), issuerAddress);
 		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(tag), tag);
 
 		try {
 			const buildParams: NftOutputBuilderParams = {
 				nftId: "0x0000000000000000000000000000000000000000000000000000000000000000",
 				unlockConditions: [
-					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(issuer)))
+					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(issuerAddress)))
 				],
-				immutableFeatures: [new IssuerFeature(new Ed25519Address(Utils.bech32ToHex(issuer)))],
+				immutableFeatures: [
+					new IssuerFeature(new Ed25519Address(Utils.bech32ToHex(issuerAddress)))
+				],
 				features: [
-					new SenderFeature(new Ed25519Address(Utils.bech32ToHex(issuer))),
+					new SenderFeature(new Ed25519Address(Utils.bech32ToHex(issuerAddress))),
 					new TagFeature(Converter.utf8ToHex(tag, true))
 				]
 			};
@@ -308,11 +310,15 @@ export class IotaNftConnector implements INftConnector {
 	/**
 	 * Burn an NFT.
 	 * @param requestContext The context for the request.
-	 * @param issuer The issuer for the NFT to return the funds to.
+	 * @param ownerAddress The owner address for the NFT to return the funds to.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @returns Nothing.
 	 */
-	public async burn(requestContext: IRequestContext, issuer: string, id: string): Promise<void> {
+	public async burn(
+		requestContext: IRequestContext,
+		ownerAddress: string,
+		id: string
+	): Promise<void> {
 		Guards.object<IRequestContext>(
 			IotaNftConnector._CLASS_NAME,
 			nameof(requestContext),
@@ -328,7 +334,7 @@ export class IotaNftConnector implements INftConnector {
 			nameof(requestContext.identity),
 			requestContext.identity
 		);
-		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(issuer), issuer);
+		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(ownerAddress), ownerAddress);
 
 		Urn.guard(IotaNftConnector._CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
@@ -362,7 +368,7 @@ export class IotaNftConnector implements INftConnector {
 				],
 				outputs: [
 					new BasicOutput(nftOutputResponse.output.getAmount(), [
-						new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(issuer)))
+						new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(ownerAddress)))
 					])
 				]
 			});
@@ -380,13 +386,13 @@ export class IotaNftConnector implements INftConnector {
 	 * Transfer an NFT.
 	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to transfer in urn format.
-	 * @param recipient The recipient of the NFT.
+	 * @param recipientAddress The recipient address of the NFT.
 	 * @returns Nothing.
 	 */
 	public async transfer(
 		requestContext: IRequestContext,
 		id: string,
-		recipient: string
+		recipientAddress: string
 	): Promise<void> {
 		Guards.object<IRequestContext>(
 			IotaNftConnector._CLASS_NAME,
@@ -404,7 +410,7 @@ export class IotaNftConnector implements INftConnector {
 			requestContext.identity
 		);
 		Urn.guard(IotaNftConnector._CLASS_NAME, nameof(id), id);
-		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(recipient), recipient);
+		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(recipientAddress), recipientAddress);
 
 		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
@@ -428,7 +434,7 @@ export class IotaNftConnector implements INftConnector {
 			const recipientNftOutput = await client.buildNftOutput({
 				nftId,
 				unlockConditions: [
-					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(recipient)))
+					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(recipientAddress)))
 				],
 				immutableFeatures: nftOutput.immutableFeatures,
 				features: nftOutput.features

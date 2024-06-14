@@ -39,8 +39,8 @@ describe("EntityStorageNftConnector", () => {
 
 		const store = TEST_NFT_STORAGE.getStore(TEST_TENANT_ID);
 		expect(store?.[0].id).toEqual(urn.namespaceSpecific());
-		expect(store?.[0].owner).toEqual(TEST_ADDRESS_1);
-		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
+		expect(store?.[0].ownerAddress).toEqual(TEST_ADDRESS_1);
+		expect(store?.[0].issuerAddress).toEqual(TEST_ADDRESS_1);
 		expect(store?.[0].tag).toEqual("footag");
 		expect(store?.[0].immutableMetadata).toEqual(JSON.stringify(immutableMetadata));
 		expect(store?.[0].metadata).toEqual(JSON.stringify({ bar: "foo" }));
@@ -87,8 +87,8 @@ describe("EntityStorageNftConnector", () => {
 
 		const store = TEST_NFT_STORAGE.getStore(TEST_TENANT_ID);
 		expect(store?.[0].id).toEqual(urn.namespaceSpecific());
-		expect(store?.[0].owner).toEqual(TEST_ADDRESS_2);
-		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
+		expect(store?.[0].ownerAddress).toEqual(TEST_ADDRESS_2);
+		expect(store?.[0].issuerAddress).toEqual(TEST_ADDRESS_1);
 	});
 
 	test("Can fail to burn an NFT that has been transferred", async () => {
@@ -104,8 +104,8 @@ describe("EntityStorageNftConnector", () => {
 
 		const store = TEST_NFT_STORAGE.getStore(TEST_TENANT_ID);
 		expect(store?.[0].id).toEqual(urn.namespaceSpecific());
-		expect(store?.[0].owner).toEqual(TEST_ADDRESS_2);
-		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
+		expect(store?.[0].ownerAddress).toEqual(TEST_ADDRESS_2);
+		expect(store?.[0].issuerAddress).toEqual(TEST_ADDRESS_1);
 	});
 
 	test("Can burn an NFT", async () => {

@@ -40,7 +40,7 @@ The namespace supported by the wallet connector.
 
 ### mint()
 
-> **mint**\<`T`, `U`\>(`requestContext`, `issuer`, `tag`, `immutableMetadata`?, `metadata`?): `Promise`\<`string`\>
+> **mint**\<`T`, `U`\>(`requestContext`, `issuerAddress`, `tag`, `immutableMetadata`?, `metadata`?): `Promise`\<`string`\>
 
 Mint an NFT.
 
@@ -56,9 +56,9 @@ Mint an NFT.
 
 The context for the request.
 
-• **issuer**: `string`
+• **issuerAddress**: `string`
 
-The issuer for the NFT.
+The issuer address for the NFT, will also be the owner address.
 
 • **tag**: `string`
 
@@ -140,7 +140,7 @@ The data for the NFT.
 
 ### burn()
 
-> **burn**(`requestContext`, `issuer`, `id`): `Promise`\<`void`\>
+> **burn**(`requestContext`, `ownerAddress`, `id`): `Promise`\<`void`\>
 
 Burn an NFT.
 
@@ -150,9 +150,9 @@ Burn an NFT.
 
 The context for the request.
 
-• **issuer**: `string`
+• **ownerAddress**: `string`
 
-The issuer for the NFT to return the funds to.
+The owner address for the NFT to return the funds to.
 
 • **id**: `string`
 
@@ -172,7 +172,7 @@ Nothing.
 
 ### transfer()
 
-> **transfer**(`requestContext`, `id`, `recipient`): `Promise`\<`void`\>
+> **transfer**(`requestContext`, `id`, `recipientAddress`): `Promise`\<`void`\>
 
 Transfer an NFT.
 
@@ -186,9 +186,9 @@ The context for the request.
 
 The id of the NFT to transfer in urn format.
 
-• **recipient**: `string`
+• **recipientAddress**: `string`
 
-The recipient of the NFT.
+The recipient address of the NFT.
 
 #### Returns
 

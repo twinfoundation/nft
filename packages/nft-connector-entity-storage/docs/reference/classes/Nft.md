@@ -22,19 +22,19 @@ The identity of the nft.
 
 ***
 
-### issuer
+### issuerAddress
 
-> **issuer**: `string`
+> **issuerAddress**: `string`
 
-The identity of the issuer.
+The address of the issuer.
 
 ***
 
-### owner
+### ownerAddress
 
-> **owner**: `string`
+> **ownerAddress**: `string`
 
-The identity of the owner.
+The address of the owner.
 
 ***
 

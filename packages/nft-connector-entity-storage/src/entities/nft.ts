@@ -15,16 +15,16 @@ export class Nft {
 	public id!: string;
 
 	/**
-	 * The identity of the issuer.
+	 * The address of the issuer.
 	 */
 	@property({ type: "string" })
-	public issuer!: string;
+	public issuerAddress!: string;
 
 	/**
-	 * The identity of the owner.
+	 * The address of the owner.
 	 */
 	@property({ type: "string" })
-	public owner!: string;
+	public ownerAddress!: string;
 
 	/**
 	 * The tag for the nft.

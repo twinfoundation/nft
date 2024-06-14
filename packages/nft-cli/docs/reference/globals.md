@@ -10,5 +10,7 @@
 - [actionCommandNftBurn](functions/actionCommandNftBurn.md)
 - [buildCommandNftMint](functions/buildCommandNftMint.md)
 - [actionCommandNftMint](functions/actionCommandNftMint.md)
+- [buildCommandNftResolve](functions/buildCommandNftResolve.md)
+- [actionCommandNftResolve](functions/actionCommandNftResolve.md)
 - [buildCommandNftTransfer](functions/buildCommandNftTransfer.md)
 - [actionCommandNftTransfer](functions/actionCommandNftTransfer.md)
