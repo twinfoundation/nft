@@ -8,6 +8,7 @@ import { buildCommandFaucet } from "@gtsc/wallet-cli";
 import type { Command } from "commander";
 import { buildCommandNftBurn } from "./commands/nftBurn";
 import { buildCommandNftMint } from "./commands/nftMint";
+import { buildCommandNftResolve } from "./commands/nftResolve";
 import { buildCommandNftTransfer } from "./commands/nftTransfer";
 
 /**
@@ -45,6 +46,7 @@ export class CLI extends CLIBase {
 			buildCommandAddress(),
 			buildCommandFaucet(),
 			buildCommandNftMint(),
+			buildCommandNftResolve(),
 			buildCommandNftBurn(),
 			buildCommandNftTransfer()
 		];

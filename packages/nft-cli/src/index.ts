@@ -3,4 +3,5 @@
 export * from "./cli";
 export * from "./commands/nftBurn";
 export * from "./commands/nftMint";
+export * from "./commands/nftResolve";
 export * from "./commands/nftTransfer";
