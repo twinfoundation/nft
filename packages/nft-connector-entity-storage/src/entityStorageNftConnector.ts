@@ -103,6 +103,76 @@ export class EntityStorageNftConnector implements INftConnector {
 	}
 
 	/**
+	 * Resolve an NFT.
+	 * @param requestContext The context for the request.
+	 * @param id The id of the NFT to resolve.
+	 * @returns The data for the NFT.
+	 */
+	public async resolve<T = unknown, U = unknown>(
+		requestContext: IRequestContext,
+		id: string
+	): Promise<{
+		issuer: string;
+		owner: string;
+		tag: string;
+		immutableMetadata?: T;
+		metadata?: U;
+	}> {
+		Guards.object<IRequestContext>(
+			EntityStorageNftConnector._CLASS_NAME,
+			nameof(requestContext),
+			requestContext
+		);
+		Guards.stringValue(
+			EntityStorageNftConnector._CLASS_NAME,
+			nameof(requestContext.tenantId),
+			requestContext.tenantId
+		);
+		Guards.stringValue(
+			EntityStorageNftConnector._CLASS_NAME,
+			nameof(requestContext.identity),
+			requestContext.identity
+		);
+		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
+
+		Urn.guard(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
+		const urnParsed = Urn.fromValidString(id);
+
+		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
+			throw new GeneralError(EntityStorageNftConnector._CLASS_NAME, "namespaceMismatch", {
+				namespace: EntityStorageNftConnector.NAMESPACE,
+				id
+			});
+		}
+
+		try {
+			const nftId = urnParsed.namespaceSpecific();
+			const nft = await this._nftEntityStorage.get(requestContext, nftId);
+
+			if (Is.empty(nft)) {
+				throw new NotFoundError(EntityStorageNftConnector._CLASS_NAME, "nftNotFound");
+			}
+
+			return {
+				owner: nft.owner,
+				issuer: nft.issuer,
+				tag: nft.tag,
+				immutableMetadata: Is.empty(nft.immutableMetadata)
+					? undefined
+					: JSON.parse(nft.immutableMetadata),
+				metadata: Is.empty(nft.metadata) ? undefined : JSON.parse(nft.metadata)
+			};
+		} catch (error) {
+			throw new GeneralError(
+				EntityStorageNftConnector._CLASS_NAME,
+				"resolvingFailed",
+				undefined,
+				error
+			);
+		}
+	}
+
+	/**
 	 * Burn an NFT.
 	 * @param requestContext The context for the request.
 	 * @param issuer The issuer for the NFT to return the funds to.

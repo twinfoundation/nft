@@ -24,6 +24,23 @@ export interface INftConnector {
 	): Promise<string>;
 
 	/**
+	 * Resolve an NFT.
+	 * @param requestContext The context for the request.
+	 * @param id The id of the NFT to resolve.
+	 * @returns The data for the NFT.
+	 */
+	resolve<T = unknown, U = unknown>(
+		requestContext: IRequestContext,
+		id: string
+	): Promise<{
+		issuer: string;
+		owner: string;
+		tag: string;
+		immutableMetadata?: T;
+		metadata?: U;
+	}>;
+
+	/**
 	 * Burn an NFT.
 	 * @param requestContext The context for the request.
 	 * @param issuer The issuer for the NFT to return the funds to.

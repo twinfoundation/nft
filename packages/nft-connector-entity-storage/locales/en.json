@@ -6,6 +6,7 @@
 			"notOwnerTransfer": "The NFT can only be transferred by the owner",
 			"signatureFailed": "The signature verification failed",
 			"mintingFailed": "Minting the NFT failed",
+			"resolvingFailed": "Resolving the NFT failed",
 			"burningFailed": "Burning the NFT failed",
 			"namespaceMismatch": "The namespace in the urn \"{id}\" does not match the namespace of the IOTA NFT connector \"{namespace}\""
 		}
