@@ -96,6 +96,60 @@ The id of the created NFT in urn format.
 
 ***
 
+### resolve()
+
+> **resolve**\<`T`, `U`\>(`requestContext`, `id`): `Promise`\<`object`\>
+
+Resolve an NFT.
+
+#### Type parameters
+
+• **T** = `unknown`
+
+• **U** = `unknown`
+
+#### Parameters
+
+• **requestContext**: `IRequestContext`
+
+The context for the request.
+
+• **id**: `string`
+
+The id of the NFT to resolve.
+
+#### Returns
+
+`Promise`\<`object`\>
+
+The data for the NFT.
+
+##### issuer
+
+> **issuer**: `string`
+
+##### owner
+
+> **owner**: `string`
+
+##### tag
+
+> **tag**: `string`
+
+##### immutableMetadata?
+
+> `optional` **immutableMetadata**: `T`
+
+##### metadata?
+
+> `optional` **metadata**: `U`
+
+#### Implementation of
+
+`INftConnector.resolve`
+
+***
+
 ### burn()
 
 > **burn**(`requestContext`, `issuer`, `id`): `Promise`\<`void`\>

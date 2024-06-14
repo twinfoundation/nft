@@ -7,6 +7,7 @@ import {
 	TEST_CLIENT_OPTIONS,
 	TEST_COIN_TYPE,
 	TEST_CONTEXT,
+	TEST_IDENTITY_ID,
 	TEST_IDENTITY_ID_2,
 	TEST_MNEMONIC_NAME,
 	TEST_NFT_ADDRESS_2_BECH32,
@@ -40,11 +41,10 @@ describe("IotaNftConnector", () => {
 			version: "v1.0",
 			type: "video/mp4",
 			uri: "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
-			name: "Shimmer OG NFT",
+			name: "Test Name",
 			collectionName: "Test Collection",
 			issuerName: "Test Issuer",
-			description:
-				"The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network."
+			description: "Test Description"
 		};
 		const idUrn = await connector.mint(
 			TEST_CONTEXT,
@@ -67,6 +67,41 @@ describe("IotaNftConnector", () => {
 		nftId = idUrn;
 	});
 
+	test("Can resolve an NFT", async () => {
+		const connector = new IotaNftConnector(
+			{
+				vaultConnector: TEST_VAULT_CONNECTOR
+			},
+			{
+				clientOptions: TEST_CLIENT_OPTIONS,
+				vaultMnemonicId: TEST_MNEMONIC_NAME,
+				coinType: TEST_COIN_TYPE
+			}
+		);
+		const response = await connector.resolve(
+			{
+				tenantId: TEST_CONTEXT.tenantId,
+				identity: TEST_IDENTITY_ID
+			},
+			nftId
+		);
+
+		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
+		expect(response.owner).toEqual(TEST_NFT_ADDRESS_BECH32);
+		expect(response.tag).toEqual("footag");
+		expect(response.metadata).toEqual({ bar: "foo" });
+		expect(response.immutableMetadata).toEqual({
+			standard: "IRC27",
+			version: "v1.0",
+			type: "video/mp4",
+			uri: "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
+			name: "Test Name",
+			collectionName: "Test Collection",
+			issuerName: "Test Issuer",
+			description: "Test Description"
+		});
+	});
+
 	test("Can transfer an NFT", async () => {
 		const connector = new IotaNftConnector(
 			{
@@ -80,6 +115,17 @@ describe("IotaNftConnector", () => {
 		);
 
 		await connector.transfer(TEST_CONTEXT, nftId, TEST_NFT_ADDRESS_2_BECH32);
+
+		const response = await connector.resolve(
+			{
+				tenantId: TEST_CONTEXT.tenantId,
+				identity: TEST_IDENTITY_ID
+			},
+			nftId
+		);
+
+		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
+		expect(response.owner).toEqual(TEST_NFT_ADDRESS_2_BECH32);
 	});
 
 	test("Can fail to burn an NFT that has been transferred", async () => {

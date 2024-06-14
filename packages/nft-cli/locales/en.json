@@ -38,6 +38,23 @@
 				"nftId": "NFT Id"
 			}
 		},
+		"nft-resolve": {
+			"summary": "Resolve an NFT.",
+			"description": "Resolve an NFT.",
+			"options": {
+				"id": {
+					"param": "--id '<'id'>'",
+					"description": "The id for the NFT in urn format."
+				}
+			},
+			"progress": {
+				"resolvingNft": "Resolving NFT"
+			},
+			"labels": {
+				"nft": "NFT",
+				"nftId": "NFT Id"
+			}
+		},
 		"nft-burn": {
 			"summary": "Burn an NFT.",
 			"description": "Burn an NFT.",

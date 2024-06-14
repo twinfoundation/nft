@@ -5,10 +5,10 @@ import {
 	Converter,
 	GeneralError,
 	Guards,
-	type IError,
 	Is,
 	ObjectHelper,
-	Urn
+	Urn,
+	type IError
 } from "@gtsc/core";
 import { Bip39 } from "@gtsc/crypto";
 import { nameof } from "@gtsc/nameof";
@@ -21,11 +21,13 @@ import {
 	Client,
 	CoinType,
 	Ed25519Address,
+	FeatureType,
 	IssuerFeature,
 	MetadataFeature,
 	SenderFeature,
 	TagFeature,
 	UTXOInput,
+	UnlockConditionType,
 	Utils,
 	type Block,
 	type IBuildBlockOptions,
@@ -195,6 +197,108 @@ export class IotaNftConnector implements INftConnector {
 			throw new GeneralError(
 				IotaNftConnector._CLASS_NAME,
 				"mintingFailed",
+				undefined,
+				this.extractPayloadError(error)
+			);
+		}
+	}
+
+	/**
+	 * Resolve an NFT.
+	 * @param requestContext The context for the request.
+	 * @param id The id of the NFT to resolve.
+	 * @returns The data for the NFT.
+	 */
+	public async resolve<T = unknown, U = unknown>(
+		requestContext: IRequestContext,
+		id: string
+	): Promise<{
+		issuer: string;
+		owner: string;
+		tag: string;
+		immutableMetadata?: T;
+		metadata?: U;
+	}> {
+		Guards.object<IRequestContext>(
+			IotaNftConnector._CLASS_NAME,
+			nameof(requestContext),
+			requestContext
+		);
+		Guards.stringValue(
+			IotaNftConnector._CLASS_NAME,
+			nameof(requestContext.tenantId),
+			requestContext.tenantId
+		);
+		Guards.stringValue(
+			IotaNftConnector._CLASS_NAME,
+			nameof(requestContext.identity),
+			requestContext.identity
+		);
+		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(id), id);
+
+		Urn.guard(IotaNftConnector._CLASS_NAME, nameof(id), id);
+		const urnParsed = Urn.fromValidString(id);
+
+		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
+			throw new GeneralError(IotaNftConnector._CLASS_NAME, "namespaceMismatch", {
+				namespace: IotaNftConnector.NAMESPACE,
+				id
+			});
+		}
+
+		try {
+			const client = new Client(this._config.clientOptions);
+			const nftParts = urnParsed.namespaceSpecific().split(":");
+
+			const hrp = nftParts[0];
+			const nftId = nftParts[1];
+			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
+
+			const nftOutputId = await client.nftOutputId(nftId);
+			const nftOutputResponse = await client.getOutput(nftOutputId);
+			const nftOutput = nftOutputResponse.output as NftOutput;
+
+			const unlockConditions = nftOutput.unlockConditions?.filter(
+				f => f.type === UnlockConditionType.Address
+			);
+			const issuerFeatures = nftOutput.immutableFeatures?.filter(
+				f => f.type === FeatureType.Issuer
+			);
+			const immutableFeatures = nftOutput.immutableFeatures?.filter(
+				f => f.type === FeatureType.Metadata
+			);
+			const metadataFeatures = nftOutput.features?.filter(f => f.type === FeatureType.Metadata);
+			const tagFeatures = nftOutput.features?.filter(f => f.type === FeatureType.Tag);
+
+			const owner = Is.arrayValue(unlockConditions)
+				? ((unlockConditions[0] as AddressUnlockCondition).address as Ed25519Address).pubKeyHash
+				: "";
+			const issuer = Is.arrayValue(issuerFeatures)
+				? ((issuerFeatures[0] as IssuerFeature).address as Ed25519Address).pubKeyHash
+				: "";
+			const immutableMetadata = Is.arrayValue(immutableFeatures)
+				? Converter.hexToUtf8((immutableFeatures[0] as MetadataFeature).data)
+				: "";
+			const tag = Is.arrayValue(tagFeatures)
+				? Converter.hexToUtf8((tagFeatures[0] as TagFeature).tag)
+				: "";
+			const metadata = Is.arrayValue(metadataFeatures)
+				? Converter.hexToUtf8((metadataFeatures[0] as MetadataFeature).data)
+				: "";
+
+			return {
+				issuer: Utils.hexToBech32(issuer, hrp),
+				owner: Utils.hexToBech32(owner, hrp),
+				tag,
+				immutableMetadata: Is.stringValue(immutableMetadata)
+					? JSON.parse(immutableMetadata)
+					: undefined,
+				metadata: Is.stringValue(metadata) ? JSON.parse(metadata) : undefined
+			};
+		} catch (error) {
+			throw new GeneralError(
+				IotaNftConnector._CLASS_NAME,
+				"resolvingFailed",
 				undefined,
 				this.extractPayloadError(error)
 			);

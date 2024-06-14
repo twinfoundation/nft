@@ -32,6 +32,7 @@ Commands:
   address [options]       Create bech32 addresses and keys from the seed.
   faucet [options]        Request funds from the faucet.
   nft-mint [options]      Mint an NFT.
+  nft-resolve [options]   Resolve an NFT.
   nft-burn [options]      Burn an NFT.
   nft-transfer [options]  Transfer an NFT.
 ```
@@ -113,6 +114,14 @@ gtsc-nft faucet --load-env config.env wallet.env --address !ADDRESS_0_BECH32
 
 # Mint the NFT and store the id in the nft.env file
 gtsc-nft nft-mint --load-env config.env wallet.env --seed !SEED --issuer !ADDRESS_0_BECH32 --tag MY-NFT --immutable-json immutable.json --env nft.env
+```
+
+### nft-resolve
+
+To resolve the NFT and retrieve its details issue the following command.
+
+```shell
+gtsc-nft nft-resolve --load-env config.env nft.env --id !NFT_ID
 ```
 
 ### nft-transfer
