@@ -6,7 +6,7 @@ Interface describing an NFT connector.
 
 ### mint()
 
-> **mint**\<`T`, `U`\>(`requestContext`, `issuer`, `tag`, `immutableMetadata`, `metadata`): `Promise`\<`string`\>
+> **mint**\<`T`, `U`\>(`requestContext`, `issuer`, `tag`, `immutableMetadata`?, `metadata`?): `Promise`\<`string`\>
 
 Mint an NFT.
 
@@ -30,11 +30,11 @@ The issuer for the NFT.
 
 The tag for the NFT.
 
-• **immutableMetadata**: `undefined` \| `T`
+• **immutableMetadata?**: `T`
 
 The immutable metadata for the NFT.
 
-• **metadata**: `undefined` \| `U`
+• **metadata?**: `U`
 
 The metadata for the NFT.
 
