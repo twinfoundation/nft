@@ -19,8 +19,8 @@ export interface INftConnector {
 		requestContext: IRequestContext,
 		issuer: string,
 		tag: string,
-		immutableMetadata: T | undefined,
-		metadata: U | undefined
+		immutableMetadata?: T,
+		metadata?: U
 	): Promise<string>;
 
 	/**

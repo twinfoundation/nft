@@ -86,12 +86,6 @@ export class IotaNftConnector implements INftConnector {
 	private readonly _config: IIotaNftConnectorConfig;
 
 	/**
-	 * The IOTA Wallet client.
-	 * @internal
-	 */
-	private _client?: Client;
-
-	/**
 	 * Create a new instance of IotaNftConnector.
 	 * @param dependencies The dependencies for the class.
 	 * @param dependencies.vaultConnector The vault connector.
@@ -182,7 +176,7 @@ export class IotaNftConnector implements INftConnector {
 				);
 			}
 
-			const client = await this.createClient();
+			const client = new Client(this._config.clientOptions);
 
 			const nftOutput = await client.buildNftOutput(buildParams);
 
@@ -243,7 +237,7 @@ export class IotaNftConnector implements INftConnector {
 		}
 
 		try {
-			const client = await this.createClient();
+			const client = new Client(this._config.clientOptions);
 			const nftParts = urnParsed.namespaceSpecific().split(":");
 
 			const nftId = nftParts[1];
@@ -317,7 +311,7 @@ export class IotaNftConnector implements INftConnector {
 		}
 
 		try {
-			const client = await this.createClient();
+			const client = new Client(this._config.clientOptions);
 
 			const nftParts = urnParsed.namespaceSpecific().split(":");
 			const nftId = nftParts[1];
@@ -353,18 +347,6 @@ export class IotaNftConnector implements INftConnector {
 				this.extractPayloadError(error)
 			);
 		}
-	}
-
-	/**
-	 * Create a client for the IOTA network.
-	 * @returns The client.
-	 * @internal
-	 */
-	private async createClient(): Promise<Client> {
-		if (!this._client) {
-			this._client = new Client(this._config.clientOptions);
-		}
-		return this._client;
 	}
 
 	/**
