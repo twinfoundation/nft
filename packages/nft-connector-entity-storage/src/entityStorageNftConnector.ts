@@ -46,7 +46,7 @@ export class EntityStorageNftConnector implements INftConnector {
 	/**
 	 * Mint an NFT.
 	 * @param requestContext The context for the request.
-	 * @param issuerAddress The issuer address for the NFT, will also be the owner address.
+	 * @param issuer The issuer for the NFT, will also be the initial owner.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
@@ -54,7 +54,7 @@ export class EntityStorageNftConnector implements INftConnector {
 	 */
 	public async mint<T = unknown, U = unknown>(
 		requestContext: IRequestContext,
-		issuerAddress: string,
+		issuer: string,
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U
@@ -74,7 +74,7 @@ export class EntityStorageNftConnector implements INftConnector {
 			nameof(requestContext.identity),
 			requestContext.identity
 		);
-		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(issuerAddress), issuerAddress);
+		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(tag), tag);
 
 		try {
@@ -82,8 +82,8 @@ export class EntityStorageNftConnector implements INftConnector {
 
 			const nft: Nft = {
 				id: nftId,
-				issuerAddress,
-				ownerAddress: issuerAddress,
+				issuer,
+				owner: issuer,
 				tag,
 				immutableMetadata: Is.empty(immutableMetadata) ? "" : JSON.stringify(immutableMetadata),
 				metadata: Is.empty(metadata) ? "" : JSON.stringify(metadata)
@@ -154,8 +154,8 @@ export class EntityStorageNftConnector implements INftConnector {
 			}
 
 			return {
-				owner: nft.ownerAddress,
-				issuer: nft.issuerAddress,
+				owner: nft.owner,
+				issuer: nft.issuer,
 				tag: nft.tag,
 				immutableMetadata: Is.empty(nft.immutableMetadata)
 					? undefined
@@ -175,15 +175,11 @@ export class EntityStorageNftConnector implements INftConnector {
 	/**
 	 * Burn an NFT.
 	 * @param requestContext The context for the request.
-	 * @param ownerAddress The owner address for the NFT to return the funds to.
+	 * @param owner The owner for the NFT to return the funds to.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @returns Nothing.
 	 */
-	public async burn(
-		requestContext: IRequestContext,
-		ownerAddress: string,
-		id: string
-	): Promise<void> {
+	public async burn(requestContext: IRequestContext, owner: string, id: string): Promise<void> {
 		Guards.object<IRequestContext>(
 			EntityStorageNftConnector._CLASS_NAME,
 			nameof(requestContext),
@@ -199,7 +195,7 @@ export class EntityStorageNftConnector implements INftConnector {
 			nameof(requestContext.identity),
 			requestContext.identity
 		);
-		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(ownerAddress), ownerAddress);
+		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(owner), owner);
 		Urn.guard(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
@@ -218,7 +214,7 @@ export class EntityStorageNftConnector implements INftConnector {
 				throw new NotFoundError(EntityStorageNftConnector._CLASS_NAME, "nftNotFound");
 			}
 
-			if (nft.ownerAddress !== ownerAddress) {
+			if (nft.owner !== owner) {
 				throw new GeneralError(EntityStorageNftConnector._CLASS_NAME, "notOwnerBurn");
 			}
 
@@ -237,13 +233,13 @@ export class EntityStorageNftConnector implements INftConnector {
 	 * Transfer an NFT.
 	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to transfer in urn format.
-	 * @param recipientAddress The recipient address of the NFT.
+	 * @param recipient The recipient of the NFT.
 	 * @returns Nothing.
 	 */
 	public async transfer(
 		requestContext: IRequestContext,
 		id: string,
-		recipientAddress: string
+		recipient: string
 	): Promise<void> {
 		Guards.object<IRequestContext>(
 			EntityStorageNftConnector._CLASS_NAME,
@@ -261,11 +257,7 @@ export class EntityStorageNftConnector implements INftConnector {
 			requestContext.identity
 		);
 		Urn.guard(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(recipientAddress),
-			recipientAddress
-		);
+		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(recipient), recipient);
 
 		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
@@ -283,7 +275,7 @@ export class EntityStorageNftConnector implements INftConnector {
 				throw new NotFoundError(EntityStorageNftConnector._CLASS_NAME, "nftNotFound");
 			}
 
-			nft.ownerAddress = recipientAddress;
+			nft.owner = recipient;
 
 			await this._nftEntityStorage.set(requestContext, nft);
 		} catch (error) {

@@ -52,7 +52,7 @@ Default name for the seed secret.
 
 ### mint()
 
-> **mint**\<`T`, `U`\>(`requestContext`, `issuerAddress`, `tag`, `immutableMetadata`?, `metadata`?): `Promise`\<`string`\>
+> **mint**\<`T`, `U`\>(`requestContext`, `issuer`, `tag`, `immutableMetadata`?, `metadata`?): `Promise`\<`string`\>
 
 Mint an NFT.
 
@@ -68,9 +68,9 @@ Mint an NFT.
 
 The context for the request.
 
-• **issuerAddress**: `string`
+• **issuer**: `string`
 
-The issuer address for the NFT, will also be the owner address.
+The issuer for the NFT, will also be the initial owner.
 
 • **tag**: `string`
 
@@ -152,7 +152,7 @@ The data for the NFT.
 
 ### burn()
 
-> **burn**(`requestContext`, `ownerAddress`, `id`): `Promise`\<`void`\>
+> **burn**(`requestContext`, `owner`, `id`): `Promise`\<`void`\>
 
 Burn an NFT.
 
@@ -162,9 +162,9 @@ Burn an NFT.
 
 The context for the request.
 
-• **ownerAddress**: `string`
+• **owner**: `string`
 
-The owner address for the NFT to return the funds to.
+The owner for the NFT to return the funds to.
 
 • **id**: `string`
 
@@ -184,7 +184,7 @@ Nothing.
 
 ### transfer()
 
-> **transfer**(`requestContext`, `id`, `recipientAddress`): `Promise`\<`void`\>
+> **transfer**(`requestContext`, `id`, `recipient`): `Promise`\<`void`\>
 
 Transfer an NFT.
 
@@ -198,9 +198,9 @@ The context for the request.
 
 The id of the NFT to transfer in urn format.
 
-• **recipientAddress**: `string`
+• **recipient**: `string`
 
-The recipient address of the NFT.
+The recipient of the NFT.
 
 #### Returns
 

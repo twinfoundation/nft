@@ -18,23 +18,23 @@ Class describing the nft.
 
 > **id**: `string`
 
-The identity of the nft.
+The identity of the NFT.
 
 ***
 
-### issuerAddress
+### issuer
 
-> **issuerAddress**: `string`
+> **issuer**: `string`
 
-The address of the issuer.
+The issuer of the NFT.
 
 ***
 
-### ownerAddress
+### owner
 
-> **ownerAddress**: `string`
+> **owner**: `string`
 
-The address of the owner.
+The owner of the NFT.
 
 ***
 

@@ -9,22 +9,22 @@ import { entity, property } from "@gtsc/entity";
 @entity()
 export class Nft {
 	/**
-	 * The identity of the nft.
+	 * The identity of the NFT.
 	 */
 	@property({ type: "string", isPrimary: true })
 	public id!: string;
 
 	/**
-	 * The address of the issuer.
+	 * The issuer of the NFT.
 	 */
 	@property({ type: "string" })
-	public issuerAddress!: string;
+	public issuer!: string;
 
 	/**
-	 * The address of the owner.
+	 * The owner of the NFT.
 	 */
 	@property({ type: "string" })
-	public ownerAddress!: string;
+	public owner!: string;
 
 	/**
 	 * The tag for the nft.
