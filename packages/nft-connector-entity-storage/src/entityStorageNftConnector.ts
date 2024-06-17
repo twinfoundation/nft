@@ -234,12 +234,14 @@ export class EntityStorageNftConnector implements INftConnector {
 	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to transfer in urn format.
 	 * @param recipient The recipient of the NFT.
+	 * @param metadata Optional mutable data to include during the transfer.
 	 * @returns Nothing.
 	 */
-	public async transfer(
+	public async transfer<T = unknown>(
 		requestContext: IRequestContext,
 		id: string,
-		recipient: string
+		recipient: string,
+		metadata?: T
 	): Promise<void> {
 		Guards.object<IRequestContext>(
 			EntityStorageNftConnector._CLASS_NAME,
@@ -276,12 +278,72 @@ export class EntityStorageNftConnector implements INftConnector {
 			}
 
 			nft.owner = recipient;
+			nft.metadata = Is.empty(metadata) ? nft.metadata : JSON.stringify(metadata);
 
 			await this._nftEntityStorage.set(requestContext, nft);
 		} catch (error) {
 			throw new GeneralError(
 				EntityStorageNftConnector._CLASS_NAME,
 				"transferFailed",
+				undefined,
+				error
+			);
+		}
+	}
+
+	/**
+	 * Update the mutable data of the NFT.
+	 * @param requestContext The context for the request.
+	 * @param id The id of the NFT to update in urn format.
+	 * @param metadata The mutable data to update.
+	 * @returns Nothing.
+	 */
+	public async updateMutable<T = unknown>(
+		requestContext: IRequestContext,
+		id: string,
+		metadata: T
+	): Promise<void> {
+		Guards.object<IRequestContext>(
+			EntityStorageNftConnector._CLASS_NAME,
+			nameof(requestContext),
+			requestContext
+		);
+		Guards.stringValue(
+			EntityStorageNftConnector._CLASS_NAME,
+			nameof(requestContext.tenantId),
+			requestContext.tenantId
+		);
+		Guards.stringValue(
+			EntityStorageNftConnector._CLASS_NAME,
+			nameof(requestContext.identity),
+			requestContext.identity
+		);
+		Urn.guard(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
+		Guards.object<T>(EntityStorageNftConnector._CLASS_NAME, nameof(metadata), metadata);
+
+		const urnParsed = Urn.fromValidString(id);
+		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
+			throw new GeneralError(EntityStorageNftConnector._CLASS_NAME, "namespaceMismatch", {
+				namespace: EntityStorageNftConnector.NAMESPACE,
+				id
+			});
+		}
+
+		try {
+			const nftId = urnParsed.namespaceSpecific();
+			const nft = await this._nftEntityStorage.get(requestContext, nftId);
+
+			if (Is.empty(nft)) {
+				throw new NotFoundError(EntityStorageNftConnector._CLASS_NAME, "nftNotFound");
+			}
+
+			nft.metadata = JSON.stringify(metadata);
+
+			await this._nftEntityStorage.set(requestContext, nft);
+		} catch (error) {
+			throw new GeneralError(
+				EntityStorageNftConnector._CLASS_NAME,
+				"updateFailed",
 				undefined,
 				error
 			);

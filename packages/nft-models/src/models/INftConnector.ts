@@ -54,7 +54,26 @@ export interface INftConnector {
 	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to transfer in urn format.
 	 * @param recipient The recipient of the NFT.
+	 * @param metadata Optional mutable data to include during the transfer.
 	 * @returns Nothing.
 	 */
-	transfer(requestContext: IRequestContext, id: string, recipient: string): Promise<void>;
+	transfer<T = unknown>(
+		requestContext: IRequestContext,
+		id: string,
+		recipient: string,
+		metadata?: T
+	): Promise<void>;
+
+	/**
+	 * Update the mutable data of the NFT.
+	 * @param requestContext The context for the request.
+	 * @param id The id of the NFT to update in urn format.
+	 * @param metadata The mutable data to update.
+	 * @returns Nothing.
+	 */
+	updateMutable<T = unknown>(
+		requestContext: IRequestContext,
+		id: string,
+		metadata: T
+	): Promise<void>;
 }
