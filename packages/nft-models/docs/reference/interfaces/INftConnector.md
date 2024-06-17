@@ -126,9 +126,13 @@ Nothing.
 
 ### transfer()
 
-> **transfer**(`requestContext`, `id`, `recipient`): `Promise`\<`void`\>
+> **transfer**\<`T`\>(`requestContext`, `id`, `recipient`, `metadata`?): `Promise`\<`void`\>
 
 Transfer an NFT.
+
+#### Type parameters
+
+• **T** = `unknown`
 
 #### Parameters
 
@@ -143,6 +147,42 @@ The id of the NFT to transfer in urn format.
 • **recipient**: `string`
 
 The recipient of the NFT.
+
+• **metadata?**: `T`
+
+Optional mutable data to include during the transfer.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+Nothing.
+
+***
+
+### updateMutable()
+
+> **updateMutable**\<`T`\>(`requestContext`, `id`, `metadata`): `Promise`\<`void`\>
+
+Update the mutable data of the NFT.
+
+#### Type parameters
+
+• **T** = `unknown`
+
+#### Parameters
+
+• **requestContext**: `IRequestContext`
+
+The context for the request.
+
+• **id**: `string`
+
+The id of the NFT to update in urn format.
+
+• **metadata**: `T`
+
+The mutable data to update.
 
 #### Returns
 

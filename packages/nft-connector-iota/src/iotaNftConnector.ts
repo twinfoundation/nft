@@ -381,12 +381,14 @@ export class IotaNftConnector implements INftConnector {
 	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to transfer in urn format.
 	 * @param recipient The recipient of the NFT.
+	 * @param metadata Optional mutable data to include during the transfer.
 	 * @returns Nothing.
 	 */
-	public async transfer(
+	public async transfer<T>(
 		requestContext: IRequestContext,
 		id: string,
-		recipient: string
+		recipient: string,
+		metadata?: T
 	): Promise<void> {
 		Guards.object<IRequestContext>(
 			IotaNftConnector._CLASS_NAME,
@@ -425,13 +427,24 @@ export class IotaNftConnector implements INftConnector {
 			const nftOutputResponse = await client.getOutput(nftOutputId);
 			const nftOutput = nftOutputResponse.output as NftOutput;
 
+			let mutableFeatures = nftOutput.features ?? [];
+
+			if (Is.object(metadata)) {
+				// If there is new mutable data with the transfer then filter out the old
+				// version and include the new one
+				mutableFeatures = mutableFeatures.filter(m => m.type !== FeatureType.Metadata);
+				mutableFeatures.push(
+					new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
+				);
+			}
+
 			const recipientNftOutput = await client.buildNftOutput({
 				nftId,
 				unlockConditions: [
 					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(recipient)))
 				],
 				immutableFeatures: nftOutput.immutableFeatures,
-				features: nftOutput.features
+				features: mutableFeatures
 			});
 
 			await this.prepareAndPostTransaction(requestContext, client, {
@@ -447,6 +460,90 @@ export class IotaNftConnector implements INftConnector {
 			throw new GeneralError(
 				IotaNftConnector._CLASS_NAME,
 				"transferFailed",
+				undefined,
+				this.extractPayloadError(error)
+			);
+		}
+	}
+
+	/**
+	 * Update the mutable data of the NFT.
+	 * @param requestContext The context for the request.
+	 * @param id The id of the NFT to update in urn format.
+	 * @param metadata The mutable data to update.
+	 * @returns Nothing.
+	 */
+	public async updateMutable<T>(
+		requestContext: IRequestContext,
+		id: string,
+		metadata?: T
+	): Promise<void> {
+		Guards.object<IRequestContext>(
+			IotaNftConnector._CLASS_NAME,
+			nameof(requestContext),
+			requestContext
+		);
+		Guards.stringValue(
+			IotaNftConnector._CLASS_NAME,
+			nameof(requestContext.tenantId),
+			requestContext.tenantId
+		);
+		Guards.stringValue(
+			IotaNftConnector._CLASS_NAME,
+			nameof(requestContext.identity),
+			requestContext.identity
+		);
+		Urn.guard(IotaNftConnector._CLASS_NAME, nameof(id), id);
+		Guards.object<T>(IotaNftConnector._CLASS_NAME, nameof(metadata), metadata);
+
+		const urnParsed = Urn.fromValidString(id);
+		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
+			throw new GeneralError(IotaNftConnector._CLASS_NAME, "namespaceMismatch", {
+				namespace: IotaNftConnector.NAMESPACE,
+				id
+			});
+		}
+
+		try {
+			const client = new Client(this._config.clientOptions);
+
+			const nftParts = urnParsed.namespaceSpecific().split(":");
+			const nftId = nftParts[1];
+			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
+
+			const nftOutputId = await client.nftOutputId(nftId);
+			const nftOutputResponse = await client.getOutput(nftOutputId);
+			const nftOutput = nftOutputResponse.output as NftOutput;
+
+			let mutableFeatures = nftOutput.features ?? [];
+
+			// If there is new mutable data with the transfer then filter out the old
+			// version and include the new one
+			mutableFeatures = mutableFeatures.filter(m => m.type !== FeatureType.Metadata);
+			mutableFeatures.push(
+				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
+			);
+
+			const recipientNftOutput = await client.buildNftOutput({
+				nftId,
+				unlockConditions: nftOutput.unlockConditions,
+				immutableFeatures: nftOutput.immutableFeatures,
+				features: mutableFeatures
+			});
+
+			await this.prepareAndPostTransaction(requestContext, client, {
+				inputs: [
+					new UTXOInput(
+						nftOutputResponse.metadata.transactionId,
+						nftOutputResponse.metadata.outputIndex
+					)
+				],
+				outputs: [recipientNftOutput]
+			});
+		} catch (error) {
+			throw new GeneralError(
+				IotaNftConnector._CLASS_NAME,
+				"updateFailed",
 				undefined,
 				this.extractPayloadError(error)
 			);
