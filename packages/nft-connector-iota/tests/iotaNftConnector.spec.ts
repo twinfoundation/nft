@@ -7,7 +7,6 @@ import {
 	TEST_CLIENT_OPTIONS,
 	TEST_COIN_TYPE,
 	TEST_CONTEXT,
-	TEST_IDENTITY_ID,
 	TEST_IDENTITY_ID_2,
 	TEST_MNEMONIC_NAME,
 	TEST_NFT_ADDRESS_2_BECH32,
@@ -78,13 +77,7 @@ describe("IotaNftConnector", () => {
 				coinType: TEST_COIN_TYPE
 			}
 		);
-		const response = await connector.resolve(
-			{
-				tenantId: TEST_CONTEXT.tenantId,
-				identity: TEST_IDENTITY_ID
-			},
-			nftId
-		);
+		const response = await connector.resolve(TEST_CONTEXT, nftId);
 
 		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
 		expect(response.owner).toEqual(TEST_NFT_ADDRESS_BECH32);
@@ -116,16 +109,84 @@ describe("IotaNftConnector", () => {
 
 		await connector.transfer(TEST_CONTEXT, nftId, TEST_NFT_ADDRESS_2_BECH32);
 
-		const response = await connector.resolve(
-			{
-				tenantId: TEST_CONTEXT.tenantId,
-				identity: TEST_IDENTITY_ID
-			},
-			nftId
-		);
+		const response = await connector.resolve(TEST_CONTEXT, nftId);
 
 		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
 		expect(response.owner).toEqual(TEST_NFT_ADDRESS_2_BECH32);
+	});
+
+	test("Can return transfer an NFT", async () => {
+		const connector = new IotaNftConnector(
+			{
+				vaultConnector: TEST_VAULT_CONNECTOR
+			},
+			{
+				clientOptions: TEST_CLIENT_OPTIONS,
+				vaultMnemonicId: TEST_MNEMONIC_NAME,
+				coinType: TEST_COIN_TYPE
+			}
+		);
+
+		await connector.transfer(
+			{
+				tenantId: TEST_CONTEXT.tenantId,
+				identity: TEST_IDENTITY_ID_2
+			},
+			nftId,
+			TEST_NFT_ADDRESS_BECH32
+		);
+
+		const response = await connector.resolve(TEST_CONTEXT, nftId);
+
+		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
+		expect(response.owner).toEqual(TEST_NFT_ADDRESS_BECH32);
+	});
+
+	test("Can transfer an NFT with a larger mutable payload", async () => {
+		const connector = new IotaNftConnector(
+			{
+				vaultConnector: TEST_VAULT_CONNECTOR
+			},
+			{
+				clientOptions: TEST_CLIENT_OPTIONS,
+				vaultMnemonicId: TEST_MNEMONIC_NAME,
+				coinType: TEST_COIN_TYPE
+			}
+		);
+
+		await connector.transfer(TEST_CONTEXT, nftId, TEST_NFT_ADDRESS_2_BECH32, {
+			payload: "a".repeat(128)
+		});
+
+		const response = await connector.resolve(TEST_CONTEXT, nftId);
+
+		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
+		expect(response.owner).toEqual(TEST_NFT_ADDRESS_2_BECH32);
+	});
+
+	test("Can update the mutable data of an NFT", async () => {
+		const connector = new IotaNftConnector(
+			{
+				vaultConnector: TEST_VAULT_CONNECTOR
+			},
+			{
+				clientOptions: TEST_CLIENT_OPTIONS,
+				vaultMnemonicId: TEST_MNEMONIC_NAME,
+				coinType: TEST_COIN_TYPE
+			}
+		);
+		await connector.updateMutable(
+			{
+				tenantId: TEST_CONTEXT.tenantId,
+				identity: TEST_IDENTITY_ID_2
+			},
+			nftId,
+			{
+				payload1: "a".repeat(128),
+				payload2: "b".repeat(128),
+				payload3: "c".repeat(128)
+			}
+		);
 	});
 
 	test("Can fail to burn an NFT that has been transferred", async () => {
@@ -140,7 +201,7 @@ describe("IotaNftConnector", () => {
 			}
 		);
 		await expect(
-			connector.burn(TEST_CONTEXT, TEST_NFT_ADDRESS_BECH32, nftId)
+			connector.burn(TEST_CONTEXT, TEST_NFT_ADDRESS_2_BECH32, nftId)
 		).rejects.toMatchObject({
 			name: "GeneralError",
 			message: "iotaNftConnector.burningFailed"

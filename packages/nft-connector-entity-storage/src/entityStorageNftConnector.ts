@@ -157,10 +157,10 @@ export class EntityStorageNftConnector implements INftConnector {
 				owner: nft.owner,
 				issuer: nft.issuer,
 				tag: nft.tag,
-				immutableMetadata: Is.empty(nft.immutableMetadata)
-					? undefined
-					: JSON.parse(nft.immutableMetadata),
-				metadata: Is.empty(nft.metadata) ? undefined : JSON.parse(nft.metadata)
+				immutableMetadata: Is.stringValue(nft.immutableMetadata)
+					? JSON.parse(nft.immutableMetadata)
+					: undefined,
+				metadata: Is.stringValue(nft.metadata) ? JSON.parse(nft.metadata) : undefined
 			};
 		} catch (error) {
 			throw new GeneralError(
