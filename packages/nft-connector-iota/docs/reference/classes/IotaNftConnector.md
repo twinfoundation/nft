@@ -224,7 +224,7 @@ Nothing.
 
 ### updateMutable()
 
-> **updateMutable**\<`T`\>(`requestContext`, `id`, `metadata`?): `Promise`\<`void`\>
+> **updateMutable**\<`T`\>(`requestContext`, `id`, `metadata`): `Promise`\<`void`\>
 
 Update the mutable data of the NFT.
 
@@ -242,7 +242,7 @@ The context for the request.
 
 The id of the NFT to update in urn format.
 
-• **metadata?**: `T`
+• **metadata**: `T`
 
 The mutable data to update.
 

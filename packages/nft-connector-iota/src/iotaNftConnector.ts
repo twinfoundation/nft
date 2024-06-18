@@ -33,7 +33,8 @@ import {
 	type IBuildBlockOptions,
 	type NftOutput,
 	type NftOutputBuilderParams,
-	type TransactionPayload
+	type TransactionPayload,
+	type Feature
 } from "@iota/sdk-wasm/node/lib/index.js";
 import type { IIotaNftConnectorConfig } from "./models/IIotaNftConnectorConfig";
 
@@ -420,6 +421,7 @@ export class IotaNftConnector implements INftConnector {
 			const client = new Client(this._config.clientOptions);
 
 			const nftParts = urnParsed.namespaceSpecific().split(":");
+			const hrp = nftParts[0];
 			const nftId = nftParts[1];
 			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
 
@@ -427,15 +429,23 @@ export class IotaNftConnector implements INftConnector {
 			const nftOutputResponse = await client.getOutput(nftOutputId);
 			const nftOutput = nftOutputResponse.output as NftOutput;
 
-			let mutableFeatures = nftOutput.features ?? [];
+			const unlockConditions = nftOutput.unlockConditions?.filter(
+				f => f.type === UnlockConditionType.Address
+			);
+			const currentOwner = Is.arrayValue(unlockConditions)
+				? ((unlockConditions[0] as AddressUnlockCondition).address as Ed25519Address).pubKeyHash
+				: "";
+			const currentOwnerAddressBech32 = Utils.hexToBech32(currentOwner, hrp);
+
+			const mutableFeatures: Feature[] = [new SenderFeature(new Ed25519Address(currentOwner))];
 
 			if (Is.object(metadata)) {
-				// If there is new mutable data with the transfer then filter out the old
-				// version and include the new one
-				mutableFeatures = mutableFeatures.filter(m => m.type !== FeatureType.Metadata);
 				mutableFeatures.push(
 					new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
 				);
+			} else {
+				const currentMetadata = mutableFeatures.filter(m => m.type === FeatureType.Metadata);
+				mutableFeatures.push(...currentMetadata);
 			}
 
 			const recipientNftOutput = await client.buildNftOutput({
@@ -447,12 +457,19 @@ export class IotaNftConnector implements INftConnector {
 				features: mutableFeatures
 			});
 
+			// We need additional inputs in case the mutable data size has grown.
+			const additionalInputs = await client.findInputs(
+				[currentOwnerAddressBech32],
+				recipientNftOutput.getAmount()
+			);
+
 			await this.prepareAndPostTransaction(requestContext, client, {
 				inputs: [
 					new UTXOInput(
 						nftOutputResponse.metadata.transactionId,
 						nftOutputResponse.metadata.outputIndex
-					)
+					),
+					...additionalInputs
 				],
 				outputs: [recipientNftOutput]
 			});
@@ -476,7 +493,7 @@ export class IotaNftConnector implements INftConnector {
 	public async updateMutable<T>(
 		requestContext: IRequestContext,
 		id: string,
-		metadata?: T
+		metadata: T
 	): Promise<void> {
 		Guards.object<IRequestContext>(
 			IotaNftConnector._CLASS_NAME,
@@ -508,6 +525,7 @@ export class IotaNftConnector implements INftConnector {
 			const client = new Client(this._config.clientOptions);
 
 			const nftParts = urnParsed.namespaceSpecific().split(":");
+			const hrp = nftParts[0];
 			const nftId = nftParts[1];
 			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
 
@@ -515,14 +533,18 @@ export class IotaNftConnector implements INftConnector {
 			const nftOutputResponse = await client.getOutput(nftOutputId);
 			const nftOutput = nftOutputResponse.output as NftOutput;
 
-			let mutableFeatures = nftOutput.features ?? [];
-
-			// If there is new mutable data with the transfer then filter out the old
-			// version and include the new one
-			mutableFeatures = mutableFeatures.filter(m => m.type !== FeatureType.Metadata);
-			mutableFeatures.push(
-				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
+			const unlockConditions = nftOutput.unlockConditions?.filter(
+				f => f.type === UnlockConditionType.Address
 			);
+			const currentOwner = Is.arrayValue(unlockConditions)
+				? ((unlockConditions[0] as AddressUnlockCondition).address as Ed25519Address).pubKeyHash
+				: "";
+			const currentOwnerAddressBech32 = Utils.hexToBech32(currentOwner, hrp);
+
+			const mutableFeatures: Feature[] = [
+				new SenderFeature(new Ed25519Address(currentOwner)),
+				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
+			];
 
 			const recipientNftOutput = await client.buildNftOutput({
 				nftId,
@@ -531,12 +553,19 @@ export class IotaNftConnector implements INftConnector {
 				features: mutableFeatures
 			});
 
+			// We need additional inputs in case the mutable data size has grown.
+			const additionalInputs = await client.findInputs(
+				[currentOwnerAddressBech32],
+				recipientNftOutput.getAmount()
+			);
+
 			await this.prepareAndPostTransaction(requestContext, client, {
 				inputs: [
 					new UTXOInput(
 						nftOutputResponse.metadata.transactionId,
 						nftOutputResponse.metadata.outputIndex
-					)
+					),
+					...additionalInputs
 				],
 				outputs: [recipientNftOutput]
 			});
@@ -626,9 +655,13 @@ export class IotaNftConnector implements INftConnector {
 	private extractPayloadError(error: unknown): IError {
 		if (Is.json(error)) {
 			const obj = JSON.parse(error);
+			let message = obj.payload?.error;
+			if (message === "no input with matching ed25519 address provided") {
+				message = "There were insufficient funds to complete the operation";
+			}
 			return {
 				name: "IOTA",
-				message: obj.payload?.error
+				message
 			};
 		}
 
