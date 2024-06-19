@@ -37,7 +37,7 @@ Commands:
   nft-transfer [options]  Transfer an NFT.
 ```
 
-You can get further detail on the sub commands by using the help option for the individual commands.
+You can get further details on the sub commands by using the help option for the individual commands.
 
 ```shell
 gtsc-nft nft-mint --help
@@ -74,7 +74,7 @@ The commands `mnemonic`, `address` and `faucet` are described in more detail in 
 
 ### nft-mint
 
-Use this command to min a new NFT, the issuer address must have sufficient funds to store the NFT. The seed and the funds can be generated using the `mnemonic` and `faucet` commands.
+Use this command to mint a new NFT, the issuer address must have sufficient funds to store the NFT. The seed and the funds can be generated using the `mnemonic` and `faucet` commands.
 
 ```shell
 # Generate a seed and mnemonic and store it in the env file
