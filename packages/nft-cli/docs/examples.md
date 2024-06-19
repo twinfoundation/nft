@@ -129,7 +129,7 @@ gtsc-nft nft-resolve --load-env config.env nft.env --id !NFT_ID
 You can transfer the NFT to another address using the following command. You must provide the seed from the current issuer/owner so that it can be unlocked and transferred. In this example we read the nft id from the env file and transfer to the second address we created earlier.
 
 ```shell
-gtsc-nft nft-tranfer --load-env config.env wallet.env nft.env --seed !SEED --id !NFT_ID --recipient !ADDRESS_1_BECH32
+gtsc-nft nft-transfer --load-env config.env wallet.env nft.env --seed !SEED --id !NFT_ID --recipient !ADDRESS_1_BECH32
 ```
 
 ### nft-burn
