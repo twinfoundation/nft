@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import path from "node:path";
-import { CLIDisplay, CLIOptions, CLIParam, CLIUtils } from "@gtsc/cli-core";
+import { CLIDisplay, CLIOptions, CLIParam, CLIUtils, type CliOutputOptions } from "@gtsc/cli-core";
 import { Converter, I18n, Is, StringHelper } from "@gtsc/core";
 import { EntitySchemaHelper } from "@gtsc/entity";
 import { MemoryEntityStorageConnector } from "@gtsc/entity-storage-connector-memory";
@@ -76,28 +76,20 @@ export function buildCommandNftMint(): Command {
  * @param opts.tag The tag for the NFT.
  * @param opts.immutableJson Filename of the immutable JSON data.
  * @param opts.mutableJson Filename of the mutable JSON data.
- * @param opts.console Flag to display on the console.
- * @param opts.json Output the data to a JSON file.
- * @param opts.mergeJson Merge the data to a JSON file.
- * @param opts.env Output the data to an environment file.
- * @param opts.mergeEnv Merge the data to an environment file.
  * @param opts.node The node URL.
  * @param opts.explorer The explorer URL.
  */
-export async function actionCommandNftMint(opts: {
-	seed: string;
-	issuer: string;
-	tag: string;
-	immutableJson?: string;
-	mutableJson?: string;
-	console: boolean;
-	json?: string;
-	mergeJson: boolean;
-	env?: string;
-	mergeEnv: boolean;
-	node: string;
-	explorer: string;
-}): Promise<void> {
+export async function actionCommandNftMint(
+	opts: {
+		seed: string;
+		issuer: string;
+		tag: string;
+		immutableJson?: string;
+		mutableJson?: string;
+		node: string;
+		explorer: string;
+	} & CliOutputOptions
+): Promise<void> {
 	const seed: Uint8Array = CLIParam.hexBase64("seed", opts.seed);
 	const issuer: string = CLIParam.bech32("issuer", opts.issuer);
 	const tag: string = CLIParam.stringValue("tag", opts.tag);
@@ -163,15 +155,13 @@ export async function actionCommandNftMint(opts: {
 
 	if (Is.object(immutableJsonData)) {
 		CLIDisplay.section(I18n.formatMessage("commands.nft-mint.labels.immutableJson"));
-		CLIDisplay.write(JSON.stringify(immutableJsonData, undefined, 2));
-		CLIDisplay.break();
+		CLIDisplay.json(immutableJsonData);
 		CLIDisplay.break();
 	}
 
 	if (Is.object(mutableJsonData)) {
 		CLIDisplay.section(I18n.formatMessage("commands.nft-mint.labels.mutableJson"));
-		CLIDisplay.write(JSON.stringify(mutableJsonData, undefined, 2));
-		CLIDisplay.break();
+		CLIDisplay.json(mutableJsonData);
 		CLIDisplay.break();
 	}
 

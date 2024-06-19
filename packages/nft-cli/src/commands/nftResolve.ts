@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { CLIDisplay, CLIOptions, CLIParam, CLIUtils } from "@gtsc/cli-core";
+import { CLIDisplay, CLIOptions, CLIParam, CLIUtils, type CliOutputOptions } from "@gtsc/cli-core";
 import { I18n, Is, StringHelper } from "@gtsc/core";
 import { EntitySchemaHelper } from "@gtsc/entity";
 import { MemoryEntityStorageConnector } from "@gtsc/entity-storage-connector-memory";
@@ -55,20 +55,16 @@ export function buildCommandNftResolve(): Command {
  * Action the nft resolve command.
  * @param opts The options for the command.
  * @param opts.id The id of the NFT to resolve in urn format.
- * @param opts.console Flag to display on the console.
- * @param opts.json Output the data to a JSON file.
- * @param opts.mergeJson Merge the data to a JSON file.
  * @param opts.node The node URL.
  * @param opts.explorer The explorer URL.
  */
-export async function actionCommandNftResolve(opts: {
-	id: string;
-	console: boolean;
-	json?: string;
-	mergeJson: boolean;
-	node: string;
-	explorer: string;
-}): Promise<void> {
+export async function actionCommandNftResolve(
+	opts: {
+		id: string;
+		node: string;
+		explorer: string;
+	} & CliOutputOptions
+): Promise<void> {
 	const id: string = CLIParam.stringValue("id", opts.id);
 	const nodeEndpoint: string = CLIParam.url("node", opts.node);
 	const explorerEndpoint: string = CLIParam.url("explorer", opts.explorer);
@@ -111,8 +107,7 @@ export async function actionCommandNftResolve(opts: {
 
 	if (opts.console) {
 		CLIDisplay.section(I18n.formatMessage("commands.nft-resolve.labels.nft"));
-
-		CLIDisplay.write(JSON.stringify(nft, undefined, 2));
+		CLIDisplay.json(nft);
 		CLIDisplay.break();
 	}
 
