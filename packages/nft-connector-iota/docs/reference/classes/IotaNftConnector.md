@@ -10,21 +10,21 @@ Class for performing NFT operations on IOTA.
 
 ### new IotaNftConnector()
 
-> **new IotaNftConnector**(`dependencies`, `config`): [`IotaNftConnector`](IotaNftConnector.md)
+> **new IotaNftConnector**(`options`): [`IotaNftConnector`](IotaNftConnector.md)
 
 Create a new instance of IotaNftConnector.
 
 #### Parameters
 
-• **dependencies**
+• **options**
 
-The dependencies for the class.
+The options for the connector.
 
-• **dependencies.vaultConnector**: `IVaultConnector`
+• **options.vaultConnectorType?**: `string`
 
-The vault connector.
+The type of the vault connector, defaults to "vault".
 
-• **config**: [`IIotaNftConnectorConfig`](../interfaces/IIotaNftConnectorConfig.md)
+• **options.config**: [`IIotaNftConnectorConfig`](../interfaces/IIotaNftConnectorConfig.md)
 
 The configuration for the connector.
 

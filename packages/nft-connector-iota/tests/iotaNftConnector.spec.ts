@@ -11,7 +11,6 @@ import {
 	TEST_MNEMONIC_NAME,
 	TEST_NFT_ADDRESS_2_BECH32,
 	TEST_NFT_ADDRESS_BECH32,
-	TEST_VAULT_CONNECTOR,
 	setupTestEnv
 } from "./setupTestEnv";
 import { IotaNftConnector } from "../src/iotaNftConnector";
@@ -25,16 +24,13 @@ describe("IotaNftConnector", () => {
 	});
 
 	test("Can mint an NFT", async () => {
-		const connector = new IotaNftConnector(
-			{
-				vaultConnector: TEST_VAULT_CONNECTOR
-			},
-			{
+		const connector = new IotaNftConnector({
+			config: {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				coinType: TEST_COIN_TYPE
 			}
-		);
+		});
 		const immutableMetadata: IIrc27Metadata = {
 			standard: "IRC27",
 			version: "v1.0",
@@ -67,16 +63,13 @@ describe("IotaNftConnector", () => {
 	});
 
 	test("Can resolve an NFT", async () => {
-		const connector = new IotaNftConnector(
-			{
-				vaultConnector: TEST_VAULT_CONNECTOR
-			},
-			{
+		const connector = new IotaNftConnector({
+			config: {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				coinType: TEST_COIN_TYPE
 			}
-		);
+		});
 		const response = await connector.resolve(TEST_CONTEXT, nftId);
 
 		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
@@ -96,16 +89,13 @@ describe("IotaNftConnector", () => {
 	});
 
 	test("Can transfer an NFT", async () => {
-		const connector = new IotaNftConnector(
-			{
-				vaultConnector: TEST_VAULT_CONNECTOR
-			},
-			{
+		const connector = new IotaNftConnector({
+			config: {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				coinType: TEST_COIN_TYPE
 			}
-		);
+		});
 
 		await connector.transfer(TEST_CONTEXT, nftId, TEST_NFT_ADDRESS_2_BECH32);
 
@@ -116,16 +106,13 @@ describe("IotaNftConnector", () => {
 	});
 
 	test("Can return transfer an NFT", async () => {
-		const connector = new IotaNftConnector(
-			{
-				vaultConnector: TEST_VAULT_CONNECTOR
-			},
-			{
+		const connector = new IotaNftConnector({
+			config: {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				coinType: TEST_COIN_TYPE
 			}
-		);
+		});
 
 		await connector.transfer(
 			{
@@ -143,16 +130,13 @@ describe("IotaNftConnector", () => {
 	});
 
 	test("Can transfer an NFT with a larger mutable payload", async () => {
-		const connector = new IotaNftConnector(
-			{
-				vaultConnector: TEST_VAULT_CONNECTOR
-			},
-			{
+		const connector = new IotaNftConnector({
+			config: {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				coinType: TEST_COIN_TYPE
 			}
-		);
+		});
 
 		await connector.transfer(TEST_CONTEXT, nftId, TEST_NFT_ADDRESS_2_BECH32, {
 			payload: "a".repeat(128)
@@ -165,16 +149,13 @@ describe("IotaNftConnector", () => {
 	});
 
 	test("Can update the mutable data of an NFT", async () => {
-		const connector = new IotaNftConnector(
-			{
-				vaultConnector: TEST_VAULT_CONNECTOR
-			},
-			{
+		const connector = new IotaNftConnector({
+			config: {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				coinType: TEST_COIN_TYPE
 			}
-		);
+		});
 		await connector.updateMutable(
 			{
 				tenantId: TEST_CONTEXT.tenantId,
@@ -190,16 +171,13 @@ describe("IotaNftConnector", () => {
 	});
 
 	test("Can fail to burn an NFT that has been transferred", async () => {
-		const connector = new IotaNftConnector(
-			{
-				vaultConnector: TEST_VAULT_CONNECTOR
-			},
-			{
+		const connector = new IotaNftConnector({
+			config: {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				coinType: TEST_COIN_TYPE
 			}
-		);
+		});
 		await expect(
 			connector.burn(TEST_CONTEXT, TEST_NFT_ADDRESS_2_BECH32, nftId)
 		).rejects.toMatchObject({
@@ -209,16 +187,13 @@ describe("IotaNftConnector", () => {
 	});
 
 	test("Can burn an NFT", async () => {
-		const connector = new IotaNftConnector(
-			{
-				vaultConnector: TEST_VAULT_CONNECTOR
-			},
-			{
+		const connector = new IotaNftConnector({
+			config: {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				coinType: TEST_COIN_TYPE
 			}
-		);
+		});
 		await connector.burn(
 			{
 				tenantId: TEST_CONTEXT.tenantId,

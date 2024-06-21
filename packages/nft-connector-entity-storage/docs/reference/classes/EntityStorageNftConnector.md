@@ -10,19 +10,19 @@ Class for performing NFT operations on entity storage.
 
 ### new EntityStorageNftConnector()
 
-> **new EntityStorageNftConnector**(`dependencies`): [`EntityStorageNftConnector`](EntityStorageNftConnector.md)
+> **new EntityStorageNftConnector**(`options`?): [`EntityStorageNftConnector`](EntityStorageNftConnector.md)
 
 Create a new instance of EntityStorageNftConnector.
 
 #### Parameters
 
-• **dependencies**
+• **options?**
 
 The dependencies for the class.
 
-• **dependencies.nftEntityStorage**: `IEntityStorageConnector`\<[`Nft`](Nft.md)\>
+• **options.nftEntityStorageType?**: `string`
 
-The entity storage for nfts.
+The entity storage for nfts, defaults to "nft".
 
 #### Returns
 

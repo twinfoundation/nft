@@ -2,15 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { CLIDisplay, CLIOptions, CLIParam, CLIUtils, type CliOutputOptions } from "@gtsc/cli-core";
 import { I18n, Is, StringHelper } from "@gtsc/core";
-import { EntitySchemaHelper } from "@gtsc/entity";
-import { MemoryEntityStorageConnector } from "@gtsc/entity-storage-connector-memory";
 import { IotaNftConnector, IotaNftUtils } from "@gtsc/nft-connector-iota";
-import {
-	EntityStorageVaultConnector,
-	VaultKey,
-	VaultSecret
-} from "@gtsc/vault-connector-entity-storage";
 import { Command } from "commander";
+import { setupVault } from "./setupCommands";
 
 /**
  * Build the nft resolve command for the CLI.
@@ -73,28 +67,18 @@ export async function actionCommandNftResolve(
 	CLIDisplay.value(I18n.formatMessage("commands.common.labels.node"), nodeEndpoint);
 	CLIDisplay.break();
 
-	const vaultConnector = new EntityStorageVaultConnector({
-		vaultKeyEntityStorageConnector: new MemoryEntityStorageConnector<VaultKey>(
-			EntitySchemaHelper.getSchema(VaultKey)
-		),
-		vaultSecretEntityStorageConnector: new MemoryEntityStorageConnector<VaultSecret>(
-			EntitySchemaHelper.getSchema(VaultSecret)
-		)
-	});
+	setupVault();
 
 	const requestContext = { identity: "local", tenantId: "local" };
 
-	const iotaNftConnector = new IotaNftConnector(
-		{
-			vaultConnector
-		},
-		{
+	const iotaNftConnector = new IotaNftConnector({
+		config: {
 			clientOptions: {
 				nodes: [nodeEndpoint],
 				localPow: true
 			}
 		}
-	);
+	});
 
 	CLIDisplay.task(I18n.formatMessage("commands.nft-resolve.progress.resolvingNft"));
 	CLIDisplay.break();

@@ -14,7 +14,7 @@ import { Bip39 } from "@gtsc/crypto";
 import { nameof } from "@gtsc/nameof";
 import type { INftConnector } from "@gtsc/nft-models";
 import type { IRequestContext } from "@gtsc/services";
-import type { IVaultConnector } from "@gtsc/vault-models";
+import { VaultConnectorFactory, type IVaultConnector } from "@gtsc/vault-models";
 import {
 	AddressUnlockCondition,
 	BasicOutput,
@@ -90,30 +90,24 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Create a new instance of IotaNftConnector.
-	 * @param dependencies The dependencies for the class.
-	 * @param dependencies.vaultConnector The vault connector.
-	 * @param config The configuration for the connector.
+	 * @param options The options for the connector.
+	 * @param options.vaultConnectorType The type of the vault connector, defaults to "vault".
+	 * @param options.config The configuration for the connector.
 	 */
-	constructor(
-		dependencies: {
-			vaultConnector: IVaultConnector;
-		},
-		config: IIotaNftConnectorConfig
-	) {
-		Guards.object(IotaNftConnector._CLASS_NAME, nameof(dependencies), dependencies);
-		Guards.object<IVaultConnector>(
+	constructor(options: { vaultConnectorType?: string; config: IIotaNftConnectorConfig }) {
+		Guards.object(IotaNftConnector._CLASS_NAME, nameof(options), options);
+		Guards.object<IIotaNftConnectorConfig>(
 			IotaNftConnector._CLASS_NAME,
-			nameof(dependencies.vaultConnector),
-			dependencies.vaultConnector
+			nameof(options.config),
+			options.config
 		);
-		Guards.object<IIotaNftConnectorConfig>(IotaNftConnector._CLASS_NAME, nameof(config), config);
 		Guards.object<IIotaNftConnectorConfig["clientOptions"]>(
 			IotaNftConnector._CLASS_NAME,
-			nameof(config.clientOptions),
-			config.clientOptions
+			nameof(options.config.clientOptions),
+			options.config.clientOptions
 		);
-		this._vaultConnector = dependencies.vaultConnector;
-		this._config = config;
+		this._vaultConnector = VaultConnectorFactory.get(options.vaultConnectorType ?? "vault");
+		this._config = options.config;
 		this._config.vaultMnemonicId ??= IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME;
 		this._config.vaultSeedId ??= IotaNftConnector._DEFAULT_SEED_SECRET_NAME;
 		this._config.coinType ??= IotaNftConnector._DEFAULT_COIN_TYPE;

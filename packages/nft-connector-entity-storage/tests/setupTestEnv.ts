@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0.
 
 import path from "node:path";
-import { EntitySchemaHelper } from "@gtsc/entity";
+import { EntitySchemaFactory, EntitySchemaHelper } from "@gtsc/entity";
 import { MemoryEntityStorageConnector } from "@gtsc/entity-storage-connector-memory";
+import { EntityStorageConnectorFactory } from "@gtsc/entity-storage-models";
+import { nameof } from "@gtsc/nameof";
 import type { IRequestContext } from "@gtsc/services";
 import * as dotenv from "dotenv";
 import { Nft } from "../src/entities/nft";
@@ -18,8 +20,14 @@ export const TEST_IDENTITY_ID = "test-identity";
 export const TEST_ADDRESS_1 = "test-address-1";
 export const TEST_ADDRESS_2 = "test-address-2";
 
-export const TEST_NFT_STORAGE = new MemoryEntityStorageConnector<Nft>(
-	EntitySchemaHelper.getSchema(Nft)
+EntitySchemaFactory.register(nameof(Nft), () => EntitySchemaHelper.getSchema(Nft));
+
+EntityStorageConnectorFactory.register(
+	"nft",
+	() =>
+		new MemoryEntityStorageConnector<Nft>({
+			entitySchema: nameof(Nft)
+		})
 );
 
 export const TEST_CONTEXT: IRequestContext = {

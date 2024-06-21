@@ -1,7 +1,10 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import { Converter, GeneralError, Guards, Is, NotFoundError, RandomHelper, Urn } from "@gtsc/core";
-import type { IEntityStorageConnector } from "@gtsc/entity-storage-models";
+import {
+	EntityStorageConnectorFactory,
+	type IEntityStorageConnector
+} from "@gtsc/entity-storage-models";
 import { nameof } from "@gtsc/nameof";
 import type { INftConnector } from "@gtsc/nft-models";
 import type { IRequestContext } from "@gtsc/services";
@@ -30,17 +33,13 @@ export class EntityStorageNftConnector implements INftConnector {
 
 	/**
 	 * Create a new instance of EntityStorageNftConnector.
-	 * @param dependencies The dependencies for the class.
-	 * @param dependencies.nftEntityStorage The entity storage for nfts.
+	 * @param options The dependencies for the class.
+	 * @param options.nftEntityStorageType The entity storage for nfts, defaults to "nft".
 	 */
-	constructor(dependencies: { nftEntityStorage: IEntityStorageConnector<Nft> }) {
-		Guards.object(EntityStorageNftConnector._CLASS_NAME, nameof(dependencies), dependencies);
-		Guards.object<IEntityStorageConnector<Nft>>(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(dependencies.nftEntityStorage),
-			dependencies.nftEntityStorage
+	constructor(options?: { nftEntityStorageType?: string }) {
+		this._nftEntityStorage = EntityStorageConnectorFactory.get(
+			options?.nftEntityStorageType ?? "nft"
 		);
-		this._nftEntityStorage = dependencies.nftEntityStorage;
 	}
 
 	/**
