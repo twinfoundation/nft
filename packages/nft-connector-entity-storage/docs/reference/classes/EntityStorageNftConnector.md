@@ -210,11 +210,11 @@ Nothing.
 
 ***
 
-### updateMutable()
+### update()
 
-> **updateMutable**\<`T`\>(`requestContext`, `id`, `metadata`): `Promise`\<`void`\>
+> **update**\<`T`\>(`requestContext`, `id`, `metadata`): `Promise`\<`void`\>
 
-Update the mutable data of the NFT.
+Update the data of the NFT.
 
 #### Type parameters
 
@@ -242,4 +242,4 @@ Nothing.
 
 #### Implementation of
 
-`INftConnector.updateMutable`
+`INftConnector.update`

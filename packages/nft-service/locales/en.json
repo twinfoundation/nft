@@ -1,0 +1,12 @@
+{
+	"error": {
+		"nftService": {
+			"noConnectors": "There are no connectors registered with the nft factory",
+			"mintFailed": "The minting of the NFT failed",
+			"resolveFailed": "The resolving of the NFT failed",
+			"burnFailed": "The burning of the NFT failed",
+			"transferFailed": "The transfer of the NFT failed",
+			"updateFailed": "The update of the NFT failed"
+		}
+	}
+}

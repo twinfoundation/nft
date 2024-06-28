@@ -291,13 +291,13 @@ export class EntityStorageNftConnector implements INftConnector {
 	}
 
 	/**
-	 * Update the mutable data of the NFT.
+	 * Update the data of the NFT.
 	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to update in urn format.
 	 * @param metadata The mutable data to update.
 	 * @returns Nothing.
 	 */
-	public async updateMutable<T = unknown>(
+	public async update<T = unknown>(
 		requestContext: IRequestContext,
 		id: string,
 		metadata: T
