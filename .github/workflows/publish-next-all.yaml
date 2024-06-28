@@ -15,7 +15,15 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        package: [nft-models, nft-connector-iota, nft-connector-entity-storage, nft-cli]
+        package:
+          [
+            nft-models,
+            nft-connector-iota,
+            nft-connector-entity-storage,
+            nft-service,
+            nft-rest-client,
+            nft-cli
+          ]
 
     steps:
       - name: Checkout

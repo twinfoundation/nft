@@ -156,7 +156,7 @@ describe("IotaNftConnector", () => {
 				coinType: TEST_COIN_TYPE
 			}
 		});
-		await connector.updateMutable(
+		await connector.update(
 			{
 				tenantId: TEST_CONTEXT.tenantId,
 				identity: TEST_IDENTITY_ID_2

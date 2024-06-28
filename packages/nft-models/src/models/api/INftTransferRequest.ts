@@ -1,0 +1,32 @@
+// Copyright 2024 IOTA Stiftung.
+// SPDX-License-Identifier: Apache-2.0.
+
+/**
+ * Transfer the NFT and update the metadata.
+ */
+export interface INftTransferRequest<T = unknown> {
+	/**
+	 * The data to be used in the transfer.
+	 */
+	pathParams: {
+		/**
+		 * The id of the NFT to transfer in urn format.
+		 */
+		id: string;
+	};
+
+	/**
+	 * The data to be used in the minting.
+	 */
+	body: {
+		/**
+		 * The recipient for the NFT.
+		 */
+		recipient: string;
+
+		/**
+		 * The metadata for the NFT.
+		 */
+		metadata?: T;
+	};
+}

@@ -11,6 +11,8 @@ on:
           - nft-models
           - nft-connector-iota
           - nft-connector-entity-storage
+          - nft-service,
+          - nft-rest-client,
           - nft-cli
 
 jobs:

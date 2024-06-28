@@ -71,9 +71,5 @@ export interface INftConnector {
 	 * @param metadata The mutable data to update.
 	 * @returns Nothing.
 	 */
-	updateMutable<T = unknown>(
-		requestContext: IRequestContext,
-		id: string,
-		metadata: T
-	): Promise<void>;
+	update<T = unknown>(requestContext: IRequestContext, id: string, metadata: T): Promise<void>;
 }

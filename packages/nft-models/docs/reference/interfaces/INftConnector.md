@@ -160,9 +160,9 @@ Nothing.
 
 ***
 
-### updateMutable()
+### update()
 
-> **updateMutable**\<`T`\>(`requestContext`, `id`, `metadata`): `Promise`\<`void`\>
+> **update**\<`T`\>(`requestContext`, `id`, `metadata`): `Promise`\<`void`\>
 
 Update the mutable data of the NFT.
 

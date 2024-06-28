@@ -484,11 +484,7 @@ export class IotaNftConnector implements INftConnector {
 	 * @param metadata The mutable data to update.
 	 * @returns Nothing.
 	 */
-	public async updateMutable<T>(
-		requestContext: IRequestContext,
-		id: string,
-		metadata: T
-	): Promise<void> {
+	public async update<T>(requestContext: IRequestContext, id: string, metadata: T): Promise<void> {
 		Guards.object<IRequestContext>(
 			IotaNftConnector._CLASS_NAME,
 			nameof(requestContext),
