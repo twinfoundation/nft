@@ -48,12 +48,6 @@ export class IotaNftConnector implements INftConnector {
 	public static NAMESPACE: string = "iota-nft";
 
 	/**
-	 * Runtime name for the class.
-	 * @internal
-	 */
-	private static readonly _CLASS_NAME: string = nameof<IotaNftConnector>();
-
-	/**
 	 * Default name for the seed secret.
 	 */
 	private static readonly _DEFAULT_SEED_SECRET_NAME: string = "seed";
@@ -77,6 +71,11 @@ export class IotaNftConnector implements INftConnector {
 	private static readonly _DEFAULT_COIN_TYPE: number = CoinType.IOTA;
 
 	/**
+	 * Runtime name for the class.
+	 */
+	public readonly CLASS_NAME: string = nameof<IotaNftConnector>();
+
+	/**
 	 * Connector for vault operations.
 	 * @internal
 	 */
@@ -95,14 +94,10 @@ export class IotaNftConnector implements INftConnector {
 	 * @param options.config The configuration for the connector.
 	 */
 	constructor(options: { vaultConnectorType?: string; config: IIotaNftConnectorConfig }) {
-		Guards.object(IotaNftConnector._CLASS_NAME, nameof(options), options);
-		Guards.object<IIotaNftConnectorConfig>(
-			IotaNftConnector._CLASS_NAME,
-			nameof(options.config),
-			options.config
-		);
+		Guards.object(this.CLASS_NAME, nameof(options), options);
+		Guards.object<IIotaNftConnectorConfig>(this.CLASS_NAME, nameof(options.config), options.config);
 		Guards.object<IIotaNftConnectorConfig["clientOptions"]>(
-			IotaNftConnector._CLASS_NAME,
+			this.CLASS_NAME,
 			nameof(options.config.clientOptions),
 			options.config.clientOptions
 		);
@@ -130,23 +125,11 @@ export class IotaNftConnector implements INftConnector {
 		immutableMetadata?: T,
 		metadata?: U
 	): Promise<string> {
-		Guards.object<IRequestContext>(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(issuer), issuer);
-		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(tag), tag);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
+		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
 		try {
 			const buildParams: NftOutputBuilderParams = {
@@ -190,7 +173,7 @@ export class IotaNftConnector implements INftConnector {
 			return new Urn(IotaNftConnector.NAMESPACE, `${hrp}:${nftId}`).toString();
 		} catch (error) {
 			throw new GeneralError(
-				IotaNftConnector._CLASS_NAME,
+				this.CLASS_NAME,
 				"mintingFailed",
 				undefined,
 				this.extractPayloadError(error)
@@ -214,28 +197,16 @@ export class IotaNftConnector implements INftConnector {
 		immutableMetadata?: T;
 		metadata?: U;
 	}> {
-		Guards.object<IRequestContext>(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(id), id);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
 
-		Urn.guard(IotaNftConnector._CLASS_NAME, nameof(id), id);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
 		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
-			throw new GeneralError(IotaNftConnector._CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: IotaNftConnector.NAMESPACE,
 				id
 			});
@@ -247,7 +218,7 @@ export class IotaNftConnector implements INftConnector {
 
 			const hrp = nftParts[0];
 			const nftId = nftParts[1];
-			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
+			Guards.stringHexLength(this.CLASS_NAME, "nftId", nftId, 64, true);
 
 			const nftOutputId = await client.nftOutputId(nftId);
 			const nftOutputResponse = await client.getOutput(nftOutputId);
@@ -292,7 +263,7 @@ export class IotaNftConnector implements INftConnector {
 			};
 		} catch (error) {
 			throw new GeneralError(
-				IotaNftConnector._CLASS_NAME,
+				this.CLASS_NAME,
 				"resolvingFailed",
 				undefined,
 				this.extractPayloadError(error)
@@ -308,28 +279,16 @@ export class IotaNftConnector implements INftConnector {
 	 * @returns Nothing.
 	 */
 	public async burn(requestContext: IRequestContext, owner: string, id: string): Promise<void> {
-		Guards.object<IRequestContext>(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(owner), owner);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(owner), owner);
 
-		Urn.guard(IotaNftConnector._CLASS_NAME, nameof(id), id);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
 		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
-			throw new GeneralError(IotaNftConnector._CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: IotaNftConnector.NAMESPACE,
 				id
 			});
@@ -340,7 +299,7 @@ export class IotaNftConnector implements INftConnector {
 			const nftParts = urnParsed.namespaceSpecific().split(":");
 
 			const nftId = nftParts[1];
-			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
+			Guards.stringHexLength(this.CLASS_NAME, "nftId", nftId, 64, true);
 
 			const nftOutputId = await client.nftOutputId(nftId);
 			const nftOutputResponse = await client.getOutput(nftOutputId);
@@ -363,7 +322,7 @@ export class IotaNftConnector implements INftConnector {
 			});
 		} catch (error) {
 			throw new GeneralError(
-				IotaNftConnector._CLASS_NAME,
+				this.CLASS_NAME,
 				"burningFailed",
 				undefined,
 				this.extractPayloadError(error)
@@ -385,27 +344,15 @@ export class IotaNftConnector implements INftConnector {
 		recipient: string,
 		metadata?: T
 	): Promise<void> {
-		Guards.object<IRequestContext>(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Urn.guard(IotaNftConnector._CLASS_NAME, nameof(id), id);
-		Guards.stringValue(IotaNftConnector._CLASS_NAME, nameof(recipient), recipient);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
 
 		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
-			throw new GeneralError(IotaNftConnector._CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: IotaNftConnector.NAMESPACE,
 				id
 			});
@@ -417,7 +364,7 @@ export class IotaNftConnector implements INftConnector {
 			const nftParts = urnParsed.namespaceSpecific().split(":");
 			const hrp = nftParts[0];
 			const nftId = nftParts[1];
-			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
+			Guards.stringHexLength(this.CLASS_NAME, "nftId", nftId, 64, true);
 
 			const nftOutputId = await client.nftOutputId(nftId);
 			const nftOutputResponse = await client.getOutput(nftOutputId);
@@ -469,7 +416,7 @@ export class IotaNftConnector implements INftConnector {
 			});
 		} catch (error) {
 			throw new GeneralError(
-				IotaNftConnector._CLASS_NAME,
+				this.CLASS_NAME,
 				"transferFailed",
 				undefined,
 				this.extractPayloadError(error)
@@ -485,27 +432,15 @@ export class IotaNftConnector implements INftConnector {
 	 * @returns Nothing.
 	 */
 	public async update<T>(requestContext: IRequestContext, id: string, metadata: T): Promise<void> {
-		Guards.object<IRequestContext>(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			IotaNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Urn.guard(IotaNftConnector._CLASS_NAME, nameof(id), id);
-		Guards.object<T>(IotaNftConnector._CLASS_NAME, nameof(metadata), metadata);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
+		Guards.object<T>(this.CLASS_NAME, nameof(metadata), metadata);
 
 		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
-			throw new GeneralError(IotaNftConnector._CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: IotaNftConnector.NAMESPACE,
 				id
 			});
@@ -517,7 +452,7 @@ export class IotaNftConnector implements INftConnector {
 			const nftParts = urnParsed.namespaceSpecific().split(":");
 			const hrp = nftParts[0];
 			const nftId = nftParts[1];
-			Guards.stringHexLength(IotaNftConnector._CLASS_NAME, "nftId", nftId, 64, true);
+			Guards.stringHexLength(this.CLASS_NAME, "nftId", nftId, 64, true);
 
 			const nftOutputId = await client.nftOutputId(nftId);
 			const nftOutputResponse = await client.getOutput(nftOutputId);
@@ -561,7 +496,7 @@ export class IotaNftConnector implements INftConnector {
 			});
 		} catch (error) {
 			throw new GeneralError(
-				IotaNftConnector._CLASS_NAME,
+				this.CLASS_NAME,
 				"updateFailed",
 				undefined,
 				this.extractPayloadError(error)
@@ -601,7 +536,7 @@ export class IotaNftConnector implements INftConnector {
 			await client.retryUntilIncluded(blockIdAndBlock[0], 2, Math.ceil(timeoutSeconds / 2));
 		} catch (error) {
 			throw new GeneralError(
-				IotaNftConnector._CLASS_NAME,
+				this.CLASS_NAME,
 				"inclusionFailed",
 				undefined,
 				this.extractPayloadError(error)

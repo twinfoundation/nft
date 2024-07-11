@@ -1,11 +1,11 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IRequestContext } from "@gtsc/services";
+import type { IRequestContext, IService } from "@gtsc/services";
 
 /**
  * Interface describing an NFT connector.
  */
-export interface INftConnector {
+export interface INftConnector extends IService {
 	/**
 	 * Mint an NFT.
 	 * @param requestContext The context for the request.

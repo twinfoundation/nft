@@ -21,9 +21,8 @@ export class EntityStorageNftConnector implements INftConnector {
 
 	/**
 	 * Runtime name for the class.
-	 * @internal
 	 */
-	private static readonly _CLASS_NAME: string = nameof<EntityStorageNftConnector>();
+	public readonly CLASS_NAME: string = nameof<EntityStorageNftConnector>();
 
 	/**
 	 * The entity storage for nfts.
@@ -58,23 +57,11 @@ export class EntityStorageNftConnector implements INftConnector {
 		immutableMetadata?: T,
 		metadata?: U
 	): Promise<string> {
-		Guards.object<IRequestContext>(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(issuer), issuer);
-		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(tag), tag);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
+		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
 		try {
 			const nftId = Converter.bytesToHex(RandomHelper.generate(32), true);
@@ -92,12 +79,7 @@ export class EntityStorageNftConnector implements INftConnector {
 
 			return new Urn(EntityStorageNftConnector.NAMESPACE, nftId).toString();
 		} catch (error) {
-			throw new GeneralError(
-				EntityStorageNftConnector._CLASS_NAME,
-				"mintingFailed",
-				undefined,
-				error
-			);
+			throw new GeneralError(this.CLASS_NAME, "mintingFailed", undefined, error);
 		}
 	}
 
@@ -117,28 +99,16 @@ export class EntityStorageNftConnector implements INftConnector {
 		immutableMetadata?: T;
 		metadata?: U;
 	}> {
-		Guards.object<IRequestContext>(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
 
-		Urn.guard(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
 		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
-			throw new GeneralError(EntityStorageNftConnector._CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: EntityStorageNftConnector.NAMESPACE,
 				id
 			});
@@ -149,7 +119,7 @@ export class EntityStorageNftConnector implements INftConnector {
 			const nft = await this._nftEntityStorage.get(requestContext, nftId);
 
 			if (Is.empty(nft)) {
-				throw new NotFoundError(EntityStorageNftConnector._CLASS_NAME, "nftNotFound");
+				throw new NotFoundError(this.CLASS_NAME, "nftNotFound");
 			}
 
 			return {
@@ -162,12 +132,7 @@ export class EntityStorageNftConnector implements INftConnector {
 				metadata: Is.stringValue(nft.metadata) ? JSON.parse(nft.metadata) : undefined
 			};
 		} catch (error) {
-			throw new GeneralError(
-				EntityStorageNftConnector._CLASS_NAME,
-				"resolvingFailed",
-				undefined,
-				error
-			);
+			throw new GeneralError(this.CLASS_NAME, "resolvingFailed", undefined, error);
 		}
 	}
 
@@ -179,27 +144,15 @@ export class EntityStorageNftConnector implements INftConnector {
 	 * @returns Nothing.
 	 */
 	public async burn(requestContext: IRequestContext, owner: string, id: string): Promise<void> {
-		Guards.object<IRequestContext>(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(owner), owner);
-		Urn.guard(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(owner), owner);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
 		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
-			throw new GeneralError(EntityStorageNftConnector._CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: EntityStorageNftConnector.NAMESPACE,
 				id
 			});
@@ -210,21 +163,16 @@ export class EntityStorageNftConnector implements INftConnector {
 			const nft = await this._nftEntityStorage.get(requestContext, nftId);
 
 			if (Is.empty(nft)) {
-				throw new NotFoundError(EntityStorageNftConnector._CLASS_NAME, "nftNotFound");
+				throw new NotFoundError(this.CLASS_NAME, "nftNotFound");
 			}
 
 			if (nft.owner !== owner) {
-				throw new GeneralError(EntityStorageNftConnector._CLASS_NAME, "notOwnerBurn");
+				throw new GeneralError(this.CLASS_NAME, "notOwnerBurn");
 			}
 
 			await this._nftEntityStorage.remove(requestContext, nftId);
 		} catch (error) {
-			throw new GeneralError(
-				EntityStorageNftConnector._CLASS_NAME,
-				"burningFailed",
-				undefined,
-				error
-			);
+			throw new GeneralError(this.CLASS_NAME, "burningFailed", undefined, error);
 		}
 	}
 
@@ -242,27 +190,15 @@ export class EntityStorageNftConnector implements INftConnector {
 		recipient: string,
 		metadata?: T
 	): Promise<void> {
-		Guards.object<IRequestContext>(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Urn.guard(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
-		Guards.stringValue(EntityStorageNftConnector._CLASS_NAME, nameof(recipient), recipient);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
 
 		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
-			throw new GeneralError(EntityStorageNftConnector._CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: EntityStorageNftConnector.NAMESPACE,
 				id
 			});
@@ -273,7 +209,7 @@ export class EntityStorageNftConnector implements INftConnector {
 			const nft = await this._nftEntityStorage.get(requestContext, nftId);
 
 			if (Is.empty(nft)) {
-				throw new NotFoundError(EntityStorageNftConnector._CLASS_NAME, "nftNotFound");
+				throw new NotFoundError(this.CLASS_NAME, "nftNotFound");
 			}
 
 			nft.owner = recipient;
@@ -281,12 +217,7 @@ export class EntityStorageNftConnector implements INftConnector {
 
 			await this._nftEntityStorage.set(requestContext, nft);
 		} catch (error) {
-			throw new GeneralError(
-				EntityStorageNftConnector._CLASS_NAME,
-				"transferFailed",
-				undefined,
-				error
-			);
+			throw new GeneralError(this.CLASS_NAME, "transferFailed", undefined, error);
 		}
 	}
 
@@ -302,27 +233,15 @@ export class EntityStorageNftConnector implements INftConnector {
 		id: string,
 		metadata: T
 	): Promise<void> {
-		Guards.object<IRequestContext>(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext),
-			requestContext
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			EntityStorageNftConnector._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Urn.guard(EntityStorageNftConnector._CLASS_NAME, nameof(id), id);
-		Guards.object<T>(EntityStorageNftConnector._CLASS_NAME, nameof(metadata), metadata);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
+		Guards.object<T>(this.CLASS_NAME, nameof(metadata), metadata);
 
 		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
-			throw new GeneralError(EntityStorageNftConnector._CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: EntityStorageNftConnector.NAMESPACE,
 				id
 			});
@@ -333,19 +252,14 @@ export class EntityStorageNftConnector implements INftConnector {
 			const nft = await this._nftEntityStorage.get(requestContext, nftId);
 
 			if (Is.empty(nft)) {
-				throw new NotFoundError(EntityStorageNftConnector._CLASS_NAME, "nftNotFound");
+				throw new NotFoundError(this.CLASS_NAME, "nftNotFound");
 			}
 
 			nft.metadata = JSON.stringify(metadata);
 
 			await this._nftEntityStorage.set(requestContext, nft);
 		} catch (error) {
-			throw new GeneralError(
-				EntityStorageNftConnector._CLASS_NAME,
-				"updateFailed",
-				undefined,
-				error
-			);
+			throw new GeneralError(this.CLASS_NAME, "updateFailed", undefined, error);
 		}
 	}
 }

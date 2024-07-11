@@ -32,6 +32,18 @@ The configuration for the client.
 
 `BaseRestClient.constructor`
 
+## Properties
+
+### CLASS\_NAME
+
+> `readonly` **CLASS\_NAME**: `string` = `NftClient._CLASS_NAME`
+
+Runtime name for the class.
+
+#### Implementation of
+
+`INft.CLASS_NAME`
+
 ## Methods
 
 ### getEndpointWithPrefix()

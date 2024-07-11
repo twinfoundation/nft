@@ -2,7 +2,83 @@
 
 Interface describing an NFT connector.
 
+## Extends
+
+- `IService`
+
+## Properties
+
+### CLASS\_NAME
+
+> `readonly` **CLASS\_NAME**: `string`
+
+The name of the service.
+
+#### Inherited from
+
+`IService.CLASS_NAME`
+
 ## Methods
+
+### bootstrap()?
+
+> `optional` **bootstrap**(`requestContext`): `Promise`\<`void`\>
+
+Bootstrap the service by creating and initializing any resources it needs.
+
+#### Parameters
+
+• **requestContext**: `IRequestContext`
+
+The request context for bootstrapping.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+Nothing.
+
+#### Inherited from
+
+`IService.bootstrap`
+
+***
+
+### start()?
+
+> `optional` **start**(): `Promise`\<`void`\>
+
+The service needs to be started when the application is initialized.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+Nothing.
+
+#### Inherited from
+
+`IService.start`
+
+***
+
+### stop()?
+
+> `optional` **stop**(): `Promise`\<`void`\>
+
+The service needs to be stopped when the application is closed.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+Nothing.
+
+#### Inherited from
+
+`IService.stop`
+
+***
 
 ### mint()
 

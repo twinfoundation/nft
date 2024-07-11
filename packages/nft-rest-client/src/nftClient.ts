@@ -27,6 +27,11 @@ export class NftClient extends BaseRestClient implements INft {
 	private static readonly _CLASS_NAME: string = nameof<NftClient>();
 
 	/**
+	 * Runtime name for the class.
+	 */
+	public readonly CLASS_NAME: string = NftClient._CLASS_NAME;
+
+	/**
 	 * Create a new instance of NftClient.
 	 * @param config The configuration for the client.
 	 */
@@ -55,19 +60,11 @@ export class NftClient extends BaseRestClient implements INft {
 			namespace?: string;
 		}
 	): Promise<string> {
-		Guards.object<IRequestContext>(NftClient._CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(NftClient._CLASS_NAME, nameof(issuer), issuer);
-		Guards.stringValue(NftClient._CLASS_NAME, nameof(tag), tag);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
+		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
 		const response = await this.fetch<INftMintRequest<T, U>, INftMintResponse>(
 			requestContext,
@@ -103,18 +100,10 @@ export class NftClient extends BaseRestClient implements INft {
 		immutableMetadata?: T;
 		metadata?: U;
 	}> {
-		Guards.object<IRequestContext>(NftClient._CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(NftClient._CLASS_NAME, nameof(id), id);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
 
 		const response = await this.fetch<INftResolveRequest, INftResolveResponse<T, U>>(
 			requestContext,
@@ -138,19 +127,11 @@ export class NftClient extends BaseRestClient implements INft {
 	 * @returns Nothing.
 	 */
 	public async burn(requestContext: IRequestContext, owner: string, id: string): Promise<void> {
-		Guards.object<IRequestContext>(NftClient._CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(NftClient._CLASS_NAME, nameof(owner), owner);
-		Guards.stringValue(NftClient._CLASS_NAME, nameof(id), id);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(owner), owner);
+		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
 
 		await this.fetch<INftBurnRequest, never>(requestContext, "/:id/burn", "POST", {
 			pathParams: {
@@ -176,19 +157,11 @@ export class NftClient extends BaseRestClient implements INft {
 		recipient: string,
 		metadata?: T
 	): Promise<void> {
-		Guards.object<IRequestContext>(NftClient._CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(NftClient._CLASS_NAME, nameof(id), id);
-		Guards.stringValue(NftClient._CLASS_NAME, nameof(recipient), recipient);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
 
 		await this.fetch<INftTransferRequest, never>(requestContext, "/:id/transfer", "POST", {
 			pathParams: {
@@ -213,19 +186,11 @@ export class NftClient extends BaseRestClient implements INft {
 		id: string,
 		metadata: T
 	): Promise<void> {
-		Guards.object<IRequestContext>(NftClient._CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.tenantId),
-			requestContext.tenantId
-		);
-		Guards.stringValue(
-			NftClient._CLASS_NAME,
-			nameof(requestContext.identity),
-			requestContext.identity
-		);
-		Guards.stringValue(NftClient._CLASS_NAME, nameof(id), id);
-		Guards.stringValue(NftClient._CLASS_NAME, nameof(metadata), metadata);
+		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
+		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(this.CLASS_NAME, nameof(metadata), metadata);
 
 		await this.fetch<INftUpdateRequest, never>(requestContext, "/:id", "PUT", {
 			pathParams: {

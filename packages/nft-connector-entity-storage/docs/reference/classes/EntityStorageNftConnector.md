@@ -36,6 +36,18 @@ The entity storage for nfts, defaults to "nft".
 
 The namespace supported by the wallet connector.
 
+***
+
+### CLASS\_NAME
+
+> `readonly` **CLASS\_NAME**: `string`
+
+Runtime name for the class.
+
+#### Implementation of
+
+`INftConnector.CLASS_NAME`
+
 ## Methods
 
 ### mint()

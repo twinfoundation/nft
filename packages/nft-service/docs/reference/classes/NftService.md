@@ -24,6 +24,18 @@ The configuration for the service.
 
 [`NftService`](NftService.md)
 
+## Properties
+
+### CLASS\_NAME
+
+> `readonly` **CLASS\_NAME**: `string`
+
+Runtime name for the class.
+
+#### Implementation of
+
+`INft.CLASS_NAME`
+
 ## Methods
 
 ### mint()
