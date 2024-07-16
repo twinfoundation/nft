@@ -53,7 +53,7 @@ export class NftClient extends BaseRestClient implements INft {
 		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
-		const response = await this.fetch<INftMintRequest<T, U>, ICreatedResponse>("/", "POST", {
+		const response = await this.fetch<INftMintRequest, ICreatedResponse>("/", "POST", {
 			body: {
 				issuer,
 				tag,
@@ -82,17 +82,19 @@ export class NftClient extends BaseRestClient implements INft {
 	}> {
 		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
 
-		const response = await this.fetch<INftResolveRequest, INftResolveResponse<T, U>>(
-			"/:id",
-			"GET",
-			{
-				pathParams: {
-					id
-				}
+		const response = await this.fetch<INftResolveRequest, INftResolveResponse>("/:id", "GET", {
+			pathParams: {
+				id
 			}
-		);
+		});
 
-		return response.body;
+		return response.body as {
+			issuer: string;
+			owner: string;
+			tag: string;
+			immutableMetadata?: T;
+			metadata?: U;
+		};
 	}
 
 	/**
