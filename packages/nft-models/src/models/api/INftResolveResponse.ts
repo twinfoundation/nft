@@ -4,7 +4,7 @@
 /**
  * Response to resolving the NFT.
  */
-export interface INftResolveResponse<T = unknown, U = unknown> {
+export interface INftResolveResponse {
 	/**
 	 * The data that was resolved.
 	 */
@@ -27,11 +27,11 @@ export interface INftResolveResponse<T = unknown, U = unknown> {
 		/**
 		 * The immutable data for the NFT.
 		 */
-		immutableMetadata?: T;
+		immutableMetadata?: unknown;
 
 		/**
 		 * The metadata for the NFT.
 		 */
-		metadata?: U;
+		metadata?: unknown;
 	};
 }

@@ -1,12 +1,6 @@
-# Interface: INftMintRequest\<T, U\>
+# Interface: INftMintRequest
 
 Mint the data and return the NFT id.
-
-## Type parameters
-
-• **T** = `unknown`
-
-• **U** = `unknown`
 
 ## Properties
 
@@ -30,13 +24,13 @@ The tag for the NFT.
 
 #### immutableMetadata?
 
-> `optional` **immutableMetadata**: `T`
+> `optional` **immutableMetadata**: `unknown`
 
 The immutable metadata for the NFT.
 
 #### metadata?
 
-> `optional` **metadata**: `U`
+> `optional` **metadata**: `unknown`
 
 The metadata for the NFT.
 

@@ -84,6 +84,33 @@
                             }
                         }
                     }
+                },
+                "requestBody": {
+                    "description": "Mint the data and return the NFT id.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NftMintRequest"
+                            },
+                            "examples": {
+                                "nftMintExample": {
+                                    "value": {
+                                        "issuer": "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv",
+                                        "tag": "MY-NFT",
+                                        "immutableMetadata": {
+                                            "docName": "bill-of-lading",
+                                            "mimeType": "application/pdf",
+                                            "fingerprint": "0xf0b95a98b3dbc5ce1c9ce59d70af95a97599f100a7296ecdd1eb108bebfa047f"
+                                        },
+                                        "metadata": {
+                                            "data": "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -113,6 +140,33 @@
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "Response to resolving the NFT.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NftResolveResponse"
+                                },
+                                "examples": {
+                                    "nftResolveResponseExample": {
+                                        "value": {
+                                            "issuer": "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv",
+                                            "owner": "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv",
+                                            "tag": "MY-NFT",
+                                            "immutableMetadata": {
+                                                "docName": "bill-of-lading",
+                                                "mimeType": "application/pdf",
+                                                "fingerprint": "0xf0b95a98b3dbc5ce1c9ce59d70af95a97599f100a7296ecdd1eb108bebfa047f"
+                                            },
+                                            "metadata": {
+                                                "data": "AAAAA"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Something went wrong with the request see the error field for more details.",
                         "content": {
@@ -163,7 +217,7 @@
                 "parameters": [
                     {
                         "name": "id",
-                        "description": "",
+                        "description": "The id of the NFT to transfer in urn format.",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -179,15 +233,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "The rest request ended in success with no data.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/OkResponse"
-                                }
-                            }
-                        }
+                    "204": {
+                        "description": "The rest request ended in success with no data."
                     },
                     "400": {
                         "description": "Something went wrong with the request see the error field for more details.",
@@ -228,6 +275,26 @@
                             }
                         }
                     }
+                },
+                "requestBody": {
+                    "description": "Update the mutable data for the NFT.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NftUpdateRequest"
+                            },
+                            "examples": {
+                                "nftUpdateExample": {
+                                    "value": {
+                                        "metadata": {
+                                            "data": "AAAAA"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -257,15 +324,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "The rest request ended in success with no data.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/OkResponse"
-                                }
-                            }
-                        }
+                    "204": {
+                        "description": "The rest request ended in success with no data."
                     },
                     "400": {
                         "description": "Something went wrong with the request see the error field for more details.",
@@ -337,7 +397,7 @@
                 "parameters": [
                     {
                         "name": "id",
-                        "description": "",
+                        "description": "The id of the NFT to transfer in urn format.",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -353,15 +413,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "The rest request ended in success with no data.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/OkResponse"
-                                }
-                            }
-                        }
+                    "204": {
+                        "description": "The rest request ended in success with no data."
                     },
                     "400": {
                         "description": "Something went wrong with the request see the error field for more details.",
@@ -396,6 +449,27 @@
                                         "value": {
                                             "name": "UnauthorizedError",
                                             "message": "component.error"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "description": "Transfer the NFT and update the metadata.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NftTransferRequest"
+                            },
+                            "examples": {
+                                "nftTransferExample": {
+                                    "value": {
+                                        "recipient": "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv",
+                                        "metadata": {
+                                            "data": "AAAAA"
                                         }
                                     }
                                 }
@@ -443,30 +517,105 @@
                 "additionalProperties": false,
                 "description": "Model to describe serialized error."
             },
-            "NftBurnRequest": {
+            "NftMintRequest": {
                 "type": "object",
                 "properties": {
-                    "body": {
-                        "type": "object",
-                        "properties": {
-                            "owner": {
-                                "type": "string",
-                                "description": "The owner for the NFT to return the funds to."
-                            }
-                        },
-                        "required": [
-                            "owner"
-                        ],
-                        "additionalProperties": false,
-                        "description": "The data to be used for burning."
+                    "issuer": {
+                        "type": "string",
+                        "description": "The issuer for the NFT, will also be the initial owner."
+                    },
+                    "tag": {
+                        "type": "string",
+                        "description": "The tag for the NFT."
+                    },
+                    "immutableMetadata": {
+                        "description": "The immutable metadata for the NFT."
+                    },
+                    "metadata": {
+                        "description": "The metadata for the NFT."
+                    },
+                    "namespace": {
+                        "type": "string",
+                        "description": "The namespace of the connector to use for the NFT, defaults to service configured namespace."
                     }
                 },
                 "required": [
-                    "pathParams",
-                    "body"
+                    "issuer",
+                    "tag"
                 ],
                 "additionalProperties": false,
-                "description": "Burn the NFT."
+                "description": "The data to be used in the minting."
+            },
+            "NftResolveResponse": {
+                "type": "object",
+                "properties": {
+                    "issuer": {
+                        "type": "string",
+                        "description": "The issuer of the NFT."
+                    },
+                    "owner": {
+                        "type": "string",
+                        "description": "The owner of the NFT."
+                    },
+                    "tag": {
+                        "type": "string",
+                        "description": "The tag data for the NFT."
+                    },
+                    "immutableMetadata": {
+                        "description": "The immutable data for the NFT."
+                    },
+                    "metadata": {
+                        "description": "The metadata for the NFT."
+                    }
+                },
+                "required": [
+                    "issuer",
+                    "owner",
+                    "tag"
+                ],
+                "additionalProperties": false,
+                "description": "The data that was resolved."
+            },
+            "NftBurnRequest": {
+                "type": "object",
+                "properties": {
+                    "owner": {
+                        "type": "string",
+                        "description": "The owner for the NFT to return the funds to."
+                    }
+                },
+                "required": [
+                    "owner"
+                ],
+                "additionalProperties": false,
+                "description": "The data to be used for burning."
+            },
+            "NftTransferRequest": {
+                "type": "object",
+                "properties": {
+                    "recipient": {
+                        "type": "string",
+                        "description": "The recipient for the NFT."
+                    },
+                    "metadata": {
+                        "description": "The metadata for the NFT."
+                    }
+                },
+                "required": [
+                    "recipient"
+                ],
+                "additionalProperties": false,
+                "description": "The data to be used in the transfer."
+            },
+            "NftUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "metadata": {
+                        "description": "The metadata for the NFT."
+                    }
+                },
+                "additionalProperties": false,
+                "description": "The data to be used in the update."
             }
         },
         "securitySchemes": {

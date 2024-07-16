@@ -4,7 +4,7 @@
 /**
  * Mint the data and return the NFT id.
  */
-export interface INftMintRequest<T = unknown, U = unknown> {
+export interface INftMintRequest {
 	/**
 	 * The data to be used in the minting.
 	 */
@@ -22,12 +22,12 @@ export interface INftMintRequest<T = unknown, U = unknown> {
 		/**
 		 * The immutable metadata for the NFT.
 		 */
-		immutableMetadata?: T;
+		immutableMetadata?: unknown;
 
 		/**
 		 * The metadata for the NFT.
 		 */
-		metadata?: U;
+		metadata?: unknown;
 
 		/**
 		 * The namespace of the connector to use for the NFT, defaults to service configured namespace.

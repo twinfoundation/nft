@@ -1,10 +1,6 @@
-# Interface: INftUpdateRequest\<T\>
+# Interface: INftUpdateRequest
 
 Update the mutable data for the NFT.
-
-## Type parameters
-
-• **T** = `unknown`
 
 ## Properties
 
@@ -26,10 +22,10 @@ The id of the NFT to transfer in urn format.
 
 > **body**: `object`
 
-The data to be used in the minting.
+The data to be used in the update.
 
 #### metadata?
 
-> `optional` **metadata**: `T`
+> `optional` **metadata**: `unknown`
 
 The metadata for the NFT.

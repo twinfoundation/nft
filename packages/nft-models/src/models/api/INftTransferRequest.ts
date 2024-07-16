@@ -4,7 +4,7 @@
 /**
  * Transfer the NFT and update the metadata.
  */
-export interface INftTransferRequest<T = unknown> {
+export interface INftTransferRequest {
 	/**
 	 * The data to be used in the transfer.
 	 */
@@ -16,7 +16,7 @@ export interface INftTransferRequest<T = unknown> {
 	};
 
 	/**
-	 * The data to be used in the minting.
+	 * The data to be used in the transfer.
 	 */
 	body: {
 		/**
@@ -27,6 +27,6 @@ export interface INftTransferRequest<T = unknown> {
 		/**
 		 * The metadata for the NFT.
 		 */
-		metadata?: T;
+		metadata?: unknown;
 	};
 }

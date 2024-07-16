@@ -14,7 +14,7 @@ The request context for the API.
 
 The name of the service to use in the routes.
 
-• **request**: `INftMintRequest`\<`unknown`, `unknown`\>
+• **request**: `INftMintRequest`
 
 The request.
 

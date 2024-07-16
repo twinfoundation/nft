@@ -4,9 +4,9 @@
 /**
  * Update the mutable data for the NFT.
  */
-export interface INftUpdateRequest<T = unknown> {
+export interface INftUpdateRequest {
 	/**
-	 * The data to be used in the transfer.
+	 * The data to be used in the update.
 	 */
 	pathParams: {
 		/**
@@ -16,12 +16,12 @@ export interface INftUpdateRequest<T = unknown> {
 	};
 
 	/**
-	 * The data to be used in the minting.
+	 * The data to be used in the update.
 	 */
 	body: {
 		/**
 		 * The metadata for the NFT.
 		 */
-		metadata?: T;
+		metadata?: unknown;
 	};
 }

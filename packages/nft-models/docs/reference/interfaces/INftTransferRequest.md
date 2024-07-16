@@ -1,10 +1,6 @@
-# Interface: INftTransferRequest\<T\>
+# Interface: INftTransferRequest
 
 Transfer the NFT and update the metadata.
-
-## Type parameters
-
-• **T** = `unknown`
 
 ## Properties
 
@@ -26,7 +22,7 @@ The id of the NFT to transfer in urn format.
 
 > **body**: `object`
 
-The data to be used in the minting.
+The data to be used in the transfer.
 
 #### recipient
 
@@ -36,6 +32,6 @@ The recipient for the NFT.
 
 #### metadata?
 
-> `optional` **metadata**: `T`
+> `optional` **metadata**: `unknown`
 
 The metadata for the NFT.

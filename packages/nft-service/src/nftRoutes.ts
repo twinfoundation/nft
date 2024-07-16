@@ -166,7 +166,12 @@ export function generateRestRoutesNft(
 					}
 				}
 			]
-		}
+		},
+		responseType: [
+			{
+				type: nameof<INoContentResponse>()
+			}
+		]
 	};
 
 	const transferRoute: IRestRoute<INftTransferRequest, INoContentResponse> = {
@@ -195,7 +200,12 @@ export function generateRestRoutesNft(
 					}
 				}
 			]
-		}
+		},
+		responseType: [
+			{
+				type: nameof<INoContentResponse>()
+			}
+		]
 	};
 
 	const updateRoute: IRestRoute<INftUpdateRequest, INoContentResponse> = {
@@ -223,7 +233,12 @@ export function generateRestRoutesNft(
 					}
 				}
 			]
-		}
+		},
+		responseType: [
+			{
+				type: nameof<INoContentResponse>()
+			}
+		]
 	};
 
 	return [mintRoute, resolveRoute, burnRoute, transferRoute, updateRoute];

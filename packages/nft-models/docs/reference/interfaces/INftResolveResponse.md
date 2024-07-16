@@ -1,12 +1,6 @@
-# Interface: INftResolveResponse\<T, U\>
+# Interface: INftResolveResponse
 
 Response to resolving the NFT.
-
-## Type parameters
-
-• **T** = `unknown`
-
-• **U** = `unknown`
 
 ## Properties
 
@@ -36,12 +30,12 @@ The tag data for the NFT.
 
 #### immutableMetadata?
 
-> `optional` **immutableMetadata**: `T`
+> `optional` **immutableMetadata**: `unknown`
 
 The immutable data for the NFT.
 
 #### metadata?
 
-> `optional` **metadata**: `U`
+> `optional` **metadata**: `unknown`
 
 The metadata for the NFT.
