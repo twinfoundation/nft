@@ -6,7 +6,7 @@ Resolve an NFT.
 
 ## Parameters
 
-• **requestContext**: `IRequestContext`
+• **requestContext**: `IHttpRequestContext`
 
 The request context for the API.
 

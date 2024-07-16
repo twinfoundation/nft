@@ -1,6 +1,6 @@
-# Function: generateRestRoutes()
+# Function: generateRestRoutesNft()
 
-> **generateRestRoutes**(`baseRouteName`, `factoryServiceName`): `IRestRoute`[]
+> **generateRestRoutesNft**(`baseRouteName`, `factoryServiceName`): `IRestRoute`[]
 
 The REST routes for NFT.
 

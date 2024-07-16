@@ -1,6 +1,6 @@
 {
 	"name": "@gtsc/nft-models",
-	"version": "0.0.3-next.10",
+	"version": "0.0.3-next.11",
 	"description": "Contains models and classes for use with NFTs",
 	"repository": {
 		"type": "git",
@@ -29,12 +29,12 @@
 	},
 	"dependencies": {
 		"@gtsc/core": "next",
-		"@gtsc/nameof": "0.0.4",
+		"@gtsc/nameof": "next",
 		"@gtsc/services": "next",
 		"@gtsc/web": "next"
 	},
 	"devDependencies": {
-		"@gtsc/nameof-transformer": "0.0.4",
+		"@gtsc/nameof-transformer": "next",
 		"@vitest/coverage-v8": "1.6.0",
 		"@types/node": "20.14.6",
 		"copyfiles": "2.4.1",

@@ -13,7 +13,7 @@ import {
 import { Bip39 } from "@gtsc/crypto";
 import { nameof } from "@gtsc/nameof";
 import type { INftConnector } from "@gtsc/nft-models";
-import type { IRequestContext } from "@gtsc/services";
+import type { IServiceRequestContext } from "@gtsc/services";
 import { VaultConnectorFactory, type IVaultConnector } from "@gtsc/vault-models";
 import {
 	AddressUnlockCondition,
@@ -30,11 +30,11 @@ import {
 	UnlockConditionType,
 	Utils,
 	type Block,
+	type Feature,
 	type IBuildBlockOptions,
 	type NftOutput,
 	type NftOutputBuilderParams,
-	type TransactionPayload,
-	type Feature
+	type TransactionPayload
 } from "@iota/sdk-wasm/node/lib/index.js";
 import type { IIotaNftConnectorConfig } from "./models/IIotaNftConnectorConfig";
 
@@ -111,23 +111,20 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Mint an NFT.
-	 * @param requestContext The context for the request.
 	 * @param issuer The issuer for the NFT, will also be the initial owner.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
+	 * @param requestContext The context for the request.
 	 * @returns The id of the created NFT in urn format.
 	 */
 	public async mint<T = unknown, U = unknown>(
-		requestContext: IRequestContext,
 		issuer: string,
 		tag: string,
 		immutableMetadata?: T,
-		metadata?: U
+		metadata?: U,
+		requestContext?: IServiceRequestContext
 	): Promise<string> {
-		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
 		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
@@ -160,9 +157,13 @@ export class IotaNftConnector implements INftConnector {
 
 			const nftOutput = await client.buildNftOutput(buildParams);
 
-			const blockDetails = await this.prepareAndPostTransaction(requestContext, client, {
-				outputs: [nftOutput]
-			});
+			const blockDetails = await this.prepareAndPostTransaction(
+				client,
+				{
+					outputs: [nftOutput]
+				},
+				requestContext
+			);
 
 			const transactionId = Utils.transactionId(blockDetails.block.payload as TransactionPayload);
 			const outputId = Utils.computeOutputId(transactionId, 0);
@@ -183,13 +184,13 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Resolve an NFT.
-	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to resolve.
+	 * @param requestContext The context for the request.
 	 * @returns The data for the NFT.
 	 */
 	public async resolve<T = unknown, U = unknown>(
-		requestContext: IRequestContext,
-		id: string
+		id: string,
+		requestContext?: IServiceRequestContext
 	): Promise<{
 		issuer: string;
 		owner: string;
@@ -197,9 +198,6 @@ export class IotaNftConnector implements INftConnector {
 		immutableMetadata?: T;
 		metadata?: U;
 	}> {
-		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
 		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
 
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
@@ -273,15 +271,16 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Burn an NFT.
-	 * @param requestContext The context for the request.
 	 * @param owner The owner for the NFT to return the funds to.
 	 * @param id The id of the NFT to burn in urn format.
+	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	public async burn(requestContext: IRequestContext, owner: string, id: string): Promise<void> {
-		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+	public async burn(
+		owner: string,
+		id: string,
+		requestContext?: IServiceRequestContext
+	): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(owner), owner);
 
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
@@ -304,22 +303,26 @@ export class IotaNftConnector implements INftConnector {
 			const nftOutputId = await client.nftOutputId(nftId);
 			const nftOutputResponse = await client.getOutput(nftOutputId);
 
-			await this.prepareAndPostTransaction(requestContext, client, {
-				burn: {
-					nfts: [nftId]
+			await this.prepareAndPostTransaction(
+				client,
+				{
+					burn: {
+						nfts: [nftId]
+					},
+					inputs: [
+						new UTXOInput(
+							nftOutputResponse.metadata.transactionId,
+							nftOutputResponse.metadata.outputIndex
+						)
+					],
+					outputs: [
+						new BasicOutput(nftOutputResponse.output.getAmount(), [
+							new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(owner)))
+						])
+					]
 				},
-				inputs: [
-					new UTXOInput(
-						nftOutputResponse.metadata.transactionId,
-						nftOutputResponse.metadata.outputIndex
-					)
-				],
-				outputs: [
-					new BasicOutput(nftOutputResponse.output.getAmount(), [
-						new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(owner)))
-					])
-				]
-			});
+				requestContext
+			);
 		} catch (error) {
 			throw new GeneralError(
 				this.CLASS_NAME,
@@ -332,21 +335,18 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Transfer an NFT.
-	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to transfer in urn format.
 	 * @param recipient The recipient of the NFT.
 	 * @param metadata Optional mutable data to include during the transfer.
+	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
 	public async transfer<T>(
-		requestContext: IRequestContext,
 		id: string,
 		recipient: string,
-		metadata?: T
+		metadata?: T,
+		requestContext?: IServiceRequestContext
 	): Promise<void> {
-		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
 
@@ -404,16 +404,20 @@ export class IotaNftConnector implements INftConnector {
 				recipientNftOutput.getAmount()
 			);
 
-			await this.prepareAndPostTransaction(requestContext, client, {
-				inputs: [
-					new UTXOInput(
-						nftOutputResponse.metadata.transactionId,
-						nftOutputResponse.metadata.outputIndex
-					),
-					...additionalInputs
-				],
-				outputs: [recipientNftOutput]
-			});
+			await this.prepareAndPostTransaction(
+				client,
+				{
+					inputs: [
+						new UTXOInput(
+							nftOutputResponse.metadata.transactionId,
+							nftOutputResponse.metadata.outputIndex
+						),
+						...additionalInputs
+					],
+					outputs: [recipientNftOutput]
+				},
+				requestContext
+			);
 		} catch (error) {
 			throw new GeneralError(
 				this.CLASS_NAME,
@@ -426,15 +430,16 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Update the mutable data of the NFT.
-	 * @param requestContext The context for the request.
 	 * @param id The id of the NFT to update in urn format.
 	 * @param metadata The mutable data to update.
+	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	public async update<T>(requestContext: IRequestContext, id: string, metadata: T): Promise<void> {
-		Guards.object<IRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.tenantId), requestContext.tenantId);
-		Guards.stringValue(this.CLASS_NAME, nameof(requestContext.identity), requestContext.identity);
+	public async update<T>(
+		id: string,
+		metadata: T,
+		requestContext?: IServiceRequestContext
+	): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.object<T>(this.CLASS_NAME, nameof(metadata), metadata);
 
@@ -484,16 +489,20 @@ export class IotaNftConnector implements INftConnector {
 				recipientNftOutput.getAmount()
 			);
 
-			await this.prepareAndPostTransaction(requestContext, client, {
-				inputs: [
-					new UTXOInput(
-						nftOutputResponse.metadata.transactionId,
-						nftOutputResponse.metadata.outputIndex
-					),
-					...additionalInputs
-				],
-				outputs: [recipientNftOutput]
-			});
+			await this.prepareAndPostTransaction(
+				client,
+				{
+					inputs: [
+						new UTXOInput(
+							nftOutputResponse.metadata.transactionId,
+							nftOutputResponse.metadata.outputIndex
+						),
+						...additionalInputs
+					],
+					outputs: [recipientNftOutput]
+				},
+				requestContext
+			);
 		} catch (error) {
 			throw new GeneralError(
 				this.CLASS_NAME,
@@ -513,9 +522,9 @@ export class IotaNftConnector implements INftConnector {
 	 * @internal
 	 */
 	private async prepareAndPostTransaction(
-		requestContext: IRequestContext,
 		client: Client,
-		options: IBuildBlockOptions
+		options: IBuildBlockOptions,
+		requestContext?: IServiceRequestContext
 	): Promise<{ blockId: string; block: Block }> {
 		const seed = await this.getSeed(requestContext);
 		const secretManager = { hexSeed: Converter.bytesToHex(seed, true) };
@@ -555,18 +564,18 @@ export class IotaNftConnector implements INftConnector {
 	 * @returns The seed.
 	 * @internal
 	 */
-	private async getSeed(requestContext: IRequestContext): Promise<Uint8Array> {
+	private async getSeed(requestContext?: IServiceRequestContext): Promise<Uint8Array> {
 		try {
 			const seedBase64 = await this._vaultConnector.getSecret<string>(
-				requestContext,
-				this._config.vaultSeedId ?? IotaNftConnector._DEFAULT_SEED_SECRET_NAME
+				this._config.vaultSeedId ?? IotaNftConnector._DEFAULT_SEED_SECRET_NAME,
+				requestContext
 			);
 			return Converter.base64ToBytes(seedBase64);
 		} catch {}
 
 		const mnemonic = await this._vaultConnector.getSecret<string>(
-			requestContext,
-			this._config.vaultMnemonicId ?? IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME
+			this._config.vaultMnemonicId ?? IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME,
+			requestContext
 		);
 
 		return Bip39.mnemonicToSeed(mnemonic);

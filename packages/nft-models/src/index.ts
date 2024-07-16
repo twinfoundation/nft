@@ -6,7 +6,6 @@ export * from "./models/INft";
 export * from "./models/INftConnector";
 export * from "./models/api/INftBurnRequest";
 export * from "./models/api/INftMintRequest";
-export * from "./models/api/INftMintResponse";
 export * from "./models/api/INftResolveRequest";
 export * from "./models/api/INftResolveResponse";
 export * from "./models/api/INftTransferRequest";

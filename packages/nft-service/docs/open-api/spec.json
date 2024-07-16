@@ -34,17 +34,10 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "The response when creating the NFT.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/NftMintResponse"
-                                }
-                            }
-                        },
+                    "201": {
+                        "description": "The rest request ended in created response.",
                         "headers": {
-                            "Location": {
+                            "location": {
                                 "schema": {
                                     "type": "string"
                                 },
@@ -415,16 +408,6 @@
     },
     "components": {
         "schemas": {
-            "OkResponse": {
-                "type": "object",
-                "additionalProperties": false,
-                "description": "The rest request ended in success with no data."
-            },
-            "HttpStatusCodes": {
-                "type": "object",
-                "additionalProperties": false,
-                "description": "Standard HTTP status codes."
-            },
             "Error": {
                 "type": "object",
                 "properties": {
@@ -460,46 +443,30 @@
                 "additionalProperties": false,
                 "description": "Model to describe serialized error."
             },
-            "NftMintResponse": {
-                "type": "object",
-                "properties": {
-                    "statusCode": {
-                        "$ref": "#/components/schemas/HttpStatusCodes"
-                    },
-                    "headers": {
-                        "type": "object",
-                        "properties": {
-                            "Location": {
-                                "type": "string"
-                            }
-                        },
-                        "required": [
-                            "Location"
-                        ],
-                        "additionalProperties": false,
-                        "description": "The result of the mint process."
-                    }
-                },
-                "required": [
-                    "statusCode",
-                    "headers"
-                ],
-                "additionalProperties": false,
-                "description": "The response when creating the NFT."
-            },
             "NftBurnRequest": {
                 "type": "object",
                 "properties": {
-                    "owner": {
-                        "type": "string",
-                        "description": "The owner for the NFT to return the funds to."
+                    "body": {
+                        "type": "object",
+                        "properties": {
+                            "owner": {
+                                "type": "string",
+                                "description": "The owner for the NFT to return the funds to."
+                            }
+                        },
+                        "required": [
+                            "owner"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The data to be used for burning."
                     }
                 },
                 "required": [
-                    "owner"
+                    "pathParams",
+                    "body"
                 ],
                 "additionalProperties": false,
-                "description": "The data to be used for burning."
+                "description": "Burn the NFT."
             }
         },
         "securitySchemes": {

@@ -1,12 +1,12 @@
 # Function: nftMint()
 
-> **nftMint**(`requestContext`, `factoryServiceName`, `request`): `Promise`\<`INftMintResponse`\>
+> **nftMint**(`requestContext`, `factoryServiceName`, `request`): `Promise`\<`ICreatedResponse`\>
 
 Mint an NFT.
 
 ## Parameters
 
-• **requestContext**: `IRequestContext`
+• **requestContext**: `IHttpRequestContext`
 
 The request context for the API.
 
@@ -20,6 +20,6 @@ The request.
 
 ## Returns
 
-`Promise`\<`INftMintResponse`\>
+`Promise`\<`ICreatedResponse`\>
 
 The response object with additional http response properties.

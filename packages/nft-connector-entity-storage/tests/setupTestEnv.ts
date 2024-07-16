@@ -1,26 +1,25 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-
 import path from "node:path";
-import { EntitySchemaFactory, EntitySchemaHelper } from "@gtsc/entity";
 import { MemoryEntityStorageConnector } from "@gtsc/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@gtsc/entity-storage-models";
 import { nameof } from "@gtsc/nameof";
-import type { IRequestContext } from "@gtsc/services";
+import type { IServiceRequestContext } from "@gtsc/services";
 import * as dotenv from "dotenv";
 import { Nft } from "../src/entities/nft";
+import { initSchema } from "../src/schema";
 
 console.debug("Setting up test environment from .env and .env.dev files");
 
 dotenv.config({ path: [path.join(__dirname, ".env"), path.join(__dirname, ".env.dev")] });
 
-export const TEST_TENANT_ID = "test-tenant";
+export const TEST_PARTITION_ID = "test-partition";
 export const TEST_IDENTITY_ID = "test-identity";
 
 export const TEST_ADDRESS_1 = "test-address-1";
 export const TEST_ADDRESS_2 = "test-address-2";
 
-EntitySchemaFactory.register(nameof(Nft), () => EntitySchemaHelper.getSchema(Nft));
+initSchema();
 
 EntityStorageConnectorFactory.register(
 	"nft",
@@ -30,7 +29,7 @@ EntityStorageConnectorFactory.register(
 		})
 );
 
-export const TEST_CONTEXT: IRequestContext = {
-	tenantId: TEST_TENANT_ID,
+export const TEST_CONTEXT: IServiceRequestContext = {
+	partitionId: TEST_PARTITION_ID,
 	identity: TEST_IDENTITY_ID
 };

@@ -42,11 +42,11 @@ describe("IotaNftConnector", () => {
 			description: "Test Description"
 		};
 		const idUrn = await connector.mint(
-			TEST_CONTEXT,
 			TEST_NFT_ADDRESS_BECH32,
 			"footag",
 			immutableMetadata,
-			{ bar: "foo" }
+			{ bar: "foo" },
+			TEST_CONTEXT
 		);
 		const urn = Urn.fromValidString(idUrn);
 
@@ -70,7 +70,7 @@ describe("IotaNftConnector", () => {
 				coinType: TEST_COIN_TYPE
 			}
 		});
-		const response = await connector.resolve(TEST_CONTEXT, nftId);
+		const response = await connector.resolve(nftId, TEST_CONTEXT);
 
 		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
 		expect(response.owner).toEqual(TEST_NFT_ADDRESS_BECH32);
@@ -97,9 +97,9 @@ describe("IotaNftConnector", () => {
 			}
 		});
 
-		await connector.transfer(TEST_CONTEXT, nftId, TEST_NFT_ADDRESS_2_BECH32);
+		await connector.transfer(nftId, TEST_NFT_ADDRESS_2_BECH32, undefined, TEST_CONTEXT);
 
-		const response = await connector.resolve(TEST_CONTEXT, nftId);
+		const response = await connector.resolve(nftId, TEST_CONTEXT);
 
 		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
 		expect(response.owner).toEqual(TEST_NFT_ADDRESS_2_BECH32);
@@ -114,16 +114,12 @@ describe("IotaNftConnector", () => {
 			}
 		});
 
-		await connector.transfer(
-			{
-				tenantId: TEST_CONTEXT.tenantId,
-				identity: TEST_IDENTITY_ID_2
-			},
-			nftId,
-			TEST_NFT_ADDRESS_BECH32
-		);
+		await connector.transfer(nftId, TEST_NFT_ADDRESS_BECH32, undefined, {
+			partitionId: TEST_CONTEXT.partitionId,
+			identity: TEST_IDENTITY_ID_2
+		});
 
-		const response = await connector.resolve(TEST_CONTEXT, nftId);
+		const response = await connector.resolve(nftId, TEST_CONTEXT);
 
 		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
 		expect(response.owner).toEqual(TEST_NFT_ADDRESS_BECH32);
@@ -138,11 +134,16 @@ describe("IotaNftConnector", () => {
 			}
 		});
 
-		await connector.transfer(TEST_CONTEXT, nftId, TEST_NFT_ADDRESS_2_BECH32, {
-			payload: "a".repeat(128)
-		});
+		await connector.transfer(
+			nftId,
+			TEST_NFT_ADDRESS_2_BECH32,
+			{
+				payload: "a".repeat(128)
+			},
+			TEST_CONTEXT
+		);
 
-		const response = await connector.resolve(TEST_CONTEXT, nftId);
+		const response = await connector.resolve(nftId, TEST_CONTEXT);
 
 		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
 		expect(response.owner).toEqual(TEST_NFT_ADDRESS_2_BECH32);
@@ -157,15 +158,15 @@ describe("IotaNftConnector", () => {
 			}
 		});
 		await connector.update(
-			{
-				tenantId: TEST_CONTEXT.tenantId,
-				identity: TEST_IDENTITY_ID_2
-			},
 			nftId,
 			{
 				payload1: "a".repeat(128),
 				payload2: "b".repeat(128),
 				payload3: "c".repeat(128)
+			},
+			{
+				partitionId: TEST_CONTEXT.partitionId,
+				identity: TEST_IDENTITY_ID_2
 			}
 		);
 	});
@@ -179,7 +180,7 @@ describe("IotaNftConnector", () => {
 			}
 		});
 		await expect(
-			connector.burn(TEST_CONTEXT, TEST_NFT_ADDRESS_2_BECH32, nftId)
+			connector.burn(TEST_NFT_ADDRESS_2_BECH32, nftId, TEST_CONTEXT)
 		).rejects.toMatchObject({
 			name: "GeneralError",
 			message: "iotaNftConnector.burningFailed"
@@ -194,13 +195,9 @@ describe("IotaNftConnector", () => {
 				coinType: TEST_COIN_TYPE
 			}
 		});
-		await connector.burn(
-			{
-				tenantId: TEST_CONTEXT.tenantId,
-				identity: TEST_IDENTITY_ID_2
-			},
-			TEST_NFT_ADDRESS_2_BECH32,
-			nftId
-		);
+		await connector.burn(TEST_NFT_ADDRESS_2_BECH32, nftId, {
+			partitionId: TEST_CONTEXT.partitionId,
+			identity: TEST_IDENTITY_ID_2
+		});
 	});
 });

@@ -9,7 +9,7 @@ import {
 	TEST_ADDRESS_2,
 	TEST_CONTEXT,
 	TEST_IDENTITY_ID,
-	TEST_TENANT_ID
+	TEST_PARTITION_ID
 } from "./setupTestEnv";
 import type { Nft } from "../src/entities/nft";
 import { EntityStorageNftConnector } from "../src/entityStorageNftConnector";
@@ -29,9 +29,15 @@ describe("EntityStorageNftConnector", () => {
 			issuerName: "Test Issuer",
 			description: "Test Description"
 		};
-		const idUrn = await connector.mint(TEST_CONTEXT, TEST_ADDRESS_1, "footag", immutableMetadata, {
-			bar: "foo"
-		});
+		const idUrn = await connector.mint(
+			TEST_ADDRESS_1,
+			"footag",
+			immutableMetadata,
+			{
+				bar: "foo"
+			},
+			TEST_CONTEXT
+		);
 		const urn = Urn.fromValidString(idUrn);
 
 		expect(urn.namespaceIdentifier()).toEqual("entity-storage-nft");
@@ -39,7 +45,7 @@ describe("EntityStorageNftConnector", () => {
 
 		const store =
 			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
-				TEST_TENANT_ID
+				TEST_PARTITION_ID
 			);
 		expect(store?.[0].id).toEqual(urn.namespaceSpecific());
 		expect(store?.[0].owner).toEqual(TEST_ADDRESS_1);
@@ -53,13 +59,10 @@ describe("EntityStorageNftConnector", () => {
 
 	test("Can resolve an NFT", async () => {
 		const connector = new EntityStorageNftConnector();
-		const response = await connector.resolve(
-			{
-				tenantId: TEST_CONTEXT.tenantId,
-				identity: TEST_IDENTITY_ID
-			},
-			nftId
-		);
+		const response = await connector.resolve(nftId, {
+			partitionId: TEST_CONTEXT.partitionId,
+			identity: TEST_IDENTITY_ID
+		});
 
 		expect(response.issuer).toEqual(TEST_ADDRESS_1);
 		expect(response.owner).toEqual(TEST_ADDRESS_1);
@@ -80,13 +83,13 @@ describe("EntityStorageNftConnector", () => {
 	test("Can transfer an NFT", async () => {
 		const connector = new EntityStorageNftConnector();
 
-		await connector.transfer(TEST_CONTEXT, nftId, TEST_ADDRESS_2);
+		await connector.transfer(nftId, TEST_ADDRESS_2, undefined, TEST_CONTEXT);
 
 		const urn = Urn.fromValidString(nftId);
 
 		const store =
 			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
-				TEST_TENANT_ID
+				TEST_PARTITION_ID
 			);
 		expect(store?.[0].id).toEqual(urn.namespaceSpecific());
 		expect(store?.[0].owner).toEqual(TEST_ADDRESS_2);
@@ -95,7 +98,7 @@ describe("EntityStorageNftConnector", () => {
 
 	test("Can fail to burn an NFT that has been transferred", async () => {
 		const connector = new EntityStorageNftConnector();
-		await expect(connector.burn(TEST_CONTEXT, TEST_ADDRESS_1, nftId)).rejects.toMatchObject({
+		await expect(connector.burn(TEST_ADDRESS_1, nftId, TEST_CONTEXT)).rejects.toMatchObject({
 			name: "GeneralError",
 			message: "entityStorageNftConnector.burningFailed"
 		});
@@ -104,7 +107,7 @@ describe("EntityStorageNftConnector", () => {
 
 		const store =
 			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
-				TEST_TENANT_ID
+				TEST_PARTITION_ID
 			);
 		expect(store?.[0].id).toEqual(urn.namespaceSpecific());
 		expect(store?.[0].owner).toEqual(TEST_ADDRESS_2);
@@ -113,18 +116,14 @@ describe("EntityStorageNftConnector", () => {
 
 	test("Can burn an NFT", async () => {
 		const connector = new EntityStorageNftConnector();
-		await connector.burn(
-			{
-				tenantId: TEST_TENANT_ID,
-				identity: TEST_IDENTITY_ID
-			},
-			TEST_ADDRESS_2,
-			nftId
-		);
+		await connector.burn(TEST_ADDRESS_2, nftId, {
+			partitionId: TEST_PARTITION_ID,
+			identity: TEST_IDENTITY_ID
+		});
 
 		const store =
 			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
-				TEST_TENANT_ID
+				TEST_PARTITION_ID
 			);
 		expect(store?.length).toEqual(0);
 	});

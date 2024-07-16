@@ -36,7 +36,7 @@ The configuration for the client.
 
 ### CLASS\_NAME
 
-> `readonly` **CLASS\_NAME**: `string` = `NftClient._CLASS_NAME`
+> `readonly` **CLASS\_NAME**: `string`
 
 Runtime name for the class.
 
@@ -66,27 +66,23 @@ The endpoint with namespace prefix attached.
 
 ### fetch()
 
-> **fetch**\<`T`, `U`\>(`requestContext`, `route`, `method`, `request`?): `Promise`\<`U`\>
+> **fetch**\<`T`, `U`\>(`route`, `method`, `request`?): `Promise`\<`U`\>
 
 Perform a request in json format.
 
 #### Type parameters
 
-• **T** *extends* `IHttpRequest`\<`unknown`\>
+• **T** *extends* `IHttpRequest`\<`any`\>
 
-• **U** *extends* `IHttpResponse`\<`unknown`\>
+• **U** *extends* `IHttpResponse`\<`any`\>
 
 #### Parameters
-
-• **requestContext**: `IRequestContext`
-
-The context for the request.
 
 • **route**: `string`
 
 The route of the request.
 
-• **method**: `HttpMethods`
+• **method**: `HttpMethod`
 
 The http method.
 
@@ -108,7 +104,7 @@ The response.
 
 ### mint()
 
-> **mint**\<`T`, `U`\>(`requestContext`, `issuer`, `tag`, `immutableMetadata`?, `metadata`?, `options`?): `Promise`\<`string`\>
+> **mint**\<`T`, `U`\>(`issuer`, `tag`, `immutableMetadata`?, `metadata`?, `options`?): `Promise`\<`string`\>
 
 Mint an NFT.
 
@@ -119,10 +115,6 @@ Mint an NFT.
 • **U** = `unknown`
 
 #### Parameters
-
-• **requestContext**: `IRequestContext`
-
-The context for the request.
 
 • **issuer**: `string`
 
@@ -162,7 +154,7 @@ The id of the created NFT in urn format.
 
 ### resolve()
 
-> **resolve**\<`T`, `U`\>(`requestContext`, `id`): `Promise`\<`object`\>
+> **resolve**\<`T`, `U`\>(`id`): `Promise`\<`object`\>
 
 Resolve an NFT.
 
@@ -173,10 +165,6 @@ Resolve an NFT.
 • **U** = `unknown`
 
 #### Parameters
-
-• **requestContext**: `IRequestContext`
-
-The context for the request.
 
 • **id**: `string`
 
@@ -216,15 +204,11 @@ The data for the NFT.
 
 ### burn()
 
-> **burn**(`requestContext`, `owner`, `id`): `Promise`\<`void`\>
+> **burn**(`owner`, `id`): `Promise`\<`void`\>
 
 Burn an NFT.
 
 #### Parameters
-
-• **requestContext**: `IRequestContext`
-
-The context for the request.
 
 • **owner**: `string`
 
@@ -248,7 +232,7 @@ Nothing.
 
 ### transfer()
 
-> **transfer**\<`T`\>(`requestContext`, `id`, `recipient`, `metadata`?): `Promise`\<`void`\>
+> **transfer**\<`T`\>(`id`, `recipient`, `metadata`?): `Promise`\<`void`\>
 
 Transfer an NFT.
 
@@ -257,10 +241,6 @@ Transfer an NFT.
 • **T** = `unknown`
 
 #### Parameters
-
-• **requestContext**: `IRequestContext`
-
-The context for the request.
 
 • **id**: `string`
 
@@ -288,7 +268,7 @@ Nothing.
 
 ### update()
 
-> **update**\<`T`\>(`requestContext`, `id`, `metadata`): `Promise`\<`void`\>
+> **update**\<`T`\>(`id`, `metadata`): `Promise`\<`void`\>
 
 Update the data of the NFT.
 
@@ -297,10 +277,6 @@ Update the data of the NFT.
 • **T** = `unknown`
 
 #### Parameters
-
-• **requestContext**: `IRequestContext`
-
-The context for the request.
 
 • **id**: `string`
 

@@ -10,11 +10,12 @@
 
 ## Variables
 
-- [tags](variables/tags.md)
+- [tagsNft](variables/tagsNft.md)
+- [restEntryPoints](variables/restEntryPoints.md)
 
 ## Functions
 
-- [generateRestRoutes](functions/generateRestRoutes.md)
+- [generateRestRoutesNft](functions/generateRestRoutesNft.md)
 - [nftMint](functions/nftMint.md)
 - [nftResolve](functions/nftResolve.md)
 - [nftBurn](functions/nftBurn.md)

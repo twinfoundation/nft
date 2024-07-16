@@ -1,21 +1,25 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-
-import type { IRestRoute, ITag } from "@gtsc/api-models";
+import type {
+	ICreatedResponse,
+	IHttpRequestContext,
+	INoContentResponse,
+	IRestRoute,
+	ITag
+} from "@gtsc/api-models";
 import { Guards } from "@gtsc/core";
 import { nameof } from "@gtsc/nameof";
 import type {
 	INft,
 	INftBurnRequest,
 	INftMintRequest,
-	INftMintResponse,
 	INftResolveRequest,
 	INftResolveResponse,
 	INftTransferRequest,
 	INftUpdateRequest
 } from "@gtsc/nft-models";
-import { ServiceFactory, type IRequestContext } from "@gtsc/services";
-import { HttpStatusCodes } from "@gtsc/web";
+import { ServiceFactory } from "@gtsc/services";
+import { HttpStatusCode } from "@gtsc/web";
 
 /**
  * The source used when communicating about these routes.
@@ -25,7 +29,7 @@ const ROUTES_SOURCE = "nftRoutes";
 /**
  * The tag to associate with the routes.
  */
-export const tags: ITag[] = [
+export const tagsNft: ITag[] = [
 	{
 		name: "NFT",
 		description: "Endpoints which are modelled to access an NFT contract."
@@ -38,14 +42,14 @@ export const tags: ITag[] = [
  * @param factoryServiceName The name of the service to use in the routes store in the ServiceFactory.
  * @returns The generated routes.
  */
-export function generateRestRoutes(
+export function generateRestRoutesNft(
 	baseRouteName: string,
 	factoryServiceName: string
 ): IRestRoute[] {
-	const mintRoute: IRestRoute<INftMintRequest, INftMintResponse> = {
+	const mintRoute: IRestRoute<INftMintRequest, ICreatedResponse> = {
 		operationId: "nftMint",
 		summary: "Mint an NFT",
-		tag: tags[0].name,
+		tag: tagsNft[0].name,
 		method: "POST",
 		path: `${baseRouteName}/`,
 		handler: async (requestContext, request) =>
@@ -74,14 +78,14 @@ export function generateRestRoutes(
 		},
 		responseType: [
 			{
-				type: nameof<INftMintResponse>(),
+				type: nameof<ICreatedResponse>(),
 				examples: [
 					{
 						id: "nftMintResponseExample",
 						response: {
-							statusCode: HttpStatusCodes.CREATED,
+							statusCode: HttpStatusCode.created,
 							headers: {
-								Location:
+								location:
 									"urn:iota-nft:aW90YS1uZnQ6dHN0OjB4NzYyYjljNDllYTg2OWUwZWJkYTliYmZhNzY5Mzk0NDdhNDI4ZGNmMTc4YzVkMTVhYjQ0N2UyZDRmYmJiNGViMg=="
 							}
 						}
@@ -94,7 +98,7 @@ export function generateRestRoutes(
 	const resolveRoute: IRestRoute<INftResolveRequest, INftResolveResponse> = {
 		operationId: "nftResolve",
 		summary: "Resolve an NFT",
-		tag: tags[0].name,
+		tag: tagsNft[0].name,
 		method: "GET",
 		path: `${baseRouteName}/:id`,
 		handler: async (requestContext, request) =>
@@ -139,10 +143,10 @@ export function generateRestRoutes(
 		]
 	};
 
-	const burnRoute: IRestRoute<INftBurnRequest, void> = {
+	const burnRoute: IRestRoute<INftBurnRequest, INoContentResponse> = {
 		operationId: "nftBurn",
 		summary: "Burn an NFT",
-		tag: tags[0].name,
+		tag: tagsNft[0].name,
 		method: "POST",
 		path: `${baseRouteName}/:id/burn`,
 		handler: async (requestContext, request) =>
@@ -165,10 +169,10 @@ export function generateRestRoutes(
 		}
 	};
 
-	const transferRoute: IRestRoute<INftTransferRequest, void> = {
+	const transferRoute: IRestRoute<INftTransferRequest, INoContentResponse> = {
 		operationId: "nftTransfer",
 		summary: "Transfer an NFT",
-		tag: tags[0].name,
+		tag: tagsNft[0].name,
 		method: "POST",
 		path: `${baseRouteName}/:id/transfer`,
 		handler: async (requestContext, request) =>
@@ -194,10 +198,10 @@ export function generateRestRoutes(
 		}
 	};
 
-	const updateRoute: IRestRoute<INftUpdateRequest, void> = {
+	const updateRoute: IRestRoute<INftUpdateRequest, INoContentResponse> = {
 		operationId: "nftUpdate",
 		summary: "Update an NFT",
-		tag: tags[0].name,
+		tag: tagsNft[0].name,
 		method: "PUT",
 		path: `${baseRouteName}/:id`,
 		handler: async (requestContext, request) =>
@@ -233,29 +237,29 @@ export function generateRestRoutes(
  * @returns The response object with additional http response properties.
  */
 export async function nftMint(
-	requestContext: IRequestContext,
+	requestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftMintRequest
-): Promise<INftMintResponse> {
+): Promise<ICreatedResponse> {
 	Guards.object<INftMintRequest>(ROUTES_SOURCE, nameof(request), request);
 	Guards.object<INftMintRequest["body"]>(ROUTES_SOURCE, nameof(request.body), request.body);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.issuer), request.body.issuer);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.tag), request.body.tag);
 	const service = ServiceFactory.get<INft>(factoryServiceName);
 	const id = await service.mint(
-		requestContext,
 		request.body.issuer,
 		request.body.tag,
 		request.body.immutableMetadata,
 		request.body.metadata,
 		{
 			namespace: request.body.namespace
-		}
+		},
+		requestContext
 	);
 	return {
-		statusCode: HttpStatusCodes.CREATED,
+		statusCode: HttpStatusCode.created,
 		headers: {
-			Location: id
+			location: id
 		}
 	};
 }
@@ -268,7 +272,7 @@ export async function nftMint(
  * @returns The response object with additional http response properties.
  */
 export async function nftResolve(
-	requestContext: IRequestContext,
+	requestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftResolveRequest
 ): Promise<INftResolveResponse> {
@@ -281,7 +285,7 @@ export async function nftResolve(
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	const result = await service.resolve(requestContext, request.pathParams.id);
+	const result = await service.resolve(request.pathParams.id, requestContext);
 	return {
 		body: result
 	};
@@ -295,10 +299,10 @@ export async function nftResolve(
  * @returns The response object with additional http response properties.
  */
 export async function nftBurn(
-	requestContext: IRequestContext,
+	requestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftBurnRequest
-): Promise<void> {
+): Promise<INoContentResponse> {
 	Guards.object<INftBurnRequest>(ROUTES_SOURCE, nameof(request), request);
 	Guards.object<INftBurnRequest["pathParams"]>(
 		ROUTES_SOURCE,
@@ -310,7 +314,11 @@ export async function nftBurn(
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.owner), request.body.owner);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.burn(requestContext, request.pathParams.id, request.body.owner);
+	await service.burn(request.pathParams.id, request.body.owner, requestContext);
+
+	return {
+		statusCode: HttpStatusCode.noContent
+	};
 }
 
 /**
@@ -321,10 +329,10 @@ export async function nftBurn(
  * @returns The response object with additional http response properties.
  */
 export async function nftTransfer(
-	requestContext: IRequestContext,
+	requestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftTransferRequest
-): Promise<void> {
+): Promise<INoContentResponse> {
 	Guards.object<INftTransferRequest>(ROUTES_SOURCE, nameof(request), request);
 	Guards.object<INftTransferRequest["pathParams"]>(
 		ROUTES_SOURCE,
@@ -337,11 +345,15 @@ export async function nftTransfer(
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
 	await service.transfer(
-		requestContext,
 		request.pathParams.id,
 		request.body.recipient,
-		request.body.metadata
+		request.body.metadata,
+		requestContext
 	);
+
+	return {
+		statusCode: HttpStatusCode.noContent
+	};
 }
 
 /**
@@ -352,10 +364,10 @@ export async function nftTransfer(
  * @returns The response object with additional http response properties.
  */
 export async function nftUpdate(
-	requestContext: IRequestContext,
+	requestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftUpdateRequest
-): Promise<void> {
+): Promise<INoContentResponse> {
 	Guards.object<INftUpdateRequest>(ROUTES_SOURCE, nameof(request), request);
 	Guards.object<INftUpdateRequest["pathParams"]>(
 		ROUTES_SOURCE,
@@ -367,5 +379,9 @@ export async function nftUpdate(
 	Guards.object(ROUTES_SOURCE, nameof(request.body.metadata), request.body.metadata);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.update(requestContext, request.pathParams.id, request.body.metadata);
+	await service.update(request.pathParams.id, request.body.metadata, requestContext);
+
+	return {
+		statusCode: HttpStatusCode.noContent
+	};
 }

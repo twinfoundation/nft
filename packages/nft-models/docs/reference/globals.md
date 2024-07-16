@@ -7,7 +7,6 @@
 - [INftConnector](interfaces/INftConnector.md)
 - [INftBurnRequest](interfaces/INftBurnRequest.md)
 - [INftMintRequest](interfaces/INftMintRequest.md)
-- [INftMintResponse](interfaces/INftMintResponse.md)
 - [INftResolveRequest](interfaces/INftResolveRequest.md)
 - [INftResolveResponse](interfaces/INftResolveResponse.md)
 - [INftTransferRequest](interfaces/INftTransferRequest.md)

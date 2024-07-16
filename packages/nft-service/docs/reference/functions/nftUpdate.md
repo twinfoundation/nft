@@ -1,12 +1,12 @@
 # Function: nftUpdate()
 
-> **nftUpdate**(`requestContext`, `factoryServiceName`, `request`): `Promise`\<`void`\>
+> **nftUpdate**(`requestContext`, `factoryServiceName`, `request`): `Promise`\<`INoContentResponse`\>
 
 Update an NFT.
 
 ## Parameters
 
-• **requestContext**: `IRequestContext`
+• **requestContext**: `IHttpRequestContext`
 
 The request context for the API.
 
@@ -20,6 +20,6 @@ The request.
 
 ## Returns
 
-`Promise`\<`void`\>
+`Promise`\<`INoContentResponse`\>
 
 The response object with additional http response properties.
