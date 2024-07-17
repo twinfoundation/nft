@@ -8,7 +8,7 @@ Update the mutable data for the NFT.
 
 > **pathParams**: `object`
 
-The data to be used in the transfer.
+The data to be used in the update.
 
 #### id
 

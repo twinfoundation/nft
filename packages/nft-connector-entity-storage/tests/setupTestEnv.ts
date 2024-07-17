@@ -6,7 +6,7 @@ import { EntityStorageConnectorFactory } from "@gtsc/entity-storage-models";
 import { nameof } from "@gtsc/nameof";
 import type { IServiceRequestContext } from "@gtsc/services";
 import * as dotenv from "dotenv";
-import { Nft } from "../src/entities/nft";
+import type { Nft } from "../src/entities/nft";
 import { initSchema } from "../src/schema";
 
 console.debug("Setting up test environment from .env and .env.dev files");
@@ -25,7 +25,7 @@ EntityStorageConnectorFactory.register(
 	"nft",
 	() =>
 		new MemoryEntityStorageConnector<Nft>({
-			entitySchema: nameof(Nft)
+			entitySchema: nameof<Nft>()
 		})
 );
 
