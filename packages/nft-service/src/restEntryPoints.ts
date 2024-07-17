@@ -6,6 +6,7 @@ import { generateRestRoutesNft, tagsNft } from "./nftRoutes";
 export const restEntryPoints: IRestRouteEntryPoint[] = [
 	{
 		name: "nft",
+		defaultBaseRoute: "nft",
 		tags: tagsNft,
 		generateRoutes: generateRestRoutesNft
 	}
