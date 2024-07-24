@@ -74,7 +74,7 @@ export class EntityStorageNftConnector implements INftConnector {
 
 			await this._nftEntityStorage.set(nft, requestContext);
 
-			return new Urn(EntityStorageNftConnector.NAMESPACE, nftId).toString();
+			return new Urn(EntityStorageNftConnector.NAMESPACE, nftId).toString(true);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "mintingFailed", undefined, error);
 		}

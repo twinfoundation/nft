@@ -172,7 +172,7 @@ export class NftService implements INft {
 		requestContext?: IServiceRequestContext
 	): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
-		Guards.stringValue(this.CLASS_NAME, nameof(metadata), metadata);
+		Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
 
 		try {
 			const idUri = Urn.fromValidString(id);

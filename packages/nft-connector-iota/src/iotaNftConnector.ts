@@ -171,7 +171,7 @@ export class IotaNftConnector implements INftConnector {
 
 			const hrp = await client.getBech32Hrp();
 
-			return new Urn(IotaNftConnector.NAMESPACE, `${hrp}:${nftId}`).toString();
+			return new Urn(IotaNftConnector.NAMESPACE, `${hrp}:${nftId}`).toString(true);
 		} catch (error) {
 			throw new GeneralError(
 				this.CLASS_NAME,

@@ -147,7 +147,7 @@ export class NftClient extends BaseRestClient implements INft {
 	 */
 	public async update<T = unknown>(id: string, metadata: T): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
-		Guards.stringValue(this.CLASS_NAME, nameof(metadata), metadata);
+		Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
 
 		await this.fetch<INftUpdateRequest, never>("/:id", "PUT", {
 			pathParams: {
