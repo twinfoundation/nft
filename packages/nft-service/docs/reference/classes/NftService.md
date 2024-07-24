@@ -26,6 +26,14 @@ The configuration for the service.
 
 ## Properties
 
+### NAMESPACE
+
+> `static` `readonly` **NAMESPACE**: `string` = `"nft"`
+
+The namespace supported by the nft service.
+
+***
+
 ### CLASS\_NAME
 
 > `readonly` **CLASS\_NAME**: `string`

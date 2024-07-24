@@ -43,9 +43,9 @@ import type { IIotaNftConnectorConfig } from "./models/IIotaNftConnectorConfig";
  */
 export class IotaNftConnector implements INftConnector {
 	/**
-	 * The namespace supported by the wallet connector.
+	 * The namespace supported by the nft connector.
 	 */
-	public static NAMESPACE: string = "iota-nft";
+	public static readonly NAMESPACE: string = "iota";
 
 	/**
 	 * Default name for the seed secret.
@@ -171,7 +171,7 @@ export class IotaNftConnector implements INftConnector {
 
 			const hrp = await client.getBech32Hrp();
 
-			return new Urn(IotaNftConnector.NAMESPACE, `${hrp}:${nftId}`).toString(true);
+			return `nft:${new Urn(IotaNftConnector.NAMESPACE, `${hrp}:${nftId}`).toString()}`;
 		} catch (error) {
 			throw new GeneralError(
 				this.CLASS_NAME,
@@ -198,12 +198,10 @@ export class IotaNftConnector implements INftConnector {
 		immutableMetadata?: T;
 		metadata?: U;
 	}> {
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
-
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
-		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
+		if (urnParsed.namespaceMethod() !== IotaNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: IotaNftConnector.NAMESPACE,
 				id
@@ -212,7 +210,7 @@ export class IotaNftConnector implements INftConnector {
 
 		try {
 			const client = new Client(this._config.clientOptions);
-			const nftParts = urnParsed.namespaceSpecific().split(":");
+			const nftParts = urnParsed.namespaceSpecificParts(1);
 
 			const hrp = nftParts[0];
 			const nftId = nftParts[1];
@@ -286,7 +284,7 @@ export class IotaNftConnector implements INftConnector {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
-		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
+		if (urnParsed.namespaceMethod() !== IotaNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: IotaNftConnector.NAMESPACE,
 				id
@@ -295,7 +293,7 @@ export class IotaNftConnector implements INftConnector {
 
 		try {
 			const client = new Client(this._config.clientOptions);
-			const nftParts = urnParsed.namespaceSpecific().split(":");
+			const nftParts = urnParsed.namespaceSpecificParts(1);
 
 			const nftId = nftParts[1];
 			Guards.stringHexLength(this.CLASS_NAME, "nftId", nftId, 64, true);
@@ -351,7 +349,7 @@ export class IotaNftConnector implements INftConnector {
 		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
 
 		const urnParsed = Urn.fromValidString(id);
-		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
+		if (urnParsed.namespaceMethod() !== IotaNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: IotaNftConnector.NAMESPACE,
 				id
@@ -361,7 +359,7 @@ export class IotaNftConnector implements INftConnector {
 		try {
 			const client = new Client(this._config.clientOptions);
 
-			const nftParts = urnParsed.namespaceSpecific().split(":");
+			const nftParts = urnParsed.namespaceSpecificParts(1);
 			const hrp = nftParts[0];
 			const nftId = nftParts[1];
 			Guards.stringHexLength(this.CLASS_NAME, "nftId", nftId, 64, true);
@@ -444,7 +442,7 @@ export class IotaNftConnector implements INftConnector {
 		Guards.object<T>(this.CLASS_NAME, nameof(metadata), metadata);
 
 		const urnParsed = Urn.fromValidString(id);
-		if (urnParsed.namespaceIdentifier() !== IotaNftConnector.NAMESPACE) {
+		if (urnParsed.namespaceMethod() !== IotaNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: IotaNftConnector.NAMESPACE,
 				id
@@ -454,7 +452,7 @@ export class IotaNftConnector implements INftConnector {
 		try {
 			const client = new Client(this._config.clientOptions);
 
-			const nftParts = urnParsed.namespaceSpecific().split(":");
+			const nftParts = urnParsed.namespaceSpecificParts(1);
 			const hrp = nftParts[0];
 			const nftId = nftParts[1];
 			Guards.stringHexLength(this.CLASS_NAME, "nftId", nftId, 64, true);

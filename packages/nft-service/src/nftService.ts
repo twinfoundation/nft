@@ -11,6 +11,11 @@ import type { INftServiceConfig } from "./models/INftServiceConfig";
  */
 export class NftService implements INft {
 	/**
+	 * The namespace supported by the nft service.
+	 */
+	public static readonly NAMESPACE: string = "nft";
+
+	/**
 	 * Runtime name for the class.
 	 */
 	public readonly CLASS_NAME: string = nameof<NftService>();
@@ -63,7 +68,15 @@ export class NftService implements INft {
 
 			const nftConnector = NftConnectorFactory.get<INftConnector>(connectorNamespace);
 
-			return nftConnector.mint(issuer, tag, immutableMetadata, metadata, requestContext);
+			const nftUrn = await nftConnector.mint(
+				issuer,
+				tag,
+				immutableMetadata,
+				metadata,
+				requestContext
+			);
+
+			return `${NftService.NAMESPACE}:${nftUrn}`;
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "mintFailed", undefined, error);
 		}
@@ -85,16 +98,10 @@ export class NftService implements INft {
 		immutableMetadata?: T;
 		metadata?: U;
 	}> {
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
-
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 
 		try {
-			const idUri = Urn.fromValidString(id);
-			const connectorNamespace = idUri.namespaceIdentifier();
-
-			const nftConnector = NftConnectorFactory.get<INftConnector>(connectorNamespace);
-
+			const nftConnector = this.getConnector(id);
 			return nftConnector.resolve(id, requestContext);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "resolveFailed", undefined, error);
@@ -114,16 +121,11 @@ export class NftService implements INft {
 		requestContext?: IServiceRequestContext
 	): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(owner), owner);
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
 
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 
 		try {
-			const idUri = Urn.fromValidString(id);
-			const connectorNamespace = idUri.namespaceIdentifier();
-
-			const nftConnector = NftConnectorFactory.get<INftConnector>(connectorNamespace);
-
+			const nftConnector = this.getConnector(id);
 			await nftConnector.burn(owner, id, requestContext);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "burnFailed", undefined, error);
@@ -144,15 +146,11 @@ export class NftService implements INft {
 		metadata?: T,
 		requestContext?: IServiceRequestContext
 	): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
 
 		try {
-			const idUri = Urn.fromValidString(id);
-			const connectorNamespace = idUri.namespaceIdentifier();
-
-			const nftConnector = NftConnectorFactory.get<INftConnector>(connectorNamespace);
-
+			const nftConnector = this.getConnector(id);
 			await nftConnector.transfer(id, recipient, metadata, requestContext);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "transferFailed", undefined, error);
@@ -171,18 +169,35 @@ export class NftService implements INft {
 		metadata: T,
 		requestContext?: IServiceRequestContext
 	): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
 
 		try {
-			const idUri = Urn.fromValidString(id);
-			const connectorNamespace = idUri.namespaceIdentifier();
-
-			const nftConnector = NftConnectorFactory.get<INftConnector>(connectorNamespace);
-
+			const nftConnector = this.getConnector(id);
 			await nftConnector.update(id, metadata, requestContext);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "updateFailed", undefined, error);
 		}
+	}
+
+	/**
+	 * Get the connector from the uri.
+	 * @param id The id of the NFT to update in urn format.
+	 * @returns The connector.
+	 * @internal
+	 */
+	private getConnector(id: string): INftConnector {
+		const idUri = Urn.fromValidString(id);
+
+		if (idUri.namespaceIdentifier() !== NftService.NAMESPACE) {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
+				namespace: NftService.NAMESPACE,
+				id
+			});
+		}
+
+		const uriParts = Urn.fromValidString(idUri.namespaceSpecific());
+
+		return NftConnectorFactory.get<INftConnector>(uriParts.namespaceIdentifier());
 	}
 }

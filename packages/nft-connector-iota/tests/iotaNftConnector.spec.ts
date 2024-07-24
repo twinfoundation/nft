@@ -53,11 +53,12 @@ describe("IotaNftConnector", () => {
 		const nftAddress = IotaNftUtils.nftIdToAddress(idUrn);
 		console.debug("Minted NFT Id", idUrn.toString());
 		console.debug("Minted NFT", `${process.env.TEST_EXPLORER_URL}addr/${nftAddress}`);
-		expect(urn.namespaceIdentifier()).toEqual("iota-nft");
+		expect(urn.namespaceIdentifier()).toEqual("nft");
 
-		const specificParts = urn.namespaceSpecific().split(":");
-		expect(specificParts[0]).toEqual(TEST_BECH32_HRP);
-		expect(specificParts[1].length).toEqual(66);
+		const specificParts = urn.namespaceSpecificParts();
+		expect(specificParts[0]).toEqual("iota");
+		expect(specificParts[1]).toEqual(TEST_BECH32_HRP);
+		expect(specificParts[2].length).toEqual(66);
 
 		nftId = idUrn;
 	});

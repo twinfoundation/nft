@@ -40,14 +40,15 @@ describe("EntityStorageNftConnector", () => {
 		);
 		const urn = Urn.fromValidString(idUrn);
 
-		expect(urn.namespaceIdentifier()).toEqual("entity-storage-nft");
-		expect(urn.namespaceSpecific().length).toEqual(66);
+		expect(urn.namespaceIdentifier()).toEqual("nft");
+		expect(urn.namespaceMethod()).toEqual("entity-storage");
+		expect(urn.namespaceSpecific(1).length).toEqual(66);
 
 		const store =
 			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
 				TEST_PARTITION_ID
 			);
-		expect(store?.[0].id).toEqual(urn.namespaceSpecific());
+		expect(store?.[0].id).toEqual(urn.namespaceSpecific(1));
 		expect(store?.[0].owner).toEqual(TEST_ADDRESS_1);
 		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
 		expect(store?.[0].tag).toEqual("footag");
@@ -91,7 +92,7 @@ describe("EntityStorageNftConnector", () => {
 			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
 				TEST_PARTITION_ID
 			);
-		expect(store?.[0].id).toEqual(urn.namespaceSpecific());
+		expect(store?.[0].id).toEqual(urn.namespaceSpecific(1));
 		expect(store?.[0].owner).toEqual(TEST_ADDRESS_2);
 		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
 	});
@@ -109,7 +110,7 @@ describe("EntityStorageNftConnector", () => {
 			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
 				TEST_PARTITION_ID
 			);
-		expect(store?.[0].id).toEqual(urn.namespaceSpecific());
+		expect(store?.[0].id).toEqual(urn.namespaceSpecific(1));
 		expect(store?.[0].owner).toEqual(TEST_ADDRESS_2);
 		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
 	});

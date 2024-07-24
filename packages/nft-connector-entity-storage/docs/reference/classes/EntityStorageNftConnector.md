@@ -32,9 +32,9 @@ The entity storage for nfts, defaults to "nft".
 
 ### NAMESPACE
 
-> `static` **NAMESPACE**: `string` = `"entity-storage-nft"`
+> `static` **NAMESPACE**: `string` = `"entity-storage"`
 
-The namespace supported by the wallet connector.
+The namespace supported by the nft connector.
 
 ***
 

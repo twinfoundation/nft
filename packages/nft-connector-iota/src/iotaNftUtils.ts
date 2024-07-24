@@ -13,9 +13,9 @@ export class IotaNftUtils {
 	 * @returns The address.
 	 */
 	public static nftIdToAddress(nftIdUrn: string): string {
-		// The nftId is made up from iota-nft:hrp:aliasId
+		// The nftId is made up from nft:iota:hrp:aliasId
 		const nftUrn = Urn.fromValidString(nftIdUrn);
-		const didParts = nftUrn.parts(true);
-		return Utils.nftIdToBech32(didParts[2], didParts[1]);
+		const didParts = nftUrn.parts();
+		return Utils.nftIdToBech32(didParts[3], didParts[2]);
 	}
 }

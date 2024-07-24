@@ -36,9 +36,9 @@ The configuration for the connector.
 
 ### NAMESPACE
 
-> `static` **NAMESPACE**: `string` = `"iota-nft"`
+> `static` `readonly` **NAMESPACE**: `string` = `"iota"`
 
-The namespace supported by the wallet connector.
+The namespace supported by the nft connector.
 
 ***
 

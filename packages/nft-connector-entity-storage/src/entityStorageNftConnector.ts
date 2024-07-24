@@ -15,9 +15,9 @@ import type { Nft } from "./entities/nft";
  */
 export class EntityStorageNftConnector implements INftConnector {
 	/**
-	 * The namespace supported by the wallet connector.
+	 * The namespace supported by the nft connector.
 	 */
-	public static NAMESPACE: string = "entity-storage-nft";
+	public static NAMESPACE: string = "entity-storage";
 
 	/**
 	 * Runtime name for the class.
@@ -74,7 +74,7 @@ export class EntityStorageNftConnector implements INftConnector {
 
 			await this._nftEntityStorage.set(nft, requestContext);
 
-			return new Urn(EntityStorageNftConnector.NAMESPACE, nftId).toString(true);
+			return `nft:${new Urn(EntityStorageNftConnector.NAMESPACE, nftId).toString()}`;
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "mintingFailed", undefined, error);
 		}
@@ -96,12 +96,10 @@ export class EntityStorageNftConnector implements INftConnector {
 		immutableMetadata?: T;
 		metadata?: U;
 	}> {
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
-
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
-		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
+		if (urnParsed.namespaceMethod() !== EntityStorageNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: EntityStorageNftConnector.NAMESPACE,
 				id
@@ -109,7 +107,7 @@ export class EntityStorageNftConnector implements INftConnector {
 		}
 
 		try {
-			const nftId = urnParsed.namespaceSpecific();
+			const nftId = urnParsed.namespaceSpecific(1);
 			const nft = await this._nftEntityStorage.get(nftId, undefined, requestContext);
 
 			if (Is.empty(nft)) {
@@ -146,7 +144,7 @@ export class EntityStorageNftConnector implements INftConnector {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		const urnParsed = Urn.fromValidString(id);
 
-		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
+		if (urnParsed.namespaceMethod() !== EntityStorageNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: EntityStorageNftConnector.NAMESPACE,
 				id
@@ -154,7 +152,7 @@ export class EntityStorageNftConnector implements INftConnector {
 		}
 
 		try {
-			const nftId = urnParsed.namespaceSpecific();
+			const nftId = urnParsed.namespaceSpecific(1);
 			const nft = await this._nftEntityStorage.get(nftId, undefined, requestContext);
 
 			if (Is.empty(nft)) {
@@ -189,7 +187,7 @@ export class EntityStorageNftConnector implements INftConnector {
 		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
 
 		const urnParsed = Urn.fromValidString(id);
-		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
+		if (urnParsed.namespaceMethod() !== EntityStorageNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: EntityStorageNftConnector.NAMESPACE,
 				id
@@ -197,7 +195,7 @@ export class EntityStorageNftConnector implements INftConnector {
 		}
 
 		try {
-			const nftId = urnParsed.namespaceSpecific();
+			const nftId = urnParsed.namespaceSpecific(1);
 			const nft = await this._nftEntityStorage.get(nftId, undefined, requestContext);
 
 			if (Is.empty(nft)) {
@@ -229,7 +227,7 @@ export class EntityStorageNftConnector implements INftConnector {
 		Guards.object<T>(this.CLASS_NAME, nameof(metadata), metadata);
 
 		const urnParsed = Urn.fromValidString(id);
-		if (urnParsed.namespaceIdentifier() !== EntityStorageNftConnector.NAMESPACE) {
+		if (urnParsed.namespaceMethod() !== EntityStorageNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: EntityStorageNftConnector.NAMESPACE,
 				id
@@ -237,7 +235,7 @@ export class EntityStorageNftConnector implements INftConnector {
 		}
 
 		try {
-			const nftId = urnParsed.namespaceSpecific();
+			const nftId = urnParsed.namespaceSpecific(1);
 			const nft = await this._nftEntityStorage.get(nftId, undefined, requestContext);
 
 			if (Is.empty(nft)) {
