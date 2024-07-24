@@ -26,7 +26,7 @@ export class CLI extends CLIBase {
 			{
 				title: "GTSC NFT",
 				appName: "gtsc-nft",
-				version: "0.0.3-next.12",
+				version: "0.0.3-next.13",
 				icon: "🌍",
 				supportsEnvFiles: true
 			},
