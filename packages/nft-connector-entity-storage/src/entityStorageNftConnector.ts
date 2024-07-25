@@ -130,20 +130,14 @@ export class EntityStorageNftConnector implements INftConnector {
 
 	/**
 	 * Burn an NFT.
-	 * @param owner The owner for the NFT to return the funds to.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	public async burn(
-		owner: string,
-		id: string,
-		requestContext?: IServiceRequestContext
-	): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(owner), owner);
+	public async burn(id: string, requestContext?: IServiceRequestContext): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
-		const urnParsed = Urn.fromValidString(id);
 
+		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceMethod() !== EntityStorageNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: EntityStorageNftConnector.NAMESPACE,
@@ -157,10 +151,6 @@ export class EntityStorageNftConnector implements INftConnector {
 
 			if (Is.empty(nft)) {
 				throw new NotFoundError(this.CLASS_NAME, "nftNotFound");
-			}
-
-			if (nft.owner !== owner) {
-				throw new GeneralError(this.CLASS_NAME, "notOwnerBurn");
 			}
 
 			await this._nftEntityStorage.remove(nftId, requestContext);

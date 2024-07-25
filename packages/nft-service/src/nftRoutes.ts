@@ -147,8 +147,8 @@ export function generateRestRoutesNft(
 		operationId: "nftBurn",
 		summary: "Burn an NFT",
 		tag: tagsNft[0].name,
-		method: "POST",
-		path: `${baseRouteName}/:id/burn`,
+		method: "DELETE",
+		path: `${baseRouteName}/:id`,
 		handler: async (requestContext, request) =>
 			nftBurn(requestContext, factoryServiceName, request),
 		requestType: {
@@ -159,9 +159,6 @@ export function generateRestRoutesNft(
 					request: {
 						pathParams: {
 							id: "nft:iota:aW90YS1uZnQ6dHN0OjB4NzYyYjljNDllYTg2OWUwZWJkYTliYmZhNzY5Mzk0NDdhNDI4ZGNmMTc4YzVkMTVhYjQ0N2UyZDRmYmJiNGViMg=="
-						},
-						body: {
-							owner: "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv"
 						}
 					}
 				}
@@ -325,11 +322,9 @@ export async function nftBurn(
 		request.pathParams
 	);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
-	Guards.object<INftBurnRequest["body"]>(ROUTES_SOURCE, nameof(request.body), request.body);
-	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.owner), request.body.owner);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.burn(request.pathParams.id, request.body.owner, requestContext);
+	await service.burn(request.pathParams.id, requestContext);
 
 	return {
 		statusCode: HttpStatusCode.noContent

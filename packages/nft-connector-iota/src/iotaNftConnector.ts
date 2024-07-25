@@ -269,21 +269,14 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Burn an NFT.
-	 * @param owner The owner for the NFT to return the funds to.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	public async burn(
-		owner: string,
-		id: string,
-		requestContext?: IServiceRequestContext
-	): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(owner), owner);
-
+	public async burn(id: string, requestContext?: IServiceRequestContext): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
-		const urnParsed = Urn.fromValidString(id);
 
+		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceMethod() !== IotaNftConnector.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
 				namespace: IotaNftConnector.NAMESPACE,
@@ -295,11 +288,22 @@ export class IotaNftConnector implements INftConnector {
 			const client = new Client(this._config.clientOptions);
 			const nftParts = urnParsed.namespaceSpecificParts(1);
 
+			const hrp = nftParts[0];
 			const nftId = nftParts[1];
 			Guards.stringHexLength(this.CLASS_NAME, "nftId", nftId, 64, true);
 
 			const nftOutputId = await client.nftOutputId(nftId);
 			const nftOutputResponse = await client.getOutput(nftOutputId);
+
+			const nftOutput = nftOutputResponse.output as NftOutput;
+
+			const unlockConditions = nftOutput.unlockConditions?.filter(
+				f => f.type === UnlockConditionType.Address
+			);
+			const currentOwner = Is.arrayValue(unlockConditions)
+				? ((unlockConditions[0] as AddressUnlockCondition).address as Ed25519Address).pubKeyHash
+				: "";
+			const currentOwnerAddressBech32 = Utils.hexToBech32(currentOwner, hrp);
 
 			await this.prepareAndPostTransaction(
 				client,
@@ -315,7 +319,9 @@ export class IotaNftConnector implements INftConnector {
 					],
 					outputs: [
 						new BasicOutput(nftOutputResponse.output.getAmount(), [
-							new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(owner)))
+							new AddressUnlockCondition(
+								new Ed25519Address(Utils.bech32ToHex(currentOwnerAddressBech32))
+							)
 						])
 					]
 				},

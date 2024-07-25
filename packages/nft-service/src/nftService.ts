@@ -110,23 +110,16 @@ export class NftService implements INft {
 
 	/**
 	 * Burn an NFT.
-	 * @param owner The owner for the NFT to return the funds to.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	public async burn(
-		owner: string,
-		id: string,
-		requestContext?: IServiceRequestContext
-	): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(owner), owner);
-
+	public async burn(id: string, requestContext?: IServiceRequestContext): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 
 		try {
 			const nftConnector = this.getConnector(id);
-			await nftConnector.burn(owner, id, requestContext);
+			await nftConnector.burn(id, requestContext);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "burnFailed", undefined, error);
 		}

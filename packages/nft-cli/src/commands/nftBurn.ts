@@ -96,7 +96,7 @@ export async function actionCommandNftBurn(opts: {
 
 	CLIDisplay.spinnerStart();
 
-	await iotaNftConnector.burn(issuer, id, requestContext);
+	await iotaNftConnector.burn(id, requestContext);
 
 	CLIDisplay.spinnerStop();
 

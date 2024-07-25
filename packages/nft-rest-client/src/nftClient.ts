@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { BaseRestClient } from "@gtsc/api-core";
 import type { IBaseRestClientConfig, ICreatedResponse } from "@gtsc/api-models";
-import { Guards, StringHelper } from "@gtsc/core";
+import { Guards, StringHelper, Urn } from "@gtsc/core";
 import { nameof } from "@gtsc/nameof";
 import type {
 	INft,
@@ -99,20 +99,15 @@ export class NftClient extends BaseRestClient implements INft {
 
 	/**
 	 * Burn an NFT.
-	 * @param owner The owner for the NFT to return the funds to.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @returns Nothing.
 	 */
-	public async burn(owner: string, id: string): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(owner), owner);
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
+	public async burn(id: string): Promise<void> {
+		Urn.guard(this.CLASS_NAME, nameof(id), id);
 
-		await this.fetch<INftBurnRequest, never>("/:id/burn", "POST", {
+		await this.fetch<INftBurnRequest, never>("/:id", "DELETE", {
 			pathParams: {
 				id
-			},
-			body: {
-				owner
 			}
 		});
 	}

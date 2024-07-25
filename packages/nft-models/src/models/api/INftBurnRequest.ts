@@ -10,18 +10,8 @@ export interface INftBurnRequest {
 	 */
 	pathParams: {
 		/**
-		 * The id of the NFT to resolve.
+		 * The id of the NFT to burn.
 		 */
 		id: string;
-	};
-
-	/**
-	 * The data to be used for burning.
-	 */
-	body: {
-		/**
-		 * The owner for the NFT to return the funds to.
-		 */
-		owner: string;
 	};
 }

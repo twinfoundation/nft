@@ -97,27 +97,9 @@ describe("EntityStorageNftConnector", () => {
 		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
 	});
 
-	test("Can fail to burn an NFT that has been transferred", async () => {
-		const connector = new EntityStorageNftConnector();
-		await expect(connector.burn(TEST_ADDRESS_1, nftId, TEST_CONTEXT)).rejects.toMatchObject({
-			name: "GeneralError",
-			message: "entityStorageNftConnector.burningFailed"
-		});
-
-		const urn = Urn.fromValidString(nftId);
-
-		const store =
-			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
-				TEST_PARTITION_ID
-			);
-		expect(store?.[0].id).toEqual(urn.namespaceSpecific(1));
-		expect(store?.[0].owner).toEqual(TEST_ADDRESS_2);
-		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
-	});
-
 	test("Can burn an NFT", async () => {
 		const connector = new EntityStorageNftConnector();
-		await connector.burn(TEST_ADDRESS_2, nftId, {
+		await connector.burn(nftId, {
 			partitionId: TEST_PARTITION_ID,
 			identity: TEST_IDENTITY_ID
 		});

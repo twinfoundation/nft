@@ -2,7 +2,6 @@
 	"error": {
 		"entityStorageNftConnector": {
 			"nftNotFound": "The NFT with the ID \"{notFoundId}\" was not found",
-			"notOwnerBurn": "The NFT can only be burned by the owner",
 			"notOwnerTransfer": "The NFT can only be transferred by the owner",
 			"signatureFailed": "The signature verification failed",
 			"mintingFailed": "Minting the NFT failed",

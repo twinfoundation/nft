@@ -47,12 +47,11 @@ export interface INft extends IService {
 
 	/**
 	 * Burn an NFT.
-	 * @param owner The owner for the NFT to return the funds to.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	burn(owner: string, id: string, requestContext?: IServiceRequestContext): Promise<void>;
+	burn(id: string, requestContext?: IServiceRequestContext): Promise<void>;
 
 	/**
 	 * Transfer an NFT.

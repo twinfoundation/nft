@@ -172,22 +172,6 @@ describe("IotaNftConnector", () => {
 		);
 	});
 
-	test("Can fail to burn an NFT that has been transferred", async () => {
-		const connector = new IotaNftConnector({
-			config: {
-				clientOptions: TEST_CLIENT_OPTIONS,
-				vaultMnemonicId: TEST_MNEMONIC_NAME,
-				coinType: TEST_COIN_TYPE
-			}
-		});
-		await expect(
-			connector.burn(TEST_NFT_ADDRESS_2_BECH32, nftId, TEST_CONTEXT)
-		).rejects.toMatchObject({
-			name: "GeneralError",
-			message: "iotaNftConnector.burningFailed"
-		});
-	});
-
 	test("Can burn an NFT", async () => {
 		const connector = new IotaNftConnector({
 			config: {
@@ -196,7 +180,7 @@ describe("IotaNftConnector", () => {
 				coinType: TEST_COIN_TYPE
 			}
 		});
-		await connector.burn(TEST_NFT_ADDRESS_2_BECH32, nftId, {
+		await connector.burn(nftId, {
 			partitionId: TEST_CONTEXT.partitionId,
 			identity: TEST_IDENTITY_ID_2
 		});
