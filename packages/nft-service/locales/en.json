@@ -1,7 +1,7 @@
 {
 	"error": {
 		"nftService": {
-			"namespaceMismatch": "The namespace in the urn \"{id}\" does not match the namespace of the IOTA service \"{namespace}\"",
+			"namespaceMismatch": "The namespace in the urn \"{id}\" does not match the namespace of the NFT service \"{namespace}\"",
 			"noConnectors": "There are no connectors registered with the nft factory",
 			"mintFailed": "The minting of the NFT failed",
 			"resolveFailed": "The resolving of the NFT failed",
