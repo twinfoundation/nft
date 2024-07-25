@@ -76,7 +76,7 @@ export class NftService implements INft {
 				requestContext
 			);
 
-			return `${NftService.NAMESPACE}:${nftUrn}`;
+			return nftUrn;
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "mintFailed", undefined, error);
 		}
@@ -196,8 +196,6 @@ export class NftService implements INft {
 			});
 		}
 
-		const uriParts = Urn.fromValidString(idUri.namespaceSpecific());
-
-		return NftConnectorFactory.get<INftConnector>(uriParts.namespaceIdentifier());
+		return NftConnectorFactory.get<INftConnector>(idUri.namespaceMethod());
 	}
 }
