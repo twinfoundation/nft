@@ -182,7 +182,7 @@ export class NftService implements INft {
 
 	/**
 	 * Get the connector from the uri.
-	 * @param id The id of the NFT to update in urn format.
+	 * @param id The id of the NFT in urn format.
 	 * @returns The connector.
 	 * @internal
 	 */
