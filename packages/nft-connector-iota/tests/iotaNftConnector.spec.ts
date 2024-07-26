@@ -117,7 +117,7 @@ describe("IotaNftConnector", () => {
 
 		await connector.transfer(nftId, TEST_NFT_ADDRESS_BECH32, undefined, {
 			partitionId: TEST_CONTEXT.partitionId,
-			identity: TEST_IDENTITY_ID_2
+			userIdentity: TEST_IDENTITY_ID_2
 		});
 
 		const response = await connector.resolve(nftId, TEST_CONTEXT);
@@ -167,7 +167,7 @@ describe("IotaNftConnector", () => {
 			},
 			{
 				partitionId: TEST_CONTEXT.partitionId,
-				identity: TEST_IDENTITY_ID_2
+				userIdentity: TEST_IDENTITY_ID_2
 			}
 		);
 	});
@@ -182,7 +182,7 @@ describe("IotaNftConnector", () => {
 		});
 		await connector.burn(nftId, {
 			partitionId: TEST_CONTEXT.partitionId,
-			identity: TEST_IDENTITY_ID_2
+			userIdentity: TEST_IDENTITY_ID_2
 		});
 	});
 });

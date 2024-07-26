@@ -62,7 +62,7 @@ describe("EntityStorageNftConnector", () => {
 		const connector = new EntityStorageNftConnector();
 		const response = await connector.resolve(nftId, {
 			partitionId: TEST_CONTEXT.partitionId,
-			identity: TEST_IDENTITY_ID
+			userIdentity: TEST_IDENTITY_ID
 		});
 
 		expect(response.issuer).toEqual(TEST_ADDRESS_1);
@@ -101,7 +101,7 @@ describe("EntityStorageNftConnector", () => {
 		const connector = new EntityStorageNftConnector();
 		await connector.burn(nftId, {
 			partitionId: TEST_PARTITION_ID,
-			identity: TEST_IDENTITY_ID
+			userIdentity: TEST_IDENTITY_ID
 		});
 
 		const store =

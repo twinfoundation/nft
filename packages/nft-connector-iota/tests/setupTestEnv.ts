@@ -84,7 +84,7 @@ export const TEST_WALLET_CONNECTOR = new IotaWalletConnector({
 
 export const TEST_CONTEXT: IServiceRequestContext = {
 	partitionId: TEST_PARTITION_ID,
-	identity: TEST_IDENTITY_ID
+	userIdentity: TEST_IDENTITY_ID
 };
 
 await secretEntityStorage.set(
@@ -108,7 +108,7 @@ export const TEST_NFT_ADDRESS_BECH32 = addresses[0];
 
 const addresses2 = await TEST_WALLET_CONNECTOR.getAddresses(1, 1, {
 	partitionId: TEST_PARTITION_ID,
-	identity: TEST_IDENTITY_ID_2
+	userIdentity: TEST_IDENTITY_ID_2
 });
 export const TEST_NFT_ADDRESS_2_BECH32 = addresses2[0];
 
