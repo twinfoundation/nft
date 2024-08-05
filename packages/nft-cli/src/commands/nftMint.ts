@@ -116,11 +116,11 @@ export async function actionCommandNftMint(
 
 	setupVault();
 
-	const requestContext = { identity: "local", partitionId: "local" };
+	const localIdentity = "local";
 	const vaultSeedId = "local-seed";
 
 	const vaultConnector = VaultConnectorFactory.get("vault");
-	await vaultConnector.setSecret(vaultSeedId, Converter.bytesToBase64(seed), requestContext);
+	await vaultConnector.setSecret(`${localIdentity}/${vaultSeedId}`, Converter.bytesToBase64(seed));
 
 	const iotaNftConnector = new IotaNftConnector({
 		config: {
@@ -157,11 +157,11 @@ export async function actionCommandNftMint(
 	CLIDisplay.spinnerStart();
 
 	const nftId = await iotaNftConnector.mint(
+		localIdentity,
 		issuer,
 		tag,
 		immutableJsonData,
-		mutableJsonData,
-		requestContext
+		mutableJsonData
 	);
 
 	CLIDisplay.spinnerStop();

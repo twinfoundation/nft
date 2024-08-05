@@ -4,13 +4,7 @@ import { Urn } from "@gtsc/core";
 import type { MemoryEntityStorageConnector } from "@gtsc/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@gtsc/entity-storage-models";
 import type { IIrc27Metadata } from "@gtsc/nft-models";
-import {
-	TEST_ADDRESS_1,
-	TEST_ADDRESS_2,
-	TEST_CONTEXT,
-	TEST_IDENTITY_ID,
-	TEST_PARTITION_ID
-} from "./setupTestEnv";
+import { TEST_ADDRESS_1, TEST_ADDRESS_2, TEST_IDENTITY_ID } from "./setupTestEnv";
 import type { Nft } from "../src/entities/nft";
 import { EntityStorageNftConnector } from "../src/entityStorageNftConnector";
 
@@ -30,13 +24,13 @@ describe("EntityStorageNftConnector", () => {
 			description: "Test Description"
 		};
 		const idUrn = await connector.mint(
+			TEST_IDENTITY_ID,
 			TEST_ADDRESS_1,
 			"footag",
 			immutableMetadata,
 			{
 				bar: "foo"
-			},
-			TEST_CONTEXT
+			}
 		);
 		const urn = Urn.fromValidString(idUrn);
 
@@ -45,9 +39,7 @@ describe("EntityStorageNftConnector", () => {
 		expect(urn.namespaceSpecific(1).length).toEqual(66);
 
 		const store =
-			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
-				TEST_PARTITION_ID
-			);
+			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore();
 		expect(store?.[0].id).toEqual(urn.namespaceSpecific(1));
 		expect(store?.[0].owner).toEqual(TEST_ADDRESS_1);
 		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
@@ -60,10 +52,7 @@ describe("EntityStorageNftConnector", () => {
 
 	test("Can resolve an NFT", async () => {
 		const connector = new EntityStorageNftConnector();
-		const response = await connector.resolve(nftId, {
-			partitionId: TEST_CONTEXT.partitionId,
-			userIdentity: TEST_IDENTITY_ID
-		});
+		const response = await connector.resolve(nftId);
 
 		expect(response.issuer).toEqual(TEST_ADDRESS_1);
 		expect(response.owner).toEqual(TEST_ADDRESS_1);
@@ -84,30 +73,23 @@ describe("EntityStorageNftConnector", () => {
 	test("Can transfer an NFT", async () => {
 		const connector = new EntityStorageNftConnector();
 
-		await connector.transfer(nftId, TEST_ADDRESS_2, undefined, TEST_CONTEXT);
+		await connector.transfer(TEST_IDENTITY_ID, nftId, TEST_ADDRESS_2);
 
 		const urn = Urn.fromValidString(nftId);
 
 		const store =
-			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
-				TEST_PARTITION_ID
-			);
+			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore();
 		expect(store?.[0].id).toEqual(urn.namespaceSpecific(1));
-		expect(store?.[0].owner).toEqual(TEST_ADDRESS_2);
 		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
+		expect(store?.[0].owner).toEqual(TEST_ADDRESS_2);
 	});
 
 	test("Can burn an NFT", async () => {
 		const connector = new EntityStorageNftConnector();
-		await connector.burn(nftId, {
-			partitionId: TEST_PARTITION_ID,
-			userIdentity: TEST_IDENTITY_ID
-		});
+		await connector.burn(TEST_IDENTITY_ID, nftId);
 
 		const store =
-			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore(
-				TEST_PARTITION_ID
-			);
+			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore();
 		expect(store?.length).toEqual(0);
 	});
 });

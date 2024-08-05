@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IService, IServiceRequestContext } from "@gtsc/services";
+import type { IService } from "@gtsc/services";
 
 /**
  * Interface describing an NFT connector.
@@ -8,30 +8,28 @@ import type { IService, IServiceRequestContext } from "@gtsc/services";
 export interface INftConnector extends IService {
 	/**
 	 * Mint an NFT.
-	 * @param issuer The issuer for the NFT, will also be the initial owner.
+	 * @param controller The identity of the user to access the vault keys.
+	 * @param issuerAddress The issuer for the NFT, will also be the initial owner.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
-	 * @param requestContext The context for the request.
 	 * @returns The id of the created NFT in urn format.
 	 */
 	mint<T = unknown, U = unknown>(
-		issuer: string,
+		controller: string,
+		issuerAddress: string,
 		tag: string,
 		immutableMetadata?: T,
-		metadata?: U,
-		requestContext?: IServiceRequestContext
+		metadata?: U
 	): Promise<string>;
 
 	/**
 	 * Resolve an NFT.
 	 * @param id The id of the NFT to resolve.
-	 * @param requestContext The context for the request.
 	 * @returns The data for the NFT.
 	 */
 	resolve<T = unknown, U = unknown>(
-		id: string,
-		requestContext?: IServiceRequestContext
+		id: string
 	): Promise<{
 		issuer: string;
 		owner: string;
@@ -42,37 +40,33 @@ export interface INftConnector extends IService {
 
 	/**
 	 * Burn an NFT.
+	 * @param controller The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to burn in urn format.
-	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	burn(id: string, requestContext?: IServiceRequestContext): Promise<void>;
+	burn(controller: string, id: string): Promise<void>;
 
 	/**
 	 * Transfer an NFT.
+	 * @param controller The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to transfer in urn format.
 	 * @param recipient The recipient of the NFT.
 	 * @param metadata Optional mutable data to include during the transfer.
-	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
 	transfer<T = unknown>(
+		controller: string,
 		id: string,
 		recipient: string,
-		metadata?: T,
-		requestContext?: IServiceRequestContext
+		metadata?: T
 	): Promise<void>;
 
 	/**
 	 * Update the mutable data of the NFT.
+	 * @param controller The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to update in urn format.
 	 * @param metadata The mutable data to update.
-	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	update<T = unknown>(
-		id: string,
-		metadata: T,
-		requestContext?: IServiceRequestContext
-	): Promise<void>;
+	update<T = unknown>(controller: string, id: string, metadata: T): Promise<void>;
 }

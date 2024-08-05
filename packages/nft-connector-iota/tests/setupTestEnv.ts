@@ -6,7 +6,6 @@ import { Bip39 } from "@gtsc/crypto";
 import { MemoryEntityStorageConnector } from "@gtsc/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@gtsc/entity-storage-models";
 import { nameof } from "@gtsc/nameof";
-import type { IServiceRequestContext } from "@gtsc/services";
 import {
 	EntityStorageVaultConnector,
 	type VaultKey,
@@ -14,7 +13,8 @@ import {
 	initSchema
 } from "@gtsc/vault-connector-entity-storage";
 import { VaultConnectorFactory } from "@gtsc/vault-models";
-import { IotaWalletConnector } from "@gtsc/wallet-connector-iota";
+import { IotaFaucetConnector, IotaWalletConnector } from "@gtsc/wallet-connector-iota";
+import { FaucetConnectorFactory } from "@gtsc/wallet-models";
 import type { IClientOptions } from "@iota/sdk-wasm/node/lib/index.js";
 import * as dotenv from "dotenv";
 
@@ -43,7 +43,6 @@ if (!Is.stringValue(process.env.TEST_MNEMONIC_2)) {
 	);
 }
 
-export const TEST_PARTITION_ID = "test-partition";
 export const TEST_IDENTITY_ID = "test-identity";
 export const TEST_IDENTITY_ID_2 = "test-identity-2";
 export const TEST_MNEMONIC_NAME = "test-mnemonic";
@@ -62,7 +61,8 @@ const secretEntityStorage = new MemoryEntityStorageConnector<VaultSecret>({
 });
 EntityStorageConnectorFactory.register("vault-secret", () => secretEntityStorage);
 
-VaultConnectorFactory.register("vault", () => new EntityStorageVaultConnector());
+export const TEST_VAULT_CONNECTOR = new EntityStorageVaultConnector();
+VaultConnectorFactory.register("vault", () => TEST_VAULT_CONNECTOR);
 
 export const TEST_CLIENT_OPTIONS: IClientOptions = {
 	nodes: [process.env.TEST_NODE_ENDPOINT],
@@ -73,6 +73,14 @@ export const TEST_SEED = Bip39.mnemonicToSeed(process.env.TEST_MNEMONIC);
 export const TEST_COIN_TYPE = Number.parseInt(process.env.TEST_COIN_TYPE, 10);
 export const TEST_BECH32_HRP = process.env.TEST_BECH32_HRP;
 
+export const TEST_FAUCET_CONNECTOR = new IotaFaucetConnector({
+	config: {
+		clientOptions: TEST_CLIENT_OPTIONS,
+		endpoint: process.env.TEST_FAUCET_ENDPOINT
+	}
+});
+FaucetConnectorFactory.register("faucet", () => TEST_FAUCET_CONNECTOR);
+
 export const TEST_WALLET_CONNECTOR = new IotaWalletConnector({
 	config: {
 		clientOptions: TEST_CLIENT_OPTIONS,
@@ -82,34 +90,20 @@ export const TEST_WALLET_CONNECTOR = new IotaWalletConnector({
 	}
 });
 
-export const TEST_CONTEXT: IServiceRequestContext = {
-	partitionId: TEST_PARTITION_ID,
-	userIdentity: TEST_IDENTITY_ID
-};
-
-await secretEntityStorage.set(
-	{
-		id: `${TEST_IDENTITY_ID}/${TEST_MNEMONIC_NAME}`,
-		data: JSON.stringify(process.env.TEST_MNEMONIC)
-	},
-	TEST_CONTEXT
+await TEST_VAULT_CONNECTOR.setSecret(
+	`${TEST_IDENTITY_ID}/${TEST_MNEMONIC_NAME}`,
+	process.env.TEST_MNEMONIC
 );
 
-await secretEntityStorage.set(
-	{
-		id: `${TEST_IDENTITY_ID_2}/${TEST_MNEMONIC_NAME}`,
-		data: JSON.stringify(process.env.TEST_MNEMONIC_2)
-	},
-	TEST_CONTEXT
+await TEST_VAULT_CONNECTOR.setSecret(
+	`${TEST_IDENTITY_ID_2}/${TEST_MNEMONIC_NAME}`,
+	process.env.TEST_MNEMONIC_2
 );
 
-const addresses = await TEST_WALLET_CONNECTOR.getAddresses(1, 1, TEST_CONTEXT);
+const addresses = await TEST_WALLET_CONNECTOR.getAddresses(TEST_IDENTITY_ID, 1, 1);
 export const TEST_NFT_ADDRESS_BECH32 = addresses[0];
 
-const addresses2 = await TEST_WALLET_CONNECTOR.getAddresses(1, 1, {
-	partitionId: TEST_PARTITION_ID,
-	userIdentity: TEST_IDENTITY_ID_2
-});
+const addresses2 = await TEST_WALLET_CONNECTOR.getAddresses(TEST_IDENTITY_ID_2, 1, 1);
 export const TEST_NFT_ADDRESS_2_BECH32 = addresses2[0];
 
 /**
@@ -121,10 +115,5 @@ export async function setupTestEnv(): Promise<void> {
 		"NFT Address 2",
 		`${process.env.TEST_EXPLORER_URL}addr/${TEST_NFT_ADDRESS_2_BECH32}`
 	);
-	await TEST_WALLET_CONNECTOR.ensureBalance(
-		TEST_NFT_ADDRESS_BECH32,
-		1000000000n,
-		undefined,
-		TEST_CONTEXT
-	);
+	await TEST_WALLET_CONNECTOR.ensureBalance(TEST_IDENTITY_ID, TEST_NFT_ADDRESS_BECH32, 1000000000n);
 }

@@ -7,7 +7,6 @@ import {
 } from "@gtsc/entity-storage-models";
 import { nameof } from "@gtsc/nameof";
 import type { INftConnector } from "@gtsc/nft-models";
-import type { IServiceRequestContext } from "@gtsc/services";
 import type { Nft } from "./entities/nft";
 
 /**
@@ -43,20 +42,21 @@ export class EntityStorageNftConnector implements INftConnector {
 
 	/**
 	 * Mint an NFT.
+	 * @param controller The controller of the NFT who can make changes.
 	 * @param issuer The issuer for the NFT, will also be the initial owner.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
-	 * @param requestContext The context for the request.
 	 * @returns The id of the created NFT in urn format.
 	 */
 	public async mint<T = unknown, U = unknown>(
+		controller: string,
 		issuer: string,
 		tag: string,
 		immutableMetadata?: T,
-		metadata?: U,
-		requestContext?: IServiceRequestContext
+		metadata?: U
 	): Promise<string> {
+		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
 		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
@@ -65,6 +65,7 @@ export class EntityStorageNftConnector implements INftConnector {
 
 			const nft: Nft = {
 				id: nftId,
+				controller,
 				issuer,
 				owner: issuer,
 				tag,
@@ -72,7 +73,7 @@ export class EntityStorageNftConnector implements INftConnector {
 				metadata: Is.empty(metadata) ? "" : JSON.stringify(metadata)
 			};
 
-			await this._nftEntityStorage.set(nft, requestContext);
+			await this._nftEntityStorage.set(nft);
 
 			return `nft:${new Urn(EntityStorageNftConnector.NAMESPACE, nftId).toString()}`;
 		} catch (error) {
@@ -83,12 +84,10 @@ export class EntityStorageNftConnector implements INftConnector {
 	/**
 	 * Resolve an NFT.
 	 * @param id The id of the NFT to resolve.
-	 * @param requestContext The context for the request.
 	 * @returns The data for the NFT.
 	 */
 	public async resolve<T = unknown, U = unknown>(
-		id: string,
-		requestContext?: IServiceRequestContext
+		id: string
 	): Promise<{
 		issuer: string;
 		owner: string;
@@ -108,7 +107,7 @@ export class EntityStorageNftConnector implements INftConnector {
 
 		try {
 			const nftId = urnParsed.namespaceSpecific(1);
-			const nft = await this._nftEntityStorage.get(nftId, undefined, requestContext);
+			const nft = await this._nftEntityStorage.get(nftId);
 
 			if (Is.empty(nft)) {
 				throw new NotFoundError(this.CLASS_NAME, "nftNotFound");
@@ -130,11 +129,12 @@ export class EntityStorageNftConnector implements INftConnector {
 
 	/**
 	 * Burn an NFT.
+	 * @param controller The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to burn in urn format.
-	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	public async burn(id: string, requestContext?: IServiceRequestContext): Promise<void> {
+	public async burn(controller: string, id: string): Promise<void> {
+		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 
 		const urnParsed = Urn.fromValidString(id);
@@ -147,13 +147,17 @@ export class EntityStorageNftConnector implements INftConnector {
 
 		try {
 			const nftId = urnParsed.namespaceSpecific(1);
-			const nft = await this._nftEntityStorage.get(nftId, undefined, requestContext);
+			const nft = await this._nftEntityStorage.get(nftId);
 
 			if (Is.empty(nft)) {
 				throw new NotFoundError(this.CLASS_NAME, "nftNotFound");
 			}
 
-			await this._nftEntityStorage.remove(nftId, requestContext);
+			if (nft.controller !== controller) {
+				throw new GeneralError(this.CLASS_NAME, "notControllerBurn");
+			}
+
+			await this._nftEntityStorage.remove(nftId);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "burningFailed", undefined, error);
 		}
@@ -161,18 +165,19 @@ export class EntityStorageNftConnector implements INftConnector {
 
 	/**
 	 * Transfer an NFT.
+	 * @param controller The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to transfer in urn format.
 	 * @param recipient The recipient of the NFT.
 	 * @param metadata Optional mutable data to include during the transfer.
-	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
 	public async transfer<T = unknown>(
+		controller: string,
 		id: string,
 		recipient: string,
-		metadata?: T,
-		requestContext?: IServiceRequestContext
+		metadata?: T
 	): Promise<void> {
+		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
 
@@ -186,16 +191,20 @@ export class EntityStorageNftConnector implements INftConnector {
 
 		try {
 			const nftId = urnParsed.namespaceSpecific(1);
-			const nft = await this._nftEntityStorage.get(nftId, undefined, requestContext);
+			const nft = await this._nftEntityStorage.get(nftId);
 
 			if (Is.empty(nft)) {
 				throw new NotFoundError(this.CLASS_NAME, "nftNotFound");
 			}
 
+			if (nft.controller !== controller) {
+				throw new GeneralError(this.CLASS_NAME, "notControllerTransfer");
+			}
+
 			nft.owner = recipient;
 			nft.metadata = Is.empty(metadata) ? nft.metadata : JSON.stringify(metadata);
 
-			await this._nftEntityStorage.set(nft, requestContext);
+			await this._nftEntityStorage.set(nft);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "transferFailed", undefined, error);
 		}
@@ -203,16 +212,13 @@ export class EntityStorageNftConnector implements INftConnector {
 
 	/**
 	 * Update the data of the NFT.
+	 * @param controller The owner of the NFT who can make changes.
 	 * @param id The id of the NFT to update in urn format.
 	 * @param metadata The mutable data to update.
-	 * @param requestContext The context for the request.
 	 * @returns Nothing.
 	 */
-	public async update<T = unknown>(
-		id: string,
-		metadata: T,
-		requestContext?: IServiceRequestContext
-	): Promise<void> {
+	public async update<T = unknown>(controller: string, id: string, metadata: T): Promise<void> {
+		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.object<T>(this.CLASS_NAME, nameof(metadata), metadata);
 
@@ -226,15 +232,19 @@ export class EntityStorageNftConnector implements INftConnector {
 
 		try {
 			const nftId = urnParsed.namespaceSpecific(1);
-			const nft = await this._nftEntityStorage.get(nftId, undefined, requestContext);
+			const nft = await this._nftEntityStorage.get(nftId);
 
 			if (Is.empty(nft)) {
 				throw new NotFoundError(this.CLASS_NAME, "nftNotFound");
 			}
 
+			if (nft.controller !== controller) {
+				throw new GeneralError(this.CLASS_NAME, "notControllerUpdate");
+			}
+
 			nft.metadata = JSON.stringify(metadata);
 
-			await this._nftEntityStorage.set(nft, requestContext);
+			await this._nftEntityStorage.set(nft);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "updateFailed", undefined, error);
 		}

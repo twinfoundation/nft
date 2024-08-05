@@ -75,11 +75,11 @@ export async function actionCommandNftTransfer(opts: {
 
 	setupVault();
 
-	const requestContext = { identity: "local", partitionId: "local" };
+	const localIdentity = "local";
 	const vaultSeedId = "local-seed";
 
 	const vaultConnector = VaultConnectorFactory.get("vault");
-	await vaultConnector.setSecret(vaultSeedId, Converter.bytesToBase64(seed), requestContext);
+	await vaultConnector.setSecret(`${localIdentity}/${vaultSeedId}`, Converter.bytesToBase64(seed));
 
 	const iotaNftConnector = new IotaNftConnector({
 		config: {
@@ -96,7 +96,7 @@ export async function actionCommandNftTransfer(opts: {
 
 	CLIDisplay.spinnerStart();
 
-	await iotaNftConnector.transfer(id, recipient, undefined, requestContext);
+	await iotaNftConnector.transfer(localIdentity, id, recipient);
 
 	CLIDisplay.spinnerStop();
 

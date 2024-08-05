@@ -30,6 +30,12 @@ export interface IIotaNftConnectorConfig {
 	coinType?: number;
 
 	/**
+	 * The wallet address index to use for funding and controlling the nfts.
+	 * @default 0
+	 */
+	walletAddressIndex?: number;
+
+	/**
 	 * The length of time to wait for the inclusion of a transaction in seconds.
 	 * @default 60
 	 */

@@ -69,8 +69,6 @@ export async function actionCommandNftResolve(
 
 	setupVault();
 
-	const requestContext = { identity: "local", partitionId: "local" };
-
 	const iotaNftConnector = new IotaNftConnector({
 		config: {
 			clientOptions: {
@@ -85,7 +83,7 @@ export async function actionCommandNftResolve(
 
 	CLIDisplay.spinnerStart();
 
-	const nft = await iotaNftConnector.resolve(id, requestContext);
+	const nft = await iotaNftConnector.resolve(id);
 
 	CLIDisplay.spinnerStop();
 

@@ -62,6 +62,12 @@ export class NftService implements INft {
 	): Promise<string> {
 		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
+		Guards.object<IServiceRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(
+			this.CLASS_NAME,
+			nameof(requestContext.userIdentity),
+			requestContext.userIdentity
+		);
 
 		try {
 			const connectorNamespace = options?.namespace ?? this._defaultNamespace;
@@ -69,11 +75,11 @@ export class NftService implements INft {
 			const nftConnector = NftConnectorFactory.get<INftConnector>(connectorNamespace);
 
 			const nftUrn = await nftConnector.mint(
+				requestContext.userIdentity,
 				issuer,
 				tag,
 				immutableMetadata,
-				metadata,
-				requestContext
+				metadata
 			);
 
 			return nftUrn;
@@ -102,7 +108,7 @@ export class NftService implements INft {
 
 		try {
 			const nftConnector = this.getConnector(id);
-			return nftConnector.resolve(id, requestContext);
+			return nftConnector.resolve(id);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "resolveFailed", undefined, error);
 		}
@@ -116,10 +122,16 @@ export class NftService implements INft {
 	 */
 	public async burn(id: string, requestContext?: IServiceRequestContext): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
+		Guards.object<IServiceRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(
+			this.CLASS_NAME,
+			nameof(requestContext.userIdentity),
+			requestContext.userIdentity
+		);
 
 		try {
 			const nftConnector = this.getConnector(id);
-			await nftConnector.burn(id, requestContext);
+			await nftConnector.burn(requestContext.userIdentity, id);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "burnFailed", undefined, error);
 		}
@@ -141,10 +153,16 @@ export class NftService implements INft {
 	): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
+		Guards.object<IServiceRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(
+			this.CLASS_NAME,
+			nameof(requestContext.userIdentity),
+			requestContext.userIdentity
+		);
 
 		try {
 			const nftConnector = this.getConnector(id);
-			await nftConnector.transfer(id, recipient, metadata, requestContext);
+			await nftConnector.transfer(requestContext.userIdentity, id, recipient, metadata);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "transferFailed", undefined, error);
 		}
@@ -164,10 +182,16 @@ export class NftService implements INft {
 	): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
+		Guards.object<IServiceRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
+		Guards.stringValue(
+			this.CLASS_NAME,
+			nameof(requestContext.userIdentity),
+			requestContext.userIdentity
+		);
 
 		try {
 			const nftConnector = this.getConnector(id);
-			await nftConnector.update(id, metadata, requestContext);
+			await nftConnector.update(requestContext.userIdentity, id, metadata);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "updateFailed", undefined, error);
 		}

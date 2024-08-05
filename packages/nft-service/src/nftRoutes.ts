@@ -243,13 +243,13 @@ export function generateRestRoutesNft(
 
 /**
  * Mint an NFT.
- * @param requestContext The request context for the API.
+ * @param httpRequestContext The request context for the API.
  * @param factoryServiceName The name of the service to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftMint(
-	requestContext: IHttpRequestContext,
+	httpRequestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftMintRequest
 ): Promise<ICreatedResponse> {
@@ -266,7 +266,7 @@ export async function nftMint(
 		{
 			namespace: request.body.namespace
 		},
-		requestContext
+		httpRequestContext
 	);
 	return {
 		statusCode: HttpStatusCode.created,
@@ -278,13 +278,13 @@ export async function nftMint(
 
 /**
  * Resolve an NFT.
- * @param requestContext The request context for the API.
+ * @param httpRequestContext The request context for the API.
  * @param factoryServiceName The name of the service to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftResolve(
-	requestContext: IHttpRequestContext,
+	httpRequestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftResolveRequest
 ): Promise<INftResolveResponse> {
@@ -297,7 +297,7 @@ export async function nftResolve(
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	const result = await service.resolve(request.pathParams.id, requestContext);
+	const result = await service.resolve(request.pathParams.id, httpRequestContext);
 	return {
 		body: result
 	};
@@ -305,13 +305,13 @@ export async function nftResolve(
 
 /**
  * Burn an NFT.
- * @param requestContext The request context for the API.
+ * @param httpRequestContext The request context for the API.
  * @param factoryServiceName The name of the service to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftBurn(
-	requestContext: IHttpRequestContext,
+	httpRequestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftBurnRequest
 ): Promise<INoContentResponse> {
@@ -324,7 +324,7 @@ export async function nftBurn(
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.burn(request.pathParams.id, requestContext);
+	await service.burn(request.pathParams.id, httpRequestContext);
 
 	return {
 		statusCode: HttpStatusCode.noContent
@@ -333,13 +333,13 @@ export async function nftBurn(
 
 /**
  * Transfer an NFT.
- * @param requestContext The request context for the API.
+ * @param httpRequestContext The request context for the API.
  * @param factoryServiceName The name of the service to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftTransfer(
-	requestContext: IHttpRequestContext,
+	httpRequestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftTransferRequest
 ): Promise<INoContentResponse> {
@@ -358,7 +358,7 @@ export async function nftTransfer(
 		request.pathParams.id,
 		request.body.recipient,
 		request.body.metadata,
-		requestContext
+		httpRequestContext
 	);
 
 	return {
@@ -368,13 +368,13 @@ export async function nftTransfer(
 
 /**
  * Update an NFT.
- * @param requestContext The request context for the API.
+ * @param httpRequestContext The request context for the API.
  * @param factoryServiceName The name of the service to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftUpdate(
-	requestContext: IHttpRequestContext,
+	httpRequestContext: IHttpRequestContext,
 	factoryServiceName: string,
 	request: INftUpdateRequest
 ): Promise<INoContentResponse> {
@@ -389,7 +389,7 @@ export async function nftUpdate(
 	Guards.object(ROUTES_SOURCE, nameof(request.body.metadata), request.body.metadata);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.update(request.pathParams.id, request.body.metadata, requestContext);
+	await service.update(request.pathParams.id, request.body.metadata, httpRequestContext);
 
 	return {
 		statusCode: HttpStatusCode.noContent
