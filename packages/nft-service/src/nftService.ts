@@ -3,7 +3,6 @@
 import { GeneralError, Guards, Urn } from "@gtsc/core";
 import { nameof } from "@gtsc/nameof";
 import { NftConnectorFactory, type INft, type INftConnector } from "@gtsc/nft-models";
-import type { IServiceRequestContext } from "@gtsc/services";
 import type { INftServiceConfig } from "./models/INftServiceConfig";
 
 /**
@@ -47,7 +46,7 @@ export class NftService implements INft {
 	 * @param metadata The metadata for the NFT.
 	 * @param options Additional options for the NFT service.
 	 * @param options.namespace The namespace of the connector to use for the NFT, defaults to service configured namespace.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns The id of the created NFT in urn format.
 	 */
 	public async mint<T = unknown, U = unknown>(
@@ -58,29 +57,18 @@ export class NftService implements INft {
 		options?: {
 			namespace?: string;
 		},
-		requestContext?: IServiceRequestContext
+		identity?: string
 	): Promise<string> {
 		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
-		Guards.object<IServiceRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(
-			this.CLASS_NAME,
-			nameof(requestContext.userIdentity),
-			requestContext.userIdentity
-		);
+		Guards.stringValue(this.CLASS_NAME, nameof(identity), identity);
 
 		try {
 			const connectorNamespace = options?.namespace ?? this._defaultNamespace;
 
 			const nftConnector = NftConnectorFactory.get<INftConnector>(connectorNamespace);
 
-			const nftUrn = await nftConnector.mint(
-				requestContext.userIdentity,
-				issuer,
-				tag,
-				immutableMetadata,
-				metadata
-			);
+			const nftUrn = await nftConnector.mint(identity, issuer, tag, immutableMetadata, metadata);
 
 			return nftUrn;
 		} catch (error) {
@@ -91,12 +79,12 @@ export class NftService implements INft {
 	/**
 	 * Resolve an NFT.
 	 * @param id The id of the NFT to resolve.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns The data for the NFT.
 	 */
 	public async resolve<T = unknown, U = unknown>(
 		id: string,
-		requestContext?: IServiceRequestContext
+		identity?: string
 	): Promise<{
 		issuer: string;
 		owner: string;
@@ -117,21 +105,16 @@ export class NftService implements INft {
 	/**
 	 * Burn an NFT.
 	 * @param id The id of the NFT to burn in urn format.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
-	public async burn(id: string, requestContext?: IServiceRequestContext): Promise<void> {
+	public async burn(id: string, identity?: string): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
-		Guards.object<IServiceRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(
-			this.CLASS_NAME,
-			nameof(requestContext.userIdentity),
-			requestContext.userIdentity
-		);
+		Guards.stringValue(this.CLASS_NAME, nameof(identity), identity);
 
 		try {
 			const nftConnector = this.getConnector(id);
-			await nftConnector.burn(requestContext.userIdentity, id);
+			await nftConnector.burn(identity, id);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "burnFailed", undefined, error);
 		}
@@ -142,27 +125,22 @@ export class NftService implements INft {
 	 * @param id The id of the NFT to transfer in urn format.
 	 * @param recipient The recipient of the NFT.
 	 * @param metadata Optional mutable data to include during the transfer.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
 	public async transfer<T = unknown>(
 		id: string,
 		recipient: string,
 		metadata?: T,
-		requestContext?: IServiceRequestContext
+		identity?: string
 	): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
-		Guards.object<IServiceRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(
-			this.CLASS_NAME,
-			nameof(requestContext.userIdentity),
-			requestContext.userIdentity
-		);
+		Guards.stringValue(this.CLASS_NAME, nameof(identity), identity);
 
 		try {
 			const nftConnector = this.getConnector(id);
-			await nftConnector.transfer(requestContext.userIdentity, id, recipient, metadata);
+			await nftConnector.transfer(identity, id, recipient, metadata);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "transferFailed", undefined, error);
 		}
@@ -172,26 +150,17 @@ export class NftService implements INft {
 	 * Update the data of the NFT.
 	 * @param id The id of the NFT to update in urn format.
 	 * @param metadata The mutable data to update.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
-	public async update<T = unknown>(
-		id: string,
-		metadata: T,
-		requestContext?: IServiceRequestContext
-	): Promise<void> {
+	public async update<T = unknown>(id: string, metadata: T, identity?: string): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
-		Guards.object<IServiceRequestContext>(this.CLASS_NAME, nameof(requestContext), requestContext);
-		Guards.stringValue(
-			this.CLASS_NAME,
-			nameof(requestContext.userIdentity),
-			requestContext.userIdentity
-		);
+		Guards.stringValue(this.CLASS_NAME, nameof(identity), identity);
 
 		try {
 			const nftConnector = this.getConnector(id);
-			await nftConnector.update(requestContext.userIdentity, id, metadata);
+			await nftConnector.update(identity, id, metadata);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "updateFailed", undefined, error);
 		}

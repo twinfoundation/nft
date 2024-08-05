@@ -545,7 +545,6 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Get the seed from the vault.
-	 * @param requestContext The context for the request.
 	 * @returns The seed.
 	 * @internal
 	 */

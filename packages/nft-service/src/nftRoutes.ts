@@ -52,8 +52,8 @@ export function generateRestRoutesNft(
 		tag: tagsNft[0].name,
 		method: "POST",
 		path: `${baseRouteName}/`,
-		handler: async (requestContext, request) =>
-			nftMint(requestContext, factoryServiceName, request),
+		handler: async (httpRequestContext, request) =>
+			nftMint(httpRequestContext, factoryServiceName, request),
 		requestType: {
 			type: nameof<INftMintRequest>(),
 			examples: [
@@ -101,8 +101,8 @@ export function generateRestRoutesNft(
 		tag: tagsNft[0].name,
 		method: "GET",
 		path: `${baseRouteName}/:id`,
-		handler: async (requestContext, request) =>
-			nftResolve(requestContext, factoryServiceName, request),
+		handler: async (httpRequestContext, request) =>
+			nftResolve(httpRequestContext, factoryServiceName, request),
 		requestType: {
 			type: nameof<INftResolveRequest>(),
 			examples: [
@@ -149,8 +149,8 @@ export function generateRestRoutesNft(
 		tag: tagsNft[0].name,
 		method: "DELETE",
 		path: `${baseRouteName}/:id`,
-		handler: async (requestContext, request) =>
-			nftBurn(requestContext, factoryServiceName, request),
+		handler: async (httpRequestContext, request) =>
+			nftBurn(httpRequestContext, factoryServiceName, request),
 		requestType: {
 			type: nameof<INftBurnRequest>(),
 			examples: [
@@ -177,8 +177,8 @@ export function generateRestRoutesNft(
 		tag: tagsNft[0].name,
 		method: "POST",
 		path: `${baseRouteName}/:id/transfer`,
-		handler: async (requestContext, request) =>
-			nftTransfer(requestContext, factoryServiceName, request),
+		handler: async (httpRequestContext, request) =>
+			nftTransfer(httpRequestContext, factoryServiceName, request),
 		requestType: {
 			type: nameof<INftTransferRequest>(),
 			examples: [
@@ -211,8 +211,8 @@ export function generateRestRoutesNft(
 		tag: tagsNft[0].name,
 		method: "PUT",
 		path: `${baseRouteName}/:id`,
-		handler: async (requestContext, request) =>
-			nftUpdate(requestContext, factoryServiceName, request),
+		handler: async (httpRequestContext, request) =>
+			nftUpdate(httpRequestContext, factoryServiceName, request),
 		requestType: {
 			type: nameof<INftUpdateRequest>(),
 			examples: [
@@ -266,7 +266,7 @@ export async function nftMint(
 		{
 			namespace: request.body.namespace
 		},
-		httpRequestContext
+		httpRequestContext.userIdentity
 	);
 	return {
 		statusCode: HttpStatusCode.created,
@@ -297,7 +297,7 @@ export async function nftResolve(
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	const result = await service.resolve(request.pathParams.id, httpRequestContext);
+	const result = await service.resolve(request.pathParams.id, httpRequestContext.userIdentity);
 	return {
 		body: result
 	};
@@ -324,7 +324,7 @@ export async function nftBurn(
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.burn(request.pathParams.id, httpRequestContext);
+	await service.burn(request.pathParams.id, httpRequestContext.userIdentity);
 
 	return {
 		statusCode: HttpStatusCode.noContent
@@ -358,7 +358,7 @@ export async function nftTransfer(
 		request.pathParams.id,
 		request.body.recipient,
 		request.body.metadata,
-		httpRequestContext
+		httpRequestContext.userIdentity
 	);
 
 	return {
@@ -389,7 +389,11 @@ export async function nftUpdate(
 	Guards.object(ROUTES_SOURCE, nameof(request.body.metadata), request.body.metadata);
 
 	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.update(request.pathParams.id, request.body.metadata, httpRequestContext);
+	await service.update(
+		request.pathParams.id,
+		request.body.metadata,
+		httpRequestContext.userIdentity
+	);
 
 	return {
 		statusCode: HttpStatusCode.noContent

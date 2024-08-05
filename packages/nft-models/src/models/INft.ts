@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IServiceRequestContext, IService } from "@gtsc/services";
+import type { IService } from "@gtsc/services";
 
 /**
  * Interface describing an NFT service.
@@ -14,7 +14,7 @@ export interface INft extends IService {
 	 * @param metadata The metadata for the NFT.
 	 * @param options Additional options for the NFT service.
 	 * @param options.namespace The namespace of the connector to use for the NFT, defaults to service configured namespace.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns The id of the created NFT in urn format.
 	 */
 	mint<T = unknown, U = unknown>(
@@ -25,18 +25,18 @@ export interface INft extends IService {
 		options?: {
 			namespace?: string;
 		},
-		requestContext?: IServiceRequestContext
+		identity?: string
 	): Promise<string>;
 
 	/**
 	 * Resolve an NFT.
 	 * @param id The id of the NFT to resolve.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns The data for the NFT.
 	 */
 	resolve<T = unknown, U = unknown>(
 		id: string,
-		requestContext?: IServiceRequestContext
+		identity?: string
 	): Promise<{
 		issuer: string;
 		owner: string;
@@ -48,36 +48,32 @@ export interface INft extends IService {
 	/**
 	 * Burn an NFT.
 	 * @param id The id of the NFT to burn in urn format.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
-	burn(id: string, requestContext?: IServiceRequestContext): Promise<void>;
+	burn(id: string, identity?: string): Promise<void>;
 
 	/**
 	 * Transfer an NFT.
 	 * @param id The id of the NFT to transfer in urn format.
 	 * @param recipient The recipient of the NFT.
 	 * @param metadata Optional mutable data to include during the transfer.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
 	transfer<T = unknown>(
 		id: string,
 		recipient: string,
 		metadata?: T,
-		requestContext?: IServiceRequestContext
+		identity?: string
 	): Promise<void>;
 
 	/**
 	 * Update the mutable data of the NFT.
 	 * @param id The id of the NFT to update in urn format.
 	 * @param metadata The mutable data to update.
-	 * @param requestContext The context for the request.
+	 * @param identity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
-	update<T = unknown>(
-		id: string,
-		metadata: T,
-		requestContext?: IServiceRequestContext
-	): Promise<void>;
+	update<T = unknown>(id: string, metadata: T, identity?: string): Promise<void>;
 }
