@@ -69,8 +69,8 @@ export class EntityStorageNftConnector implements INftConnector {
 				issuer,
 				owner: issuer,
 				tag,
-				immutableMetadata: Is.empty(immutableMetadata) ? "" : JSON.stringify(immutableMetadata),
-				metadata: Is.empty(metadata) ? "" : JSON.stringify(metadata)
+				immutableMetadata,
+				metadata
 			};
 
 			await this._nftEntityStorage.set(nft);
@@ -117,10 +117,8 @@ export class EntityStorageNftConnector implements INftConnector {
 				owner: nft.owner,
 				issuer: nft.issuer,
 				tag: nft.tag,
-				immutableMetadata: Is.stringValue(nft.immutableMetadata)
-					? JSON.parse(nft.immutableMetadata)
-					: undefined,
-				metadata: Is.stringValue(nft.metadata) ? JSON.parse(nft.metadata) : undefined
+				immutableMetadata: nft.immutableMetadata as T,
+				metadata: nft.metadata as U
 			};
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "resolvingFailed", undefined, error);
@@ -202,7 +200,7 @@ export class EntityStorageNftConnector implements INftConnector {
 			}
 
 			nft.owner = recipient;
-			nft.metadata = Is.empty(metadata) ? nft.metadata : JSON.stringify(metadata);
+			nft.metadata = metadata;
 
 			await this._nftEntityStorage.set(nft);
 		} catch (error) {
@@ -242,7 +240,7 @@ export class EntityStorageNftConnector implements INftConnector {
 				throw new GeneralError(this.CLASS_NAME, "notControllerUpdate");
 			}
 
-			nft.metadata = JSON.stringify(metadata);
+			nft.metadata = metadata;
 
 			await this._nftEntityStorage.set(nft);
 		} catch (error) {

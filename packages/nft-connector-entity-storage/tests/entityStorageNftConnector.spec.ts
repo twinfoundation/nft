@@ -44,8 +44,8 @@ describe("EntityStorageNftConnector", () => {
 		expect(store?.[0].owner).toEqual(TEST_ADDRESS_1);
 		expect(store?.[0].issuer).toEqual(TEST_ADDRESS_1);
 		expect(store?.[0].tag).toEqual("footag");
-		expect(store?.[0].immutableMetadata).toEqual(JSON.stringify(immutableMetadata));
-		expect(store?.[0].metadata).toEqual(JSON.stringify({ bar: "foo" }));
+		expect(store?.[0].immutableMetadata).toEqual(immutableMetadata);
+		expect(store?.[0].metadata).toEqual({ bar: "foo" });
 
 		nftId = idUrn;
 	});

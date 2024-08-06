@@ -38,14 +38,14 @@ export class Nft {
 	public tag!: string;
 
 	/**
-	 * The JSON stringified version of the immutable metadata.
+	 * The immutable metadata.
 	 */
-	@property({ type: "string" })
-	public immutableMetadata!: string;
+	@property({ type: "object" })
+	public immutableMetadata!: unknown;
 
 	/**
-	 * The JSON stringified version of the mutable metadata.
+	 * The mutable metadata.
 	 */
-	@property({ type: "string" })
-	public metadata!: string;
+	@property({ type: "object" })
+	public metadata!: unknown;
 }
