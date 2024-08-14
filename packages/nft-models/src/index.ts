@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 export * from "./factories/nftConnectorFactory";
 export * from "./models/IIrc27Metadata";
-export * from "./models/INft";
+export * from "./models/INftComponent";
 export * from "./models/INftConnector";
 export * from "./models/api/INftBurnRequest";
 export * from "./models/api/INftMintRequest";

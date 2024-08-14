@@ -7,18 +7,17 @@ import type {
 	IRestRoute,
 	ITag
 } from "@gtsc/api-models";
-import { Guards } from "@gtsc/core";
+import { ComponentFactory, Guards } from "@gtsc/core";
 import { nameof } from "@gtsc/nameof";
 import type {
-	INft,
 	INftBurnRequest,
+	INftComponent,
 	INftMintRequest,
 	INftResolveRequest,
 	INftResolveResponse,
 	INftTransferRequest,
 	INftUpdateRequest
 } from "@gtsc/nft-models";
-import { ServiceFactory } from "@gtsc/services";
 import { HttpStatusCode } from "@gtsc/web";
 
 /**
@@ -39,13 +38,10 @@ export const tagsNft: ITag[] = [
 /**
  * The REST routes for NFT.
  * @param baseRouteName Prefix to prepend to the paths.
- * @param factoryServiceName The name of the service to use in the routes store in the ServiceFactory.
+ * @param componentName The name of the component to use in the routes stored in the ComponentFactory.
  * @returns The generated routes.
  */
-export function generateRestRoutesNft(
-	baseRouteName: string,
-	factoryServiceName: string
-): IRestRoute[] {
+export function generateRestRoutesNft(baseRouteName: string, componentName: string): IRestRoute[] {
 	const mintRoute: IRestRoute<INftMintRequest, ICreatedResponse> = {
 		operationId: "nftMint",
 		summary: "Mint an NFT",
@@ -53,7 +49,7 @@ export function generateRestRoutesNft(
 		method: "POST",
 		path: `${baseRouteName}/`,
 		handler: async (httpRequestContext, request) =>
-			nftMint(httpRequestContext, factoryServiceName, request),
+			nftMint(httpRequestContext, componentName, request),
 		requestType: {
 			type: nameof<INftMintRequest>(),
 			examples: [
@@ -102,7 +98,7 @@ export function generateRestRoutesNft(
 		method: "GET",
 		path: `${baseRouteName}/:id`,
 		handler: async (httpRequestContext, request) =>
-			nftResolve(httpRequestContext, factoryServiceName, request),
+			nftResolve(httpRequestContext, componentName, request),
 		requestType: {
 			type: nameof<INftResolveRequest>(),
 			examples: [
@@ -150,7 +146,7 @@ export function generateRestRoutesNft(
 		method: "DELETE",
 		path: `${baseRouteName}/:id`,
 		handler: async (httpRequestContext, request) =>
-			nftBurn(httpRequestContext, factoryServiceName, request),
+			nftBurn(httpRequestContext, componentName, request),
 		requestType: {
 			type: nameof<INftBurnRequest>(),
 			examples: [
@@ -178,7 +174,7 @@ export function generateRestRoutesNft(
 		method: "POST",
 		path: `${baseRouteName}/:id/transfer`,
 		handler: async (httpRequestContext, request) =>
-			nftTransfer(httpRequestContext, factoryServiceName, request),
+			nftTransfer(httpRequestContext, componentName, request),
 		requestType: {
 			type: nameof<INftTransferRequest>(),
 			examples: [
@@ -212,7 +208,7 @@ export function generateRestRoutesNft(
 		method: "PUT",
 		path: `${baseRouteName}/:id`,
 		handler: async (httpRequestContext, request) =>
-			nftUpdate(httpRequestContext, factoryServiceName, request),
+			nftUpdate(httpRequestContext, componentName, request),
 		requestType: {
 			type: nameof<INftUpdateRequest>(),
 			examples: [
@@ -244,21 +240,21 @@ export function generateRestRoutesNft(
 /**
  * Mint an NFT.
  * @param httpRequestContext The request context for the API.
- * @param factoryServiceName The name of the service to use in the routes.
+ * @param componentName The name of the component to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftMint(
 	httpRequestContext: IHttpRequestContext,
-	factoryServiceName: string,
+	componentName: string,
 	request: INftMintRequest
 ): Promise<ICreatedResponse> {
 	Guards.object<INftMintRequest>(ROUTES_SOURCE, nameof(request), request);
 	Guards.object<INftMintRequest["body"]>(ROUTES_SOURCE, nameof(request.body), request.body);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.issuer), request.body.issuer);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.tag), request.body.tag);
-	const service = ServiceFactory.get<INft>(factoryServiceName);
-	const id = await service.mint(
+	const component = ComponentFactory.get<INftComponent>(componentName);
+	const id = await component.mint(
 		request.body.issuer,
 		request.body.tag,
 		request.body.immutableMetadata,
@@ -279,13 +275,13 @@ export async function nftMint(
 /**
  * Resolve an NFT.
  * @param httpRequestContext The request context for the API.
- * @param factoryServiceName The name of the service to use in the routes.
+ * @param componentName The name of the component to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftResolve(
 	httpRequestContext: IHttpRequestContext,
-	factoryServiceName: string,
+	componentName: string,
 	request: INftResolveRequest
 ): Promise<INftResolveResponse> {
 	Guards.object<INftResolveRequest>(ROUTES_SOURCE, nameof(request), request);
@@ -296,8 +292,8 @@ export async function nftResolve(
 	);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 
-	const service = ServiceFactory.get<INft>(factoryServiceName);
-	const result = await service.resolve(request.pathParams.id, httpRequestContext.userIdentity);
+	const component = ComponentFactory.get<INftComponent>(componentName);
+	const result = await component.resolve(request.pathParams.id, httpRequestContext.userIdentity);
 	return {
 		body: result
 	};
@@ -306,13 +302,13 @@ export async function nftResolve(
 /**
  * Burn an NFT.
  * @param httpRequestContext The request context for the API.
- * @param factoryServiceName The name of the service to use in the routes.
+ * @param componentName The name of the component to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftBurn(
 	httpRequestContext: IHttpRequestContext,
-	factoryServiceName: string,
+	componentName: string,
 	request: INftBurnRequest
 ): Promise<INoContentResponse> {
 	Guards.object<INftBurnRequest>(ROUTES_SOURCE, nameof(request), request);
@@ -323,8 +319,8 @@ export async function nftBurn(
 	);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 
-	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.burn(request.pathParams.id, httpRequestContext.userIdentity);
+	const component = ComponentFactory.get<INftComponent>(componentName);
+	await component.burn(request.pathParams.id, httpRequestContext.userIdentity);
 
 	return {
 		statusCode: HttpStatusCode.noContent
@@ -334,13 +330,13 @@ export async function nftBurn(
 /**
  * Transfer an NFT.
  * @param httpRequestContext The request context for the API.
- * @param factoryServiceName The name of the service to use in the routes.
+ * @param componentName The name of the component to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftTransfer(
 	httpRequestContext: IHttpRequestContext,
-	factoryServiceName: string,
+	componentName: string,
 	request: INftTransferRequest
 ): Promise<INoContentResponse> {
 	Guards.object<INftTransferRequest>(ROUTES_SOURCE, nameof(request), request);
@@ -353,8 +349,8 @@ export async function nftTransfer(
 	Guards.object<INftTransferRequest["body"]>(ROUTES_SOURCE, nameof(request.body), request.body);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.recipient), request.body.recipient);
 
-	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.transfer(
+	const component = ComponentFactory.get<INftComponent>(componentName);
+	await component.transfer(
 		request.pathParams.id,
 		request.body.recipient,
 		request.body.metadata,
@@ -369,13 +365,13 @@ export async function nftTransfer(
 /**
  * Update an NFT.
  * @param httpRequestContext The request context for the API.
- * @param factoryServiceName The name of the service to use in the routes.
+ * @param componentName The name of the component to use in the routes.
  * @param request The request.
  * @returns The response object with additional http response properties.
  */
 export async function nftUpdate(
 	httpRequestContext: IHttpRequestContext,
-	factoryServiceName: string,
+	componentName: string,
 	request: INftUpdateRequest
 ): Promise<INoContentResponse> {
 	Guards.object<INftUpdateRequest>(ROUTES_SOURCE, nameof(request), request);
@@ -388,8 +384,8 @@ export async function nftUpdate(
 	Guards.object<INftUpdateRequest["body"]>(ROUTES_SOURCE, nameof(request.body), request.body);
 	Guards.object(ROUTES_SOURCE, nameof(request.body.metadata), request.body.metadata);
 
-	const service = ServiceFactory.get<INft>(factoryServiceName);
-	await service.update(
+	const component = ComponentFactory.get<INftComponent>(componentName);
+	await component.update(
 		request.pathParams.id,
 		request.body.metadata,
 		httpRequestContext.userIdentity

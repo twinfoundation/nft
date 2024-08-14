@@ -30,7 +30,7 @@ export interface INftMintRequest {
 		metadata?: unknown;
 
 		/**
-		 * The namespace of the connector to use for the NFT, defaults to service configured namespace.
+		 * The namespace of the connector to use for the NFT, defaults to component configured namespace.
 		 */
 		namespace?: string;
 	};

@@ -1,19 +1,19 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IService } from "@gtsc/services";
+import type { IComponent } from "@gtsc/core";
 
 /**
- * Interface describing an NFT service.
+ * Interface describing an NFT component.
  */
-export interface INft extends IService {
+export interface INftComponent extends IComponent {
 	/**
 	 * Mint an NFT.
 	 * @param issuer The issuer for the NFT, will also be the initial owner.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
-	 * @param options Additional options for the NFT service.
-	 * @param options.namespace The namespace of the connector to use for the NFT, defaults to service configured namespace.
+	 * @param options Additional options for the NFT component.
+	 * @param options.namespace The namespace of the connector to use for the NFT, defaults to component configured namespace.
 	 * @param identity The identity to perform the nft operation on.
 	 * @returns The id of the created NFT in urn format.
 	 */

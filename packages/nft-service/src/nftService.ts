@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { GeneralError, Guards, Urn } from "@gtsc/core";
 import { nameof } from "@gtsc/nameof";
-import { NftConnectorFactory, type INft, type INftConnector } from "@gtsc/nft-models";
+import { NftConnectorFactory, type INftComponent, type INftConnector } from "@gtsc/nft-models";
 import type { INftServiceConfig } from "./models/INftServiceConfig";
 
 /**
  * Service for performing NFT operations to a connector.
  */
-export class NftService implements INft {
+export class NftService implements INftComponent {
 	/**
 	 * The namespace supported by the nft service.
 	 */

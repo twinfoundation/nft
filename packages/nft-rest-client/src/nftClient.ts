@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { BaseRestClient } from "@gtsc/api-core";
 import type { IBaseRestClientConfig, ICreatedResponse } from "@gtsc/api-models";
-import { Guards, StringHelper, Urn } from "@gtsc/core";
+import { Guards, Urn } from "@gtsc/core";
 import { nameof } from "@gtsc/nameof";
 import type {
-	INft,
 	INftBurnRequest,
+	INftComponent,
 	INftMintRequest,
 	INftResolveRequest,
 	INftResolveResponse,
@@ -17,7 +17,7 @@ import type {
 /**
  * Client for performing NFT through to REST endpoints.
  */
-export class NftClient extends BaseRestClient implements INft {
+export class NftClient extends BaseRestClient implements INftComponent {
 	/**
 	 * Runtime name for the class.
 	 */
@@ -28,7 +28,7 @@ export class NftClient extends BaseRestClient implements INft {
 	 * @param config The configuration for the client.
 	 */
 	constructor(config: IBaseRestClientConfig) {
-		super(nameof<NftClient>(), config, StringHelper.kebabCase(nameof<INft>()));
+		super(nameof<NftClient>(), config, "nft");
 	}
 
 	/**
@@ -37,8 +37,8 @@ export class NftClient extends BaseRestClient implements INft {
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
-	 * @param options Additional options for the NFT service.
-	 * @param options.namespace The namespace of the connector to use for the NFT, defaults to service configured namespace.
+	 * @param options Additional options for the NFT component.
+	 * @param options.namespace The namespace of the connector to use for the NFT, defaults to component configured namespace.
 	 * @returns The id of the created NFT in urn format.
 	 */
 	public async mint<T = unknown, U = unknown>(
