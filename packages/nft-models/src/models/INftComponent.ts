@@ -12,8 +12,7 @@ export interface INftComponent extends IComponent {
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
-	 * @param options Additional options for the NFT component.
-	 * @param options.namespace The namespace of the connector to use for the NFT, defaults to component configured namespace.
+	 * @param namespace The namespace of the connector to use for the NFT, defaults to component configured namespace.
 	 * @param identity The identity to perform the nft operation on.
 	 * @returns The id of the created NFT in urn format.
 	 */
@@ -22,9 +21,7 @@ export interface INftComponent extends IComponent {
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U,
-		options?: {
-			namespace?: string;
-		},
+		namespace?: string,
 		identity?: string
 	): Promise<string>;
 

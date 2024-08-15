@@ -37,8 +37,7 @@ export class NftClient extends BaseRestClient implements INftComponent {
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
-	 * @param options Additional options for the NFT component.
-	 * @param options.namespace The namespace of the connector to use for the NFT, defaults to component configured namespace.
+	 * @param namespace The namespace of the connector to use for the NFT, defaults to component configured namespace.
 	 * @returns The id of the created NFT in urn format.
 	 */
 	public async mint<T = unknown, U = unknown>(
@@ -46,9 +45,7 @@ export class NftClient extends BaseRestClient implements INftComponent {
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U,
-		options?: {
-			namespace?: string;
-		}
+		namespace?: string
 	): Promise<string> {
 		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
@@ -59,7 +56,7 @@ export class NftClient extends BaseRestClient implements INftComponent {
 				tag,
 				immutableMetadata,
 				metadata,
-				namespace: options?.namespace
+				namespace
 			}
 		});
 

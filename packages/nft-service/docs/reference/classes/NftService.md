@@ -48,7 +48,7 @@ Runtime name for the class.
 
 ### mint()
 
-> **mint**\<`T`, `U`\>(`issuer`, `tag`, `immutableMetadata`?, `metadata`?, `options`?, `identity`?): `Promise`\<`string`\>
+> **mint**\<`T`, `U`\>(`issuer`, `tag`, `immutableMetadata`?, `metadata`?, `namespace`?, `identity`?): `Promise`\<`string`\>
 
 Mint an NFT.
 
@@ -76,11 +76,7 @@ The immutable metadata for the NFT.
 
 The metadata for the NFT.
 
-• **options?**
-
-Additional options for the NFT service.
-
-• **options.namespace?**: `string`
+• **namespace?**: `string`
 
 The namespace of the connector to use for the NFT, defaults to service configured namespace.
 

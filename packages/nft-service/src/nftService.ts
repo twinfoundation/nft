@@ -44,8 +44,7 @@ export class NftService implements INftComponent {
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
-	 * @param options Additional options for the NFT service.
-	 * @param options.namespace The namespace of the connector to use for the NFT, defaults to service configured namespace.
+	 * @param namespace The namespace of the connector to use for the NFT, defaults to service configured namespace.
 	 * @param identity The identity to perform the nft operation on.
 	 * @returns The id of the created NFT in urn format.
 	 */
@@ -54,9 +53,7 @@ export class NftService implements INftComponent {
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U,
-		options?: {
-			namespace?: string;
-		},
+		namespace?: string,
 		identity?: string
 	): Promise<string> {
 		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
@@ -64,7 +61,7 @@ export class NftService implements INftComponent {
 		Guards.stringValue(this.CLASS_NAME, nameof(identity), identity);
 
 		try {
-			const connectorNamespace = options?.namespace ?? this._defaultNamespace;
+			const connectorNamespace = namespace ?? this._defaultNamespace;
 
 			const nftConnector = NftConnectorFactory.get<INftConnector>(connectorNamespace);
 

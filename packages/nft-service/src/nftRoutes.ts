@@ -259,9 +259,7 @@ export async function nftMint(
 		request.body.tag,
 		request.body.immutableMetadata,
 		request.body.metadata,
-		{
-			namespace: request.body.namespace
-		},
+		request.body.namespace,
 		httpRequestContext.userIdentity
 	);
 	return {
