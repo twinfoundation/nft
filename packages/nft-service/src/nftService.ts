@@ -27,15 +27,16 @@ export class NftService implements INftComponent {
 
 	/**
 	 * Create a new instance of NftService.
-	 * @param config The configuration for the service.
+	 * @param options The options for the service.
+	 * @param options.config The configuration for the service.
 	 */
-	constructor(config?: INftServiceConfig) {
+	constructor(options?: { config?: INftServiceConfig }) {
 		const names = NftConnectorFactory.names();
 		if (names.length === 0) {
 			throw new GeneralError(this.CLASS_NAME, "noConnectors");
 		}
 
-		this._defaultNamespace = config?.defaultNamespace ?? names[0];
+		this._defaultNamespace = options?.config?.defaultNamespace ?? names[0];
 	}
 
 	/**

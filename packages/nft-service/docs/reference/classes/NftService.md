@@ -10,13 +10,17 @@ Service for performing NFT operations to a connector.
 
 ### new NftService()
 
-> **new NftService**(`config`?): [`NftService`](NftService.md)
+> **new NftService**(`options`?): [`NftService`](NftService.md)
 
 Create a new instance of NftService.
 
 #### Parameters
 
-• **config?**: [`INftServiceConfig`](../interfaces/INftServiceConfig.md)
+• **options?**
+
+The options for the service.
+
+• **options.config?**: [`INftServiceConfig`](../interfaces/INftServiceConfig.md)
 
 The configuration for the service.
 
