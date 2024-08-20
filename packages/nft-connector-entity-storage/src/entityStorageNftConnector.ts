@@ -61,7 +61,7 @@ export class EntityStorageNftConnector implements INftConnector {
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
 		try {
-			const nftId = Converter.bytesToHex(RandomHelper.generate(32), true);
+			const nftId = Converter.bytesToHex(RandomHelper.generate(32));
 
 			const nft: Nft = {
 				id: nftId,
