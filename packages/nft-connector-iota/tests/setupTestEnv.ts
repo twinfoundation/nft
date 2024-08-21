@@ -100,10 +100,10 @@ await TEST_VAULT_CONNECTOR.setSecret(
 	process.env.TEST_MNEMONIC_2
 );
 
-const addresses = await TEST_WALLET_CONNECTOR.getAddresses(TEST_IDENTITY_ID, 1, 1);
+const addresses = await TEST_WALLET_CONNECTOR.getAddresses(TEST_IDENTITY_ID, 0, 1, 1);
 export const TEST_NFT_ADDRESS_BECH32 = addresses[0];
 
-const addresses2 = await TEST_WALLET_CONNECTOR.getAddresses(TEST_IDENTITY_ID_2, 1, 1);
+const addresses2 = await TEST_WALLET_CONNECTOR.getAddresses(TEST_IDENTITY_ID_2, 0, 1, 1);
 export const TEST_NFT_ADDRESS_2_BECH32 = addresses2[0];
 
 /**
