@@ -36,7 +36,7 @@ describe("EntityStorageNftConnector", () => {
 
 		expect(urn.namespaceIdentifier()).toEqual("nft");
 		expect(urn.namespaceMethod()).toEqual("entity-storage");
-		expect(urn.namespaceSpecific(1).length).toEqual(66);
+		expect(urn.namespaceSpecific(1).length).toEqual(64);
 
 		const store =
 			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore();
