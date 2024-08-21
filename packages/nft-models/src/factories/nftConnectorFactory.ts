@@ -7,4 +7,4 @@ import type { INftConnector } from "../models/INftConnector";
  * Factory for creating NFT connectors.
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const NftConnectorFactory = Factory.createFactory<INftConnector>("nftConnector");
+export const NftConnectorFactory = Factory.createFactory<INftConnector>("nft-connector");

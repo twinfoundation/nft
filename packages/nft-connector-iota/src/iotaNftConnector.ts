@@ -48,6 +48,7 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Default name for the seed secret.
+	 * @internal
 	 */
 	private static readonly _DEFAULT_SEED_SECRET_NAME: string = "seed";
 
