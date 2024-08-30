@@ -1,16 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import {
-	BaseError,
-	Converter,
-	GeneralError,
-	Guards,
-	Is,
-	ObjectHelper,
-	Urn,
-	type IError
-} from "@gtsc/core";
-import { Bip39 } from "@gtsc/crypto";
+import { Converter, GeneralError, Guards, Is, ObjectHelper, Urn } from "@gtsc/core";
+import { Iota } from "@gtsc/dlt-iota";
 import { nameof } from "@gtsc/nameof";
 import type { INftConnector } from "@gtsc/nft-models";
 import { VaultConnectorFactory, type IVaultConnector } from "@gtsc/vault-models";
@@ -18,7 +9,6 @@ import {
 	AddressUnlockCondition,
 	BasicOutput,
 	Client,
-	CoinType,
 	Ed25519Address,
 	FeatureType,
 	IssuerFeature,
@@ -28,9 +18,7 @@ import {
 	UTXOInput,
 	UnlockConditionType,
 	Utils,
-	type Block,
 	type Feature,
-	type IBuildBlockOptions,
 	type NftOutput,
 	type NftOutputBuilderParams,
 	type TransactionPayload
@@ -45,30 +33,6 @@ export class IotaNftConnector implements INftConnector {
 	 * The namespace supported by the nft connector.
 	 */
 	public static readonly NAMESPACE: string = "iota";
-
-	/**
-	 * Default name for the seed secret.
-	 * @internal
-	 */
-	private static readonly _DEFAULT_SEED_SECRET_NAME: string = "seed";
-
-	/**
-	 * Default name for the mnemonic secret.
-	 * @internal
-	 */
-	private static readonly _DEFAULT_MNEMONIC_SECRET_NAME: string = "mnemonic";
-
-	/**
-	 * The default length of time to wait for the inclusion of a transaction in seconds.
-	 * @internal
-	 */
-	private static readonly _DEFAULT_INCLUSION_TIMEOUT: number = 60;
-
-	/**
-	 * Default coin type.
-	 * @internal
-	 */
-	private static readonly _DEFAULT_COIN_TYPE: number = CoinType.IOTA;
 
 	/**
 	 * Runtime name for the class.
@@ -103,10 +67,7 @@ export class IotaNftConnector implements INftConnector {
 		);
 		this._vaultConnector = VaultConnectorFactory.get(options.vaultConnectorType ?? "vault");
 		this._config = options.config;
-		this._config.vaultMnemonicId ??= IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME;
-		this._config.vaultSeedId ??= IotaNftConnector._DEFAULT_SEED_SECRET_NAME;
-		this._config.coinType ??= IotaNftConnector._DEFAULT_COIN_TYPE;
-		this._config.inclusionTimeoutSeconds ??= IotaNftConnector._DEFAULT_INCLUSION_TIMEOUT;
+		Iota.populateConfig(this._config);
 	}
 
 	/**
@@ -158,9 +119,15 @@ export class IotaNftConnector implements INftConnector {
 
 			const nftOutput = await client.buildNftOutput(buildParams);
 
-			const blockDetails = await this.prepareAndPostTransaction(controller, client, {
-				outputs: [nftOutput]
-			});
+			const blockDetails = await Iota.prepareAndPostTransaction(
+				this._config,
+				this._vaultConnector,
+				controller,
+				client,
+				{
+					outputs: [nftOutput]
+				}
+			);
 
 			const transactionId = Utils.transactionId(blockDetails.block.payload as TransactionPayload);
 			const outputId = Utils.computeOutputId(transactionId, 0);
@@ -174,7 +141,7 @@ export class IotaNftConnector implements INftConnector {
 				this.CLASS_NAME,
 				"mintingFailed",
 				undefined,
-				this.extractPayloadError(error)
+				Iota.extractPayloadError(error)
 			);
 		}
 	}
@@ -257,7 +224,7 @@ export class IotaNftConnector implements INftConnector {
 				this.CLASS_NAME,
 				"resolvingFailed",
 				undefined,
-				this.extractPayloadError(error)
+				Iota.extractPayloadError(error)
 			);
 		}
 	}
@@ -301,7 +268,7 @@ export class IotaNftConnector implements INftConnector {
 				: "";
 			const currentOwnerAddressBech32 = Utils.hexToBech32(currentOwner, hrp);
 
-			await this.prepareAndPostTransaction(controller, client, {
+			await Iota.prepareAndPostTransaction(this._config, this._vaultConnector, controller, client, {
 				burn: {
 					nfts: [nftId]
 				},
@@ -324,7 +291,7 @@ export class IotaNftConnector implements INftConnector {
 				this.CLASS_NAME,
 				"burningFailed",
 				undefined,
-				this.extractPayloadError(error)
+				Iota.extractPayloadError(error)
 			);
 		}
 	}
@@ -401,7 +368,7 @@ export class IotaNftConnector implements INftConnector {
 				recipientNftOutput.getAmount()
 			);
 
-			await this.prepareAndPostTransaction(controller, client, {
+			await Iota.prepareAndPostTransaction(this._config, this._vaultConnector, controller, client, {
 				inputs: [
 					new UTXOInput(
 						nftOutputResponse.metadata.transactionId,
@@ -416,7 +383,7 @@ export class IotaNftConnector implements INftConnector {
 				this.CLASS_NAME,
 				"transferFailed",
 				undefined,
-				this.extractPayloadError(error)
+				Iota.extractPayloadError(error)
 			);
 		}
 	}
@@ -479,7 +446,7 @@ export class IotaNftConnector implements INftConnector {
 				recipientNftOutput.getAmount()
 			);
 
-			await this.prepareAndPostTransaction(controller, client, {
+			await Iota.prepareAndPostTransaction(this._config, this._vaultConnector, controller, client, {
 				inputs: [
 					new UTXOInput(
 						nftOutputResponse.metadata.transactionId,
@@ -494,114 +461,8 @@ export class IotaNftConnector implements INftConnector {
 				this.CLASS_NAME,
 				"updateFailed",
 				undefined,
-				this.extractPayloadError(error)
+				Iota.extractPayloadError(error)
 			);
 		}
-	}
-
-	/**
-	 * Prepare a transaction for sending, post and wait for inclusion.
-	 * @param controller The identity of the user to access the vault keys.
-	 * @param client The client to use.
-	 * @param options The options for the transaction.
-	 * @returns The block id and block.
-	 * @internal
-	 */
-	private async prepareAndPostTransaction(
-		controller: string,
-		client: Client,
-		options: IBuildBlockOptions
-	): Promise<{ blockId: string; block: Block }> {
-		const seed = await this.getSeed(controller);
-		const secretManager = { hexSeed: Converter.bytesToHex(seed, true) };
-
-		const prepared = await client.prepareTransaction(secretManager, {
-			coinType: this._config.coinType ?? IotaNftConnector._DEFAULT_COIN_TYPE,
-			...options
-		});
-
-		const signed = await client.signTransaction(secretManager, prepared);
-
-		const blockIdAndBlock = await client.postBlockPayload(signed);
-
-		try {
-			const timeoutSeconds =
-				this._config.inclusionTimeoutSeconds ?? IotaNftConnector._DEFAULT_INCLUSION_TIMEOUT;
-
-			await client.retryUntilIncluded(blockIdAndBlock[0], 2, Math.ceil(timeoutSeconds / 2));
-		} catch (error) {
-			throw new GeneralError(
-				this.CLASS_NAME,
-				"inclusionFailed",
-				undefined,
-				this.extractPayloadError(error)
-			);
-		}
-
-		return {
-			blockId: blockIdAndBlock[0],
-			block: blockIdAndBlock[1]
-		};
-	}
-
-	/**
-	 * Get the seed from the vault.
-	 * @returns The seed.
-	 * @internal
-	 */
-	private async getSeed(controller: string): Promise<Uint8Array> {
-		try {
-			const seedBase64 = await this._vaultConnector.getSecret<string>(
-				this.buildSeedKey(controller)
-			);
-			return Converter.base64ToBytes(seedBase64);
-		} catch {}
-
-		const mnemonic = await this._vaultConnector.getSecret<string>(
-			this.buildMnemonicKey(controller)
-		);
-
-		return Bip39.mnemonicToSeed(mnemonic);
-	}
-
-	/**
-	 * Extract error from SDK payload.
-	 * @param error The error to extract.
-	 * @returns The extracted error.
-	 */
-	private extractPayloadError(error: unknown): IError {
-		if (Is.json(error)) {
-			const obj = JSON.parse(error);
-			const message = obj.payload?.error;
-			if (message === "no input with matching ed25519 address provided") {
-				return new GeneralError(this.CLASS_NAME, "insufficientFunds");
-			}
-			return {
-				name: "IOTA",
-				message
-			};
-		}
-
-		return BaseError.fromError(error);
-	}
-
-	/**
-	 * Build the key name to access the mnemonic in the vault.
-	 * @param identity The identity of the user to access the vault keys.
-	 * @returns The vault key.
-	 * @internal
-	 */
-	private buildMnemonicKey(identity: string): string {
-		return `${identity}/${this._config.vaultMnemonicId ?? IotaNftConnector._DEFAULT_MNEMONIC_SECRET_NAME}`;
-	}
-
-	/**
-	 * Build the key name to access the seed in the vault.
-	 * @param identity The identity of the user to access the vault keys.
-	 * @returns The vault key.
-	 * @internal
-	 */
-	private buildSeedKey(identity: string): string {
-		return `${identity}/${this._config.vaultSeedId ?? IotaNftConnector._DEFAULT_SEED_SECRET_NAME}`;
 	}
 }
