@@ -60,7 +60,7 @@ export class NftClient extends BaseRestClient implements INftComponent {
 			}
 		});
 
-		return response.headers.location;
+		return response.headers.Location;
 	}
 
 	/**

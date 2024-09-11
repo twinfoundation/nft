@@ -18,7 +18,7 @@ import type {
 	INftTransferRequest,
 	INftUpdateRequest
 } from "@gtsc/nft-models";
-import { HttpStatusCode } from "@gtsc/web";
+import { HeaderTypes, HttpStatusCode } from "@gtsc/web";
 
 /**
  * The source used when communicating about these routes.
@@ -81,7 +81,7 @@ export function generateRestRoutesNft(baseRouteName: string, componentName: stri
 						response: {
 							statusCode: HttpStatusCode.created,
 							headers: {
-								location:
+								[HeaderTypes.Location]:
 									"nft:iota:aW90YS1uZnQ6dHN0OjB4NzYyYjljNDllYTg2OWUwZWJkYTliYmZhNzY5Mzk0NDdhNDI4ZGNmMTc4YzVkMTVhYjQ0N2UyZDRmYmJiNGViMg=="
 							}
 						}
@@ -265,7 +265,7 @@ export async function nftMint(
 	return {
 		statusCode: HttpStatusCode.created,
 		headers: {
-			location: id
+			[HeaderTypes.Location]: id
 		}
 	};
 }
