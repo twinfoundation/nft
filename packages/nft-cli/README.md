@@ -1,11 +1,11 @@
-# GTSC NFT CLI
+# TWIN NFT CLI
 
 A command line interface for interacting with the nft connectors.
 
 ## Installation
 
 ```shell
-npm install @gtsc/nft-cli
+npm install @twin.org/nft-cli
 ```
 
 ## Examples
@@ -14,7 +14,7 @@ Usage of the tool is shown in the examples [docs/examples.md](docs/examples.md)
 
 ## Reference
 
-Detailed reference documentation for the API can be found in [docs/reference/globals.md](docs/reference/globals.md)
+Detailed reference documentation for the API can be found in [docs/reference/index.md](docs/reference/index.md)
 
 ## Changelog
 

@@ -1,10 +1,16 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import path from "node:path";
-import { CLIDisplay, CLIOptions, CLIParam, CLIUtils, type CliOutputOptions } from "@gtsc/cli-core";
-import { Converter, I18n, Is, StringHelper } from "@gtsc/core";
-import { IotaNftConnector, IotaNftUtils } from "@gtsc/nft-connector-iota";
-import { VaultConnectorFactory } from "@gtsc/vault-models";
+import {
+	CLIDisplay,
+	CLIOptions,
+	CLIParam,
+	CLIUtils,
+	type CliOutputOptions
+} from "@twin.org/cli-core";
+import { Converter, I18n, Is, StringHelper } from "@twin.org/core";
+import { IotaNftConnector, IotaNftUtils } from "@twin.org/nft-connector-iota";
+import { VaultConnectorFactory } from "@twin.org/vault-models";
 import { Command } from "commander";
 import { setupVault } from "./setupCommands";
 

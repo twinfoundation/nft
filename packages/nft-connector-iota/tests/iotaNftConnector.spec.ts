@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { Urn } from "@gtsc/core";
-import type { IIrc27Metadata } from "@gtsc/nft-models";
+import { Urn } from "@twin.org/core";
+import type { IIrc27Metadata } from "@twin.org/nft-models";
 import {
 	TEST_BECH32_HRP,
 	TEST_CLIENT_OPTIONS,

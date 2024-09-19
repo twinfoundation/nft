@@ -1,4 +1,4 @@
-# @gtsc/nft-service
+# @twin.org/nft-service
 
 ## Classes
 

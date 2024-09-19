@@ -1,4 +1,4 @@
-# @gtsc/nft-connector-entity-storage
+# @twin.org/nft-connector-entity-storage
 
 ## Classes
 

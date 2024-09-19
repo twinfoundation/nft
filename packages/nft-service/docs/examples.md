@@ -1,1 +1,1 @@
-# @gtsc/nft-service - Examples
+# @twin.org/nft-service - Examples

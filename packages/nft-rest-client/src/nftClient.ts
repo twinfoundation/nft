@@ -1,9 +1,9 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { BaseRestClient } from "@gtsc/api-core";
-import type { IBaseRestClientConfig, ICreatedResponse } from "@gtsc/api-models";
-import { Guards, Urn } from "@gtsc/core";
-import { nameof } from "@gtsc/nameof";
+import { BaseRestClient } from "@twin.org/api-core";
+import type { IBaseRestClientConfig, ICreatedResponse } from "@twin.org/api-models";
+import { Guards, Urn } from "@twin.org/core";
+import { nameof } from "@twin.org/nameof";
 import type {
 	INftBurnRequest,
 	INftComponent,
@@ -12,7 +12,7 @@ import type {
 	INftResolveResponse,
 	INftTransferRequest,
 	INftUpdateRequest
-} from "@gtsc/nft-models";
+} from "@twin.org/nft-models";
 
 /**
  * Client for performing NFT through to REST endpoints.

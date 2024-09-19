@@ -14,7 +14,7 @@ Interface describing an NFT component.
 
 Mint an NFT.
 
-#### Type parameters
+#### Type Parameters
 
 • **T** = `unknown`
 
@@ -60,7 +60,7 @@ The id of the created NFT in urn format.
 
 Resolve an NFT.
 
-#### Type parameters
+#### Type Parameters
 
 • **T** = `unknown`
 
@@ -134,7 +134,7 @@ Nothing.
 
 Transfer an NFT.
 
-#### Type parameters
+#### Type Parameters
 
 • **T** = `unknown`
 
@@ -170,7 +170,7 @@ Nothing.
 
 Update the mutable data of the NFT.
 
-#### Type parameters
+#### Type Parameters
 
 • **T** = `unknown`
 

@@ -1,1 +1,1 @@
-# @gtsc/nft-connector-entity-storage - Examples
+# @twin.org/nft-connector-entity-storage - Examples

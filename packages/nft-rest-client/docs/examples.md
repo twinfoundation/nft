@@ -1,1 +1,1 @@
-# @gtsc/nft-rest-client - Examples
+# @twin.org/nft-rest-client - Examples

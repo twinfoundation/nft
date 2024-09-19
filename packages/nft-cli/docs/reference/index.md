@@ -1,4 +1,4 @@
-# @gtsc/nft-cli
+# @twin.org/nft-cli
 
 ## Classes
 
