@@ -1,5 +1,5 @@
-# @gtsc/nft-connector-iota - Changelog
+# @twin.org/nft-connector-iota - Changelog
 
-## v0.0.3
+## v0.0.1-next.3
 
 - Initial Release

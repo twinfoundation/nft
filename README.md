@@ -1,4 +1,4 @@
-# GTSC NFT
+# TWIN NFT
 
 This mono-repository contains packages which are used when creating and interacting with NFTs.
 

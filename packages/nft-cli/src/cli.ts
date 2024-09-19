@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0.
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { CLIBase } from "@gtsc/cli-core";
-import { buildCommandAddress, buildCommandMnemonic } from "@gtsc/crypto-cli";
-import { buildCommandFaucet } from "@gtsc/wallet-cli";
+import { CLIBase } from "@twin.org/cli-core";
+import { buildCommandAddress, buildCommandMnemonic } from "@twin.org/crypto-cli";
+import { buildCommandFaucet } from "@twin.org/wallet-cli";
 import type { Command } from "commander";
 import { buildCommandNftBurn } from "./commands/nftBurn";
 import { buildCommandNftMint } from "./commands/nftMint";
@@ -24,9 +24,9 @@ export class CLI extends CLIBase {
 	public async run(argv: string[], localesDirectory?: string): Promise<number> {
 		return this.execute(
 			{
-				title: "GTSC NFT",
-				appName: "gtsc-nft",
-				version: "0.0.5-next.10",
+				title: "TWIN NFT",
+				appName: "twin-nft",
+				version: "0.0.1-next.3",
 				icon: "🌍",
 				supportsEnvFiles: true
 			},

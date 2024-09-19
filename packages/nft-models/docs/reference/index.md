@@ -1,4 +1,4 @@
-# @gtsc/nft-models
+# @twin.org/nft-models
 
 ## Interfaces
 

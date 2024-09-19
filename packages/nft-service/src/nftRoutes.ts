@@ -6,9 +6,9 @@ import type {
 	INoContentResponse,
 	IRestRoute,
 	ITag
-} from "@gtsc/api-models";
-import { ComponentFactory, Guards } from "@gtsc/core";
-import { nameof } from "@gtsc/nameof";
+} from "@twin.org/api-models";
+import { ComponentFactory, Guards } from "@twin.org/core";
+import { nameof } from "@twin.org/nameof";
 import type {
 	INftBurnRequest,
 	INftComponent,
@@ -17,8 +17,8 @@ import type {
 	INftResolveResponse,
 	INftTransferRequest,
 	INftUpdateRequest
-} from "@gtsc/nft-models";
-import { HeaderTypes, HttpStatusCode } from "@gtsc/web";
+} from "@twin.org/nft-models";
+import { HeaderTypes, HttpStatusCode } from "@twin.org/web";
 
 /**
  * The source used when communicating about these routes.

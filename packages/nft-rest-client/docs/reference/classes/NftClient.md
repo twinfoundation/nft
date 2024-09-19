@@ -52,7 +52,7 @@ Runtime name for the class.
 
 Mint an NFT.
 
-#### Type parameters
+#### Type Parameters
 
 • **T** = `unknown`
 
@@ -98,7 +98,7 @@ The id of the created NFT in urn format.
 
 Resolve an NFT.
 
-#### Type parameters
+#### Type Parameters
 
 • **T** = `unknown`
 
@@ -172,7 +172,7 @@ Nothing.
 
 Transfer an NFT.
 
-#### Type parameters
+#### Type Parameters
 
 • **T** = `unknown`
 
@@ -208,7 +208,7 @@ Nothing.
 
 Update the data of the NFT.
 
-#### Type parameters
+#### Type Parameters
 
 • **T** = `unknown`
 

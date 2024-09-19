@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { EntityStorageNftConnector } from "@gtsc/nft-connector-entity-storage";
-import { NftConnectorFactory } from "@gtsc/nft-models";
+import { EntityStorageNftConnector } from "@twin.org/nft-connector-entity-storage";
+import { NftConnectorFactory } from "@twin.org/nft-models";
 import { NftService } from "../src/nftService";
 
 describe("NftService", () => {

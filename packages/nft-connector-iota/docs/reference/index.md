@@ -1,4 +1,4 @@
-# @gtsc/nft-connector-iota
+# @twin.org/nft-connector-iota
 
 ## Classes
 

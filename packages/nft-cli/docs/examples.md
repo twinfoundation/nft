@@ -1,25 +1,25 @@
-# @gtsc/nft-cli - Examples
+# @twin.org/nft-cli - Examples
 
 ## Command Line Tool
 
 First install the tool with the following script.
 
 ```shell
-npm install @gtsc/nft-cli
+npm install @twin.org/nft-cli
 ```
 
 Running the tool with no commands will provide help for all the commands. By issuing the following command you should see the result.
 
 ```shell
-gtsc-nft
+twin-nft
 ```
 
 Output
 
 ```shell
-🌍 GTSC NFT v1.0.0
+🌍 TWIN NFT v1.0.0
 
-Usage: gtsc-nft [command]
+Usage: twin-nft [command]
 
 Options:
   -V, --version                             output the version number
@@ -40,15 +40,15 @@ Commands:
 You can get further details on the sub commands by using the help option for the individual commands.
 
 ```shell
-gtsc-nft nft-mint --help
+twin-nft nft-mint --help
 ```
 
 Output
 
 ```shell
-🌍 GTSC NFT v1.0.0
+🌍 TWIN NFT v1.0.0
 
-Usage: gtsc-nft nft-mint [options]
+Usage: twin-nft nft-mint [options]
 
 Mint an NFT.
 
@@ -78,9 +78,9 @@ Use this command to mint a new NFT, the issuer address must have sufficient fund
 
 ```shell
 # Generate a seed and mnemonic and store it in the env file
-gtsc-nft mnemonic --env wallet.env
+twin-nft mnemonic --env wallet.env
 # Generate an address and store it in the env file
-gtsc-nft address --load-env wallet.env --hrp tst --seed !SEED --count 4 --env wallet.env --merge-env
+twin-nft address --load-env wallet.env --hrp tst --seed !SEED --count 4 --env wallet.env --merge-env
 ```
 
 To run this on the IOTA testnet you will need an env file with the following settings. Store the following config as config.env
@@ -110,10 +110,10 @@ To request some funds and mint the NFT you can issue the following commands:
 
 ```shell
 # Fund the controller address from the faucet loading the config and wallet env files
-gtsc-nft faucet --load-env config.env wallet.env --address !ADDRESS_0_BECH32
+twin-nft faucet --load-env config.env wallet.env --address !ADDRESS_0_BECH32
 
 # Mint the NFT and store the id in the nft.env file
-gtsc-nft nft-mint --load-env config.env wallet.env --seed !SEED --issuer !ADDRESS_0_BECH32 --tag MY-NFT --immutable-json immutable.json --env nft.env
+twin-nft nft-mint --load-env config.env wallet.env --seed !SEED --issuer !ADDRESS_0_BECH32 --tag MY-NFT --immutable-json immutable.json --env nft.env
 ```
 
 ### nft-resolve
@@ -121,7 +121,7 @@ gtsc-nft nft-mint --load-env config.env wallet.env --seed !SEED --issuer !ADDRES
 To resolve the NFT and retrieve its details issue the following command.
 
 ```shell
-gtsc-nft nft-resolve --load-env config.env nft.env --id !NFT_ID
+twin-nft nft-resolve --load-env config.env nft.env --id !NFT_ID
 ```
 
 ### nft-transfer
@@ -129,7 +129,7 @@ gtsc-nft nft-resolve --load-env config.env nft.env --id !NFT_ID
 You can transfer the NFT to another address using the following command. You must provide the seed from the current issuer/owner so that it can be unlocked and transferred. In this example we read the nft id from the env file and transfer to the second address we created earlier.
 
 ```shell
-gtsc-nft nft-transfer --load-env config.env wallet.env nft.env --seed !SEED --id !NFT_ID --recipient !ADDRESS_1_BECH32
+twin-nft nft-transfer --load-env config.env wallet.env nft.env --seed !SEED --id !NFT_ID --recipient !ADDRESS_1_BECH32
 ```
 
 ### nft-burn
@@ -137,5 +137,5 @@ gtsc-nft nft-transfer --load-env config.env wallet.env nft.env --seed !SEED --id
 To burn the NFT and reclaim the funds we issue the following command. We still require the seed as we need to transfer the deposit funds back to the issuer/owner.
 
 ```shell
-gtsc-nft nft-burn --load-env config.env wallet.env nft.env --seed !SEED --issuer !ADDRESS_1_BECH32 --id !NFT_ID
+twin-nft nft-burn --load-env config.env wallet.env nft.env --seed !SEED --issuer !ADDRESS_1_BECH32 --id !NFT_ID
 ```

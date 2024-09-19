@@ -1,4 +1,4 @@
-# @gtsc/nft-rest-client
+# @twin.org/nft-rest-client
 
 ## Classes
 

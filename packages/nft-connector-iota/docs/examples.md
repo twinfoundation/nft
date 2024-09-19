@@ -1,1 +1,1 @@
-# @gtsc/nft-connector-iota - Examples
+# @twin.org/nft-connector-iota - Examples

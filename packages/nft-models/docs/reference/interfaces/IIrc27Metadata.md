@@ -59,7 +59,7 @@ Alphanumeric text string defining the human identifiable collection name.
 
 Object containing key value pair where payment address mapped to the payout percentage.
 
-#### Index signature
+#### Index Signature
 
  \[`id`: `string`\]: `number`
 

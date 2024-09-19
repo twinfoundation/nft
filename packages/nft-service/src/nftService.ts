@@ -1,8 +1,8 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { GeneralError, Guards, Urn } from "@gtsc/core";
-import { nameof } from "@gtsc/nameof";
-import { NftConnectorFactory, type INftComponent, type INftConnector } from "@gtsc/nft-models";
+import { GeneralError, Guards, Urn } from "@twin.org/core";
+import { nameof } from "@twin.org/nameof";
+import { NftConnectorFactory, type INftComponent, type INftConnector } from "@twin.org/nft-models";
 import type { INftServiceConfig } from "./models/INftServiceConfig";
 
 /**
