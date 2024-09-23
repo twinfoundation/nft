@@ -32,14 +32,18 @@ if (!Is.stringValue(process.env.TEST_MNEMONIC)) {
 	// eslint-disable-next-line no-restricted-syntax
 	throw new Error(
 		`Please define TEST_MNEMONIC as a 24 word mnemonic either as an environment variable or inside an .env.dev file
-		 e.g. TEST_MNEMONIC="word0 word1 ... word23"`
+		 e.g. TEST_MNEMONIC="word0 word1 ... word23"
+		 You can generate one using the following command
+		 npx "@twin.org/crypto-cli" mnemonic --env ./tests/.env.dev --env-prefix TEST_`
 	);
 }
-if (!Is.stringValue(process.env.TEST_MNEMONIC_2)) {
+if (!Is.stringValue(process.env.TEST_2_MNEMONIC)) {
 	// eslint-disable-next-line no-restricted-syntax
 	throw new Error(
-		`Please define TEST_MNEMONIC as a 24 word mnemonic either as an environment variable or inside an .env.dev file
-		 e.g. TEST_MNEMONIC="word0 word1 ... word23"`
+		`Please define TEST_2_MNEMONIC as a 24 word mnemonic either as an environment variable or inside an .env.dev file
+		 e.g. TEST_2_MNEMONIC="word0 word1 ... word23"
+		 You can generate one using the following command
+		 npx "@twin.org/crypto-cli" mnemonic --env ./tests/.env.dev --env-prefix TEST_2_`
 	);
 }
 
@@ -97,7 +101,7 @@ await TEST_VAULT_CONNECTOR.setSecret(
 
 await TEST_VAULT_CONNECTOR.setSecret(
 	`${TEST_IDENTITY_ID_2}/${TEST_MNEMONIC_NAME}`,
-	process.env.TEST_MNEMONIC_2
+	process.env.TEST_2_MNEMONIC
 );
 
 const addresses = await TEST_WALLET_CONNECTOR.getAddresses(TEST_IDENTITY_ID, 0, 1, 1);

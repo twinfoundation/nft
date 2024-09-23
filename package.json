@@ -44,7 +44,7 @@
 		"packages/nft-connector-entity-storage",
 		"packages/nft-service",
 		"packages/nft-rest-client",
-		"packages/nft-cli"
+		"app/nft-cli"
 	],
 	"type": "module"
 }
