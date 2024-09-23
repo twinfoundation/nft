@@ -8,12 +8,12 @@ on:
         required: true
         type: choice
         options:
-          - "packages/nft-models"
-          - "packages/nft-connector-iota"
-          - "packages/nft-connector-entity-storage"
-          - "packages/nft-service"
-          - "packages/nft-rest-client"
-          - "apps/nft-cli"
+          - 'packages/nft-models'
+          - 'packages/nft-connector-iota'
+          - 'packages/nft-connector-entity-storage'
+          - 'packages/nft-service'
+          - 'packages/nft-rest-client'
+          - 'apps/nft-cli'
 
 jobs:
   publish:

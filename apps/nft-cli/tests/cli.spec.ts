@@ -24,7 +24,9 @@ describe("CLI", () => {
 
 	test("Can execute with no command line options and receive help", async () => {
 		const cli = new CLI();
-		const exitCode = await cli.run(["", path.join(__dirname, "nft-cli")], localesDirectory);
+		const exitCode = await cli.run(["", path.join(__dirname, "nft-cli")], localesDirectory, {
+			overrideOutputWidth: 1000
+		});
 		expect(exitCode).toBe(0);
 	});
 });

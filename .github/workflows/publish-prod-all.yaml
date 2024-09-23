@@ -19,12 +19,12 @@ jobs:
       matrix:
         package:
           [
-            "packages/nft-models",
-            "packages/nft-connector-iota",
-            "packages/nft-connector-entity-storage",
-            "packages/nft-service",
-            "packages/nft-rest-client",
-            "apps/nft-cli"
+            'packages/nft-models',
+            'packages/nft-connector-iota',
+            'packages/nft-connector-entity-storage',
+            'packages/nft-service',
+            'packages/nft-rest-client',
+            'apps/nft-cli'
           ]
 
     steps:
