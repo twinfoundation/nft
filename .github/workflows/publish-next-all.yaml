@@ -10,7 +10,7 @@ jobs:
 
     env:
       TEST_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
-      TEST_MNEMONIC_2: ${{ secrets.TEST_MNEMONIC_2 }}
+      TEST_2_MNEMONIC: ${{ secrets.TEST_2_MNEMONIC }}
 
     if: github.ref != 'refs/heads/main'
 
@@ -19,12 +19,12 @@ jobs:
       matrix:
         package:
           [
-            nft-models,
-            nft-connector-iota,
-            nft-connector-entity-storage,
-            nft-service,
-            nft-rest-client,
-            nft-cli
+            "packages/nft-models",
+            "packages/nft-connector-iota",
+            "packages/nft-connector-entity-storage",
+            "packages/nft-service",
+            "packages/nft-rest-client",
+            "apps/nft-cli"
           ]
 
     steps:
@@ -46,7 +46,7 @@ jobs:
 
       - name: Check package version contains -next
         run: |
-          cd packages/${{ matrix.package }}
+          cd ${{ matrix.package }}
           PACKAGE_VERSION=$(cat package.json | jq '.version' | tr -d '"')
           echo Package Version $PACKAGE_VERSION
           if [[ $PACKAGE_VERSION != *"-next"* ]]; then
@@ -56,19 +56,19 @@ jobs:
 
       - name: Run Dist
         run: |
-          cd packages/${{ matrix.package }}
+          cd ${{ matrix.package }}
           npm install
           npm run dist
 
       - name: Cleanup package properties
         run: |
-          cd packages/${{ matrix.package }}
+          cd ${{ matrix.package }}
           npm pkg delete scripts
           npm pkg delete devDependencies
 
       - name: Publish
         run: |
-          cd packages/${{ matrix.package }}
+          cd ${{ matrix.package }}
           npm publish --provenance --access public --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
