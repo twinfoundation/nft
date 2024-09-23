@@ -12,7 +12,7 @@ This mono-repository contains packages which are used when creating and interact
 
 ## Apps
 
-- [nft-connector-cli](packages/nft-connector-cli/README.md) - A command line interface for interacting with the NFT APIs.
+- [nft-connector-cli](apps/nft-connector-cli/README.md) - A command line interface for interacting with the NFT APIs.
 
 ## Contributing
 
