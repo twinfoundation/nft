@@ -120,4 +120,5 @@ export async function setupTestEnv(): Promise<void> {
 		`${process.env.TEST_EXPLORER_URL}addr/${TEST_NFT_ADDRESS_2_BECH32}`
 	);
 	await TEST_WALLET_CONNECTOR.ensureBalance(TEST_IDENTITY_ID, TEST_NFT_ADDRESS_BECH32, 1000000000n);
+	await TEST_WALLET_CONNECTOR.ensureBalance(TEST_IDENTITY_ID_2, TEST_NFT_ADDRESS_BECH32, 1000000000n);
 }
