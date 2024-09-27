@@ -13,6 +13,7 @@ import type {
 	INftTransferRequest,
 	INftUpdateRequest
 } from "@twin.org/nft-models";
+import { HeaderTypes } from "@twin.org/web";
 
 /**
  * Client for performing NFT through to REST endpoints.
@@ -60,7 +61,7 @@ export class NftClient extends BaseRestClient implements INftComponent {
 			}
 		});
 
-		return response.headers.location;
+		return response.headers[HeaderTypes.Location];
 	}
 
 	/**
