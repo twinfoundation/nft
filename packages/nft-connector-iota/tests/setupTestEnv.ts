@@ -43,7 +43,7 @@ if (!Is.stringValue(process.env.TEST_2_MNEMONIC)) {
 		`Please define TEST_2_MNEMONIC as a 24 word mnemonic either as an environment variable or inside an .env.dev file
 		 e.g. TEST_2_MNEMONIC="word0 word1 ... word23"
 		 You can generate one using the following command
-		 npx "@twin.org/crypto-cli" mnemonic --env ./tests/.env.dev --env-prefix TEST_2_`
+		 npx "@twin.org/crypto-cli" mnemonic --env ./tests/.env.dev --env-prefix TEST_2_ --merge-env`
 	);
 }
 
