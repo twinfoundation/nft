@@ -24,6 +24,7 @@ import { nameof } from "@twin.org/nameof";
 import type { INftConnector } from "@twin.org/nft-models";
 import { VaultConnectorFactory, type IVaultConnector } from "@twin.org/vault-models";
 import type { IIotaNftConnectorConfig } from "./models/IIotaNftConnectorConfig";
+import type { IIotaNftConnectorConstructorOptions } from "./models/IIotaNftConnectorConstructorOptions";
 
 /**
  * Class for performing NFT operations on IOTA.
@@ -54,10 +55,8 @@ export class IotaNftConnector implements INftConnector {
 	/**
 	 * Create a new instance of IotaNftConnector.
 	 * @param options The options for the connector.
-	 * @param options.vaultConnectorType The type of the vault connector, defaults to "vault".
-	 * @param options.config The configuration for the connector.
 	 */
-	constructor(options: { vaultConnectorType?: string; config: IIotaNftConnectorConfig }) {
+	constructor(options: IIotaNftConnectorConstructorOptions) {
 		Guards.object(this.CLASS_NAME, nameof(options), options);
 		Guards.object<IIotaNftConnectorConfig>(this.CLASS_NAME, nameof(options.config), options.config);
 		Guards.object<IIotaNftConnectorConfig["clientOptions"]>(

@@ -16,6 +16,7 @@ import {
 import { nameof } from "@twin.org/nameof";
 import type { INftConnector } from "@twin.org/nft-models";
 import type { Nft } from "./entities/nft";
+import type { IEntityStorageNftConnectorConstructorOptions } from "./models/IEntityStorageNftConnectorConstructorOptions";
 
 /**
  * Class for performing NFT operations on entity storage.
@@ -40,9 +41,8 @@ export class EntityStorageNftConnector implements INftConnector {
 	/**
 	 * Create a new instance of EntityStorageNftConnector.
 	 * @param options The dependencies for the class.
-	 * @param options.nftEntityStorageType The entity storage for nfts, defaults to "nft".
 	 */
-	constructor(options?: { nftEntityStorageType?: string }) {
+	constructor(options?: IEntityStorageNftConnectorConstructorOptions) {
 		this._nftEntityStorage = EntityStorageConnectorFactory.get(
 			options?.nftEntityStorageType ?? "nft"
 		);

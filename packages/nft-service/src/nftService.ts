@@ -3,7 +3,7 @@
 import { GeneralError, Guards, Urn } from "@twin.org/core";
 import { nameof } from "@twin.org/nameof";
 import { NftConnectorFactory, type INftComponent, type INftConnector } from "@twin.org/nft-models";
-import type { INftServiceConfig } from "./models/INftServiceConfig";
+import type { INftServiceConstructorOptions } from "./models/INftServiceConstructorOptions";
 
 /**
  * Service for performing NFT operations to a connector.
@@ -28,9 +28,8 @@ export class NftService implements INftComponent {
 	/**
 	 * Create a new instance of NftService.
 	 * @param options The options for the service.
-	 * @param options.config The configuration for the service.
 	 */
-	constructor(options?: { config?: INftServiceConfig }) {
+	constructor(options?: INftServiceConstructorOptions) {
 		const names = NftConnectorFactory.names();
 		if (names.length === 0) {
 			throw new GeneralError(this.CLASS_NAME, "noConnectors");
