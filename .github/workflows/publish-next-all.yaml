@@ -24,6 +24,7 @@ jobs:
             'packages/nft-connector-entity-storage',
             'packages/nft-service',
             'packages/nft-rest-client',
+            'packages/nft-connector-iota-rebased',
             'apps/nft-cli'
           ]
 
