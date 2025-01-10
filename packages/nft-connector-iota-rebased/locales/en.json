@@ -1,13 +1,13 @@
 {
 	"info": {
-		"suiNftConnector": {
+		"iotaRebasedNftConnector": {
 			"contractAlreadyDeployed": "Contract already deployed",
 			"contractDeploymentStarted": "Contract deployment started",
 			"contractDeploymentCompleted": "Contract deployment completed"
 		}
 	},
 	"error": {
-		"suiNftConnector": {
+		"iotaRebasedNftConnector": {
 			"mintingFailed": "Minting the NFT failed",
 			"resolvingFailed": "Resolving the NFT failed",
 			"burningFailed": "Burning the NFT failed",

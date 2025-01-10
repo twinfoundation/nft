@@ -23,7 +23,7 @@
 // const userIdentity2 = TEST_USER_IDENTITY_ID_2;
 
 /*
- * ATTENTION *
+ * TODO *
  * These tests have been commented out due to known latency issues with the Indexer.
  * The current checkpoint-based synchronization introduces delays, causing read-after-write consistency to fail in certain cases. This results in intermittent test failures.
  * Once the latency issues are resolved, these tests should be re-enabled.

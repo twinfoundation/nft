@@ -130,9 +130,9 @@ export class IotaRebasedNftConnector implements INftConnector {
 			// Convert base64 package(s) to bytes
 			let compiledModules: number[][];
 
-			if (Is.arrayValue(contractData.package)) {
-				compiledModules = contractData.package.map((pkg: unknown) =>
-					Array.from(Converter.base64ToBytes(pkg as string))
+			if (Is.arrayValue<string>(contractData.package)) {
+				compiledModules = contractData.package.map((pkg: string) =>
+					Array.from(Converter.base64ToBytes(pkg))
 				);
 			} else {
 				compiledModules = [Array.from(Converter.base64ToBytes(contractData.package))];
@@ -277,7 +277,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 			let description = "";
 			let uri = "";
 
-			if (immutableMetadata && Is.object(immutableMetadata)) {
+			if (Is.object(immutableMetadata)) {
 				const meta = immutableMetadata as unknown as IIotaRebasedNftMetadata;
 				name = meta.name;
 				description = meta.description;
@@ -377,7 +377,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 			const owner = object.data.owner;
 			let ownerAddress: string | null = null;
 
-			if (owner && typeof owner === "object") {
+			if (Is.object(owner)) {
 				if ("AddressOwner" in owner) {
 					ownerAddress = owner.AddressOwner;
 				} else if ("ObjectOwner" in owner) {
