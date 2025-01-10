@@ -64,7 +64,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 	 * The package ID of the deployed NFT Move module.
 	 * @internal
 	 */
-	private _packageId: string | undefined;
+	private _packageId?: string;
 
 	/**
 	 * Create a new instance of IotaRebasedNftConnector.
