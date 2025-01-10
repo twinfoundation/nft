@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Download IOTA CLI
+        run: |
+          wget https://github.com/iotaledger/iota/releases/download/v0.8.1-beta/iota-v0.8.1-beta-linux-x86_64.tgz -O iota
+          chmod +x iota
+          sudo mv iota /usr/local/bin/iota
+
       - name: Run Lint and Dist
         run: |
           npm run lint

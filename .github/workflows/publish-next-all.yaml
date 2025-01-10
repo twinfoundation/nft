@@ -55,6 +55,12 @@ jobs:
             exit 1
           fi
 
+      - name: Download IOTA CLI
+        run: |
+          wget https://github.com/iotaledger/iota/releases/download/v0.8.1-beta/iota-v0.8.1-beta-linux-x86_64.tgz -O iota
+          chmod +x iota
+          sudo mv iota /usr/local/bin/iota
+
       - name: Run Dist
         run: |
           cd ${{ matrix.package }}
