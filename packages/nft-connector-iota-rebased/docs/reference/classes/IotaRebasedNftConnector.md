@@ -1,6 +1,6 @@
-# Class: EntityStorageNftConnector
+# Class: IotaRebasedNftConnector
 
-Class for performing NFT operations on entity storage.
+Class for performing NFT operations on IOTA Rebased.
 
 ## Implements
 
@@ -8,54 +8,69 @@ Class for performing NFT operations on entity storage.
 
 ## Constructors
 
-### new EntityStorageNftConnector()
+### new IotaRebasedNftConnector()
 
-> **new EntityStorageNftConnector**(`options`?): [`EntityStorageNftConnector`](EntityStorageNftConnector.md)
+> **new IotaRebasedNftConnector**(`options`): [`IotaRebasedNftConnector`](IotaRebasedNftConnector.md)
 
-Create a new instance of EntityStorageNftConnector.
+Create a new instance of IotaRebasedNftConnector.
 
 #### Parameters
 
-##### options?
+##### options
 
-The dependencies for the class.
+[`IIotaRebasedNftConnectorConstructorOptions`](../interfaces/IIotaRebasedNftConnectorConstructorOptions.md)
 
-###### nftEntityStorageType
-
-`string`
-
-The entity storage for nfts, defaults to "nft".
-
-
-[`IEntityStorageNftConnectorConstructorOptions`](../interfaces/IEntityStorageNftConnectorConstructorOptions.md)
-
-The dependencies for the class.
+The options for the connector.
 
 #### Returns
 
-[`EntityStorageNftConnector`](EntityStorageNftConnector.md)
+[`IotaRebasedNftConnector`](IotaRebasedNftConnector.md)
 
 ## Properties
 
 ### NAMESPACE
 
-> `static` **NAMESPACE**: `string` = `"entity-storage"`
+> `readonly` `static` **NAMESPACE**: `string` = `"iota-rebased"`
 
 The namespace supported by the nft connector.
 
-***
+## Methods
 
-### CLASS\_NAME
+### start()
 
-> `readonly` **CLASS\_NAME**: `string`
+> **start**(`nodeIdentity`, `nodeLoggingConnectorType`?, `componentState`?): `Promise`\<`void`\>
 
-Runtime name for the class.
+Bootstrap the NFT contract.
+
+#### Parameters
+
+##### nodeIdentity
+
+`string`
+
+The identity of the node.
+
+##### nodeLoggingConnectorType?
+
+`string`
+
+The node logging connector type, defaults to "node-logging".
+
+##### componentState?
+
+The component state.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+void.
 
 #### Implementation of
 
-`INftConnector.CLASS_NAME`
+`INftConnector.start`
 
-## Methods
+***
 
 ### mint()
 
@@ -75,7 +90,7 @@ Mint an NFT.
 
 `string`
 
-The controller of the NFT who can make changes.
+The identity of the user to access the vault keys.
 
 ##### issuer
 
@@ -115,9 +130,9 @@ The id of the created NFT in urn format.
 
 ### resolve()
 
-> **resolve**\<`T`, `U`\>(`id`): `Promise`\<\{ `issuer`: `string`; `owner`: `string`; `tag`: `string`; `immutableMetadata`: `T`; `metadata`: `U`; \}\>
+> **resolve**\<`T`, `U`\>(`nftId`): `Promise`\<\{ `issuer`: `string`; `owner`: `string`; `tag`: `string`; `immutableMetadata`: `T`; `metadata`: `U`; \}\>
 
-Resolve an NFT.
+Resolve an NFT to get its details.
 
 #### Type Parameters
 
@@ -127,7 +142,7 @@ Resolve an NFT.
 
 #### Parameters
 
-##### id
+##### nftId
 
 `string`
 
@@ -137,7 +152,7 @@ The id of the NFT to resolve.
 
 `Promise`\<\{ `issuer`: `string`; `owner`: `string`; `tag`: `string`; `immutableMetadata`: `T`; `metadata`: `U`; \}\>
 
-The data for the NFT.
+The NFT details.
 
 #### Implementation of
 
@@ -169,7 +184,7 @@ The id of the NFT to burn in urn format.
 
 `Promise`\<`void`\>
 
-Nothing.
+void.
 
 #### Implementation of
 
@@ -179,9 +194,57 @@ Nothing.
 
 ### transfer()
 
-> **transfer**\<`T`\>(`controller`, `id`, `recipient`, `metadata`?): `Promise`\<`void`\>
+> **transfer**\<`T`\>(`controller`, `nftId`, `recipient`, `metadata`?): `Promise`\<`void`\>
 
-Transfer an NFT.
+Transfer an NFT to a new owner.
+
+#### Type Parameters
+
+• **T** = `unknown`
+
+#### Parameters
+
+##### controller
+
+`string`
+
+The identity of the user to access the vault keys.
+
+##### nftId
+
+`string`
+
+The id of the NFT to transfer.
+
+##### recipient
+
+`string`
+
+The address to transfer the NFT to.
+
+##### metadata?
+
+`T`
+
+Optional metadata to update during transfer.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+void.
+
+#### Implementation of
+
+`INftConnector.transfer`
+
+***
+
+### update()
+
+> **update**\<`T`\>(`controller`, `id`, `metadata`): `Promise`\<`void`\>
+
+Update the mutable data of an NFT.
 
 #### Type Parameters
 
@@ -199,67 +262,19 @@ The controller of the NFT who can make changes.
 
 `string`
 
-The id of the NFT to transfer in urn format.
-
-##### recipient
-
-`string`
-
-The recipient of the NFT.
-
-##### metadata?
-
-`T`
-
-Optional mutable data to include during the transfer.
-
-#### Returns
-
-`Promise`\<`void`\>
-
-Nothing.
-
-#### Implementation of
-
-`INftConnector.transfer`
-
-***
-
-### update()
-
-> **update**\<`T`\>(`controller`, `id`, `metadata`): `Promise`\<`void`\>
-
-Update the data of the NFT.
-
-#### Type Parameters
-
-• **T** = `unknown`
-
-#### Parameters
-
-##### controller
-
-`string`
-
-The owner of the NFT who can make changes.
-
-##### id
-
-`string`
-
 The id of the NFT to update in urn format.
 
 ##### metadata
 
 `T`
 
-The mutable data to update.
+The new metadata for the NFT.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-Nothing.
+void.
 
 #### Implementation of
 
