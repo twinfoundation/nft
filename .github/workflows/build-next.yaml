@@ -34,9 +34,14 @@ jobs:
 
       - name: Download IOTA CLI
         run: |
-          wget https://github.com/iotaledger/iota/releases/download/v0.8.1-beta/iota-v0.8.1-beta-linux-x86_64.tgz -O iota
+          wget https://github.com/iotaledger/iota/releases/download/v0.8.1-beta/iota-v0.8.1-beta-linux-x86_64.tgz -O iota-cli.tgz
+          tar -tzf iota-cli.tgz
+          tar xzf iota-cli.tgz
+          ls -la
           chmod +x iota
           sudo mv iota /usr/local/bin/iota
+          iota --version
+          file /usr/local/bin/iota
 
       - name: Run Lint and Dist
         run: |
