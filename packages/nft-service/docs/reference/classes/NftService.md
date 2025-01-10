@@ -17,6 +17,7 @@ Create a new instance of NftService.
 #### Parameters
 
 ##### options?
+<<<<<<< HEAD
 
 The options for the service.
 
@@ -26,6 +27,13 @@ The options for the service.
 
 The configuration for the service.
 
+=======
+
+[`INftServiceConstructorOptions`](../interfaces/INftServiceConstructorOptions.md)
+
+The options for the service.
+
+>>>>>>> next
 #### Returns
 
 [`NftService`](NftService.md)

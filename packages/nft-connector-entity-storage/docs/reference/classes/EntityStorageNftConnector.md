@@ -26,6 +26,11 @@ The dependencies for the class.
 
 The entity storage for nfts, defaults to "nft".
 
+
+[`IEntityStorageNftConnectorConstructorOptions`](../interfaces/IEntityStorageNftConnectorConstructorOptions.md)
+
+The dependencies for the class.
+
 #### Returns
 
 [`EntityStorageNftConnector`](EntityStorageNftConnector.md)

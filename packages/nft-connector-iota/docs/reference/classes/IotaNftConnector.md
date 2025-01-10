@@ -18,19 +18,9 @@ Create a new instance of IotaNftConnector.
 
 ##### options
 
+[`IIotaNftConnectorConstructorOptions`](../interfaces/IIotaNftConnectorConstructorOptions.md)
+
 The options for the connector.
-
-###### vaultConnectorType
-
-`string`
-
-The type of the vault connector, defaults to "vault".
-
-###### config
-
-[`IIotaNftConnectorConfig`](../interfaces/IIotaNftConnectorConfig.md)
-
-The configuration for the connector.
 
 #### Returns
 
