@@ -76,7 +76,7 @@ for (const contractDir of contractDirs) {
 	}
 }
 
-fs.writeFileSync(compiledModulesJsonPath, JSON.stringify(outputJson, null, 2));
+fs.writeFileSync(compiledModulesJsonPath, `${JSON.stringify(outputJson, undefined, '\t')}\n`);
 
 // eslint-disable-next-line no-console
 console.log('Compiled modules have been written to compiled-modules.json');
