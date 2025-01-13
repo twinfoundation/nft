@@ -18,15 +18,6 @@ Create a new instance of EntityStorageNftConnector.
 
 ##### options?
 
-The dependencies for the class.
-
-###### nftEntityStorageType
-
-`string`
-
-The entity storage for nfts, defaults to "nft".
-
-
 [`IEntityStorageNftConnectorConstructorOptions`](../interfaces/IEntityStorageNftConnectorConstructorOptions.md)
 
 The dependencies for the class.
