@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/nft-connector-entity-storage",
-	"version": "0.0.1-next.7",
+	"version": "0.0.1-next.8",
 	"description": "Implementation of the NFT connector using entity storage",
 	"repository": {
 		"type": "git",
@@ -34,7 +34,7 @@
 		"@twin.org/entity": "next",
 		"@twin.org/entity-storage-models": "next",
 		"@twin.org/nameof": "next",
-		"@twin.org/nft-models": "0.0.1-next.7"
+		"@twin.org/nft-models": "0.0.1-next.8"
 	},
 	"devDependencies": {
 		"@twin.org/nameof-transformer": "next",
@@ -50,7 +50,7 @@
 		"tsc-watch": "6.2.1",
 		"typedoc": "0.27.6",
 		"typedoc-plugin-markdown": "4.4.1",
-		"typescript": "5.7.2",
+		"typescript": "5.7.3",
 		"vitest": "2.1.8"
 	},
 	"main": "./dist/cjs/index.cjs",

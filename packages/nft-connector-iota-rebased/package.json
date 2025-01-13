@@ -1,13 +1,13 @@
 {
-	"name": "@twin.org/nft-cli",
+	"name": "@twin.org/nft-connector-iota-rebased",
 	"version": "0.0.1-next.8",
-	"description": "A command line interface for interacting with the nft connectors",
+	"description": "Implementation of the NFT connector using Iota Rebased",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/twinfoundation/nft.git",
-		"directory": "apps/nft-cli"
+		"directory": "packages/nft-connector-iota-rebased"
 	},
-	"author": "martyn.janes@iota.org",
+	"author": "cornel.filip@iota.org",
 	"license": "Apache-2.0",
 	"type": "module",
 	"engines": {
@@ -15,9 +15,9 @@
 	},
 	"scripts": {
 		"clean": "rimraf dist coverage",
-		"build": "tsc",
+		"build:contracts": "cd src/contracts/nft && iota move build && node ../../../scripts/compileModules.mjs",
+		"build": "tsc && npm run build:contracts",
 		"build:watch": "tsc-watch --onSuccess \"npm run bundle:esm\"",
-		"merge-locales": "merge-locales",
 		"test": "vitest --run --config ./vitest.config.ts --no-cache",
 		"coverage": "vitest --run --coverage --config ./vitest.config.ts --no-cache",
 		"bundle:esm": "rollup --config rollup.config.mjs --environment MODULE:esm",
@@ -26,32 +26,34 @@
 		"docs:clean": "rimraf docs/reference",
 		"docs:generate": "typedoc",
 		"docs": "npm run docs:clean && npm run docs:generate",
-		"dist": "npm run clean && npm run build && npm run merge-locales && npm run test && npm run bundle && npm run docs",
+		"dist": "npm run clean && npm run build && npm run test && npm run bundle && npm run docs",
 		"prepare": "ts-patch install -s"
 	},
 	"dependencies": {
+		"@iota/iota-sdk": "^0.4.0",
 		"@twin.org/core": "next",
 		"@twin.org/crypto": "next",
-		"@twin.org/cli-core": "next",
-		"@twin.org/crypto-cli": "next",
-		"@twin.org/entity": "next",
-		"@twin.org/entity-storage-connector-memory": "next",
+		"@twin.org/logging-models": "next",
 		"@twin.org/nameof": "next",
-		"@twin.org/nft-connector-iota": "0.0.1-next.8",
-		"@twin.org/vault-connector-entity-storage": "next",
+		"@twin.org/nft-models": "0.0.1-next.8",
 		"@twin.org/vault-models": "next",
-		"@twin.org/wallet-cli": "next",
-		"commander": "13.0.0"
+		"@twin.org/wallet-models": "next",
+		"@twin.org/dlt-iota-rebased": "next"
 	},
 	"devDependencies": {
-		"@twin.org/merge-locales": "next",
+		"@rollup/plugin-json": "^6.1.0",
+		"@twin.org/entity": "next",
+		"@twin.org/entity-storage-connector-memory": "next",
 		"@twin.org/nameof-transformer": "next",
 		"@twin.org/nameof-vitest-plugin": "next",
-		"@types/node": "22.10.5",
+		"@twin.org/vault-connector-entity-storage": "next",
+		"@types/node": "^22.10.5",
 		"@vitest/coverage-v8": "2.1.8",
 		"copyfiles": "2.4.1",
+		"dotenv": "16.4.7",
 		"rimraf": "6.0.1",
 		"rollup": "4.30.1",
+		"rollup-plugin-copy": "3.5.0",
 		"ts-patch": "3.3.0",
 		"tsc-watch": "6.2.1",
 		"typedoc": "0.27.6",
@@ -70,15 +72,10 @@
 		}
 	},
 	"files": [
-		"bin",
 		"dist/cjs",
 		"dist/esm",
 		"dist/types",
-		"dist/locales",
 		"locales",
 		"docs"
-	],
-	"bin": {
-		"twin-nft": "bin/index.js"
-	}
+	]
 }
