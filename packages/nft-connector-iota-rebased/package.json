@@ -35,7 +35,7 @@
 		"@twin.org/crypto": "next",
 		"@twin.org/logging-models": "next",
 		"@twin.org/nameof": "next",
-		"@twin.org/nft-models": "0.0.1-next.7",
+		"@twin.org/nft-models": "0.0.1-next.8",
 		"@twin.org/vault-models": "next",
 		"@twin.org/wallet-models": "next",
 		"@twin.org/dlt-iota-rebased": "next"
