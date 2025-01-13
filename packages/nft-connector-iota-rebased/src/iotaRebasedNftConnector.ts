@@ -3,7 +3,6 @@
 import type { IotaClient } from "@iota/iota-sdk/client";
 import { Transaction } from "@iota/iota-sdk/transactions";
 import { BaseError, Converter, GeneralError, Guards, Is, StringHelper, Urn } from "@twin.org/core";
-import { Bip39 } from "@twin.org/crypto";
 import { IotaRebased } from "@twin.org/dlt-iota-rebased";
 import { LoggingConnectorFactory } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
@@ -141,7 +140,10 @@ export class IotaRebasedNftConnector implements INftConnector {
 				this._packageId = componentState.packageId;
 
 				// Check if package exists on the network
-				const packageExists = await this.packageExistsOnNetwork(this._packageId);
+				const packageExists = await IotaRebased.packageExistsOnNetwork(
+					this._client,
+					this._packageId
+				);
 				if (packageExists) {
 					await nodeLogging?.log({
 						level: "info",
@@ -619,11 +621,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 	 * @returns The controller's address.
 	 */
 	private async getControllerAddress(identity: string): Promise<string> {
-		const mnemonic = await this._vaultConnector.getSecret<string>(
-			IotaRebased.buildMnemonicKey(identity, this._config)
-		);
-
-		const seed = Bip39.mnemonicToSeed(mnemonic);
+		const seed = await IotaRebased.getSeed(this._config, this._vaultConnector, identity);
 		const walletAddressIndex = this._config.walletAddressIndex ?? 0;
 		const addresses = IotaRebased.getAddresses(seed, this._config, 0, walletAddressIndex, 1, false);
 
@@ -666,38 +664,5 @@ export class IotaRebasedNftConnector implements INftConnector {
 	 */
 	private getModuleName(): string {
 		return StringHelper.snakeCase(this._contractName);
-	}
-
-	/**
-	 * Check if the package exists on the network.
-	 * @param packageId The package ID to check.
-	 * @returns True if the package exists, false otherwise.
-	 */
-	private async packageExistsOnNetwork(packageId: string): Promise<boolean> {
-		try {
-			const packageObject = await this._client.getObject({
-				id: packageId,
-				options: {
-					showType: true
-				}
-			});
-
-			if ("error" in packageObject) {
-				if (packageObject?.error?.code === "notExists") {
-					return false;
-				}
-				throw new GeneralError(this.CLASS_NAME, "packageObjectError", {
-					packageId,
-					error: packageObject.error
-				});
-			}
-
-			return true;
-		} catch (error) {
-			throw new GeneralError(this.CLASS_NAME, "packageNotFoundOnNetwork", {
-				packageId,
-				error: IotaRebased.extractPayloadError(error)
-			});
-		}
 	}
 }

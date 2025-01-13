@@ -8,14 +8,6 @@ Configuration for the IOTA Rebased NFT Connector.
 
 ## Properties
 
-### network
-
-> **network**: `string`
-
-The network identifier.
-
-***
-
 ### contractName?
 
 > `optional` **contractName**: `string`
