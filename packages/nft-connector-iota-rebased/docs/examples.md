@@ -14,35 +14,35 @@ The `start()` method must be called after instantiating the connector and before
 This project uses the "iota" command-line tool to compile and manage its Move contracts. To run "iota move build" or related commands on your own machine, you'll need to install the correct IOTA CLI binary for your operating system and processor architecture.
 
 1. Visit the IOTA GitHub Releases Page  
-   → https://github.com/iotaledger/iota/releases  
-   Here, you'll see multiple release artifacts (e.g., Linux x86_64, macOS arm64, Windows x86_64, etc.).  
+   [IOTA Releases](https://github.com/iotaledger/iota/releases)  
+   Here, you'll see multiple release artifacts (e.g., Linux x86_64, macOS arm64, Windows x86_64, etc.).
 
 2. Download the Correct Release  
    • Linux (x86_64): iota-vX.Y.Z-beta-linux-x86_64.tgz  
    • macOS (arm64 or x86_64): iota-vX.Y.Z-beta-macos-arm64.tgz (or macos-x86_64)  
-   • Windows (x86_64): iota-vX.Y.Z-beta-windows-x86_64.tgz  
+   • Windows (x86_64): iota-vX.Y.Z-beta-windows-x86_64.tgz
 
 3. Extract the Archive  
    On Linux/macOS (adjust the file name as needed):  
    » tar xzf iota-vX.Y.Z-beta-linux-x86_64.tgz  
-   This should produce an executable file named iota (or iota.exe on Windows).  
+   This should produce an executable file named iota (or iota.exe on Windows).
 
 4. Mark as Executable (Linux/macOS)  
-   » chmod +x iota  
+   » chmod +x iota
 
 5. (Optional) Move It to a System-Wide Location  
    » sudo mv iota /usr/local/bin/iota  
-   This allows you to run the iota command from any directory.  
+   This allows you to run the iota command from any directory.
 
 6. Confirm Installation  
-   » iota --version  
+   » iota --version
 
 7. Windows Users  
    • Extract the .tgz using a tool such as 7zip.  
    • The extracted file will typically be named iota.exe.  
-   • You can either run it from the same folder or move it somewhere in your system's PATH.  
+   • You can either run it from the same folder or move it somewhere in your system's PATH.
 
-Once installed, you can use the iota command to build or manage Move contracts locally.  
+Once installed, you can use the iota command to build or manage Move contracts locally.
 
 ---
 

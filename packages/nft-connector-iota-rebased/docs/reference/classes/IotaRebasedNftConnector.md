@@ -16,9 +16,7 @@ Create a new instance of IotaRebasedNftConnector.
 
 #### Parameters
 
-##### options
-
-[`IIotaRebasedNftConnectorConstructorOptions`](../interfaces/IIotaRebasedNftConnectorConstructorOptions.md)
+• **options**: [`IIotaRebasedNftConnectorConstructorOptions`](../interfaces/IIotaRebasedNftConnectorConstructorOptions.md)
 
 The options for the connector.
 
@@ -44,19 +42,15 @@ Bootstrap the NFT contract.
 
 #### Parameters
 
-##### nodeIdentity
-
-`string`
+• **nodeIdentity**: `string`
 
 The identity of the node.
 
-##### nodeLoggingConnectorType?
-
-`string`
+• **nodeLoggingConnectorType?**: `string`
 
 The node logging connector type, defaults to "node-logging".
 
-##### componentState?
+• **componentState?**
 
 The component state.
 
@@ -86,33 +80,23 @@ Mint an NFT.
 
 #### Parameters
 
-##### controller
-
-`string`
+• **controller**: `string`
 
 The identity of the user to access the vault keys.
 
-##### issuer
-
-`string`
+• **issuer**: `string`
 
 The issuer for the NFT, will also be the initial owner.
 
-##### tag
-
-`string`
+• **tag**: `string`
 
 The tag for the NFT.
 
-##### immutableMetadata?
-
-`T`
+• **immutableMetadata?**: `T`
 
 The immutable metadata for the NFT.
 
-##### metadata?
-
-`U`
+• **metadata?**: `U`
 
 The metadata for the NFT.
 
@@ -130,7 +114,7 @@ The id of the created NFT in urn format.
 
 ### resolve()
 
-> **resolve**\<`T`, `U`\>(`nftId`): `Promise`\<\{ `issuer`: `string`; `owner`: `string`; `tag`: `string`; `immutableMetadata`: `T`; `metadata`: `U`; \}\>
+> **resolve**\<`T`, `U`\>(`nftId`): `Promise`\<`object`\>
 
 Resolve an NFT to get its details.
 
@@ -142,17 +126,35 @@ Resolve an NFT to get its details.
 
 #### Parameters
 
-##### nftId
-
-`string`
+• **nftId**: `string`
 
 The id of the NFT to resolve.
 
 #### Returns
 
-`Promise`\<\{ `issuer`: `string`; `owner`: `string`; `tag`: `string`; `immutableMetadata`: `T`; `metadata`: `U`; \}\>
+`Promise`\<`object`\>
 
 The NFT details.
+
+##### issuer
+
+> **issuer**: `string`
+
+##### owner
+
+> **owner**: `string`
+
+##### tag
+
+> **tag**: `string`
+
+##### immutableMetadata?
+
+> `optional` **immutableMetadata**: `T`
+
+##### metadata?
+
+> `optional` **metadata**: `U`
 
 #### Implementation of
 
@@ -168,15 +170,11 @@ Burn an NFT.
 
 #### Parameters
 
-##### controller
-
-`string`
+• **controller**: `string`
 
 The controller of the NFT who can make changes.
 
-##### id
-
-`string`
+• **id**: `string`
 
 The id of the NFT to burn in urn format.
 
@@ -204,27 +202,19 @@ Transfer an NFT to a new owner.
 
 #### Parameters
 
-##### controller
-
-`string`
+• **controller**: `string`
 
 The identity of the user to access the vault keys.
 
-##### nftId
-
-`string`
+• **nftId**: `string`
 
 The id of the NFT to transfer.
 
-##### recipient
-
-`string`
+• **recipient**: `string`
 
 The address to transfer the NFT to.
 
-##### metadata?
-
-`T`
+• **metadata?**: `T`
 
 Optional metadata to update during transfer.
 
@@ -252,21 +242,15 @@ Update the mutable data of an NFT.
 
 #### Parameters
 
-##### controller
-
-`string`
+• **controller**: `string`
 
 The controller of the NFT who can make changes.
 
-##### id
-
-`string`
+• **id**: `string`
 
 The id of the NFT to update in urn format.
 
-##### metadata
-
-`T`
+• **metadata**: `T`
 
 The new metadata for the NFT.
 
