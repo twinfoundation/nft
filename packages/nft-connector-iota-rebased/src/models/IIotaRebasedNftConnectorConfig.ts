@@ -28,5 +28,5 @@ export interface IIotaRebasedNftConnectorConfig extends IIotaRebasedConfig {
 	 * The vault mnemonic identifier.
 	 * @default mnemonic
 	 */
-	vaultMnemonicId: string;
+	vaultMnemonicId?: string;
 }

@@ -50,9 +50,9 @@ The wallet address index to use when deriving addresses.
 
 ***
 
-### vaultMnemonicId
+### vaultMnemonicId?
 
-> **vaultMnemonicId**: `string`
+> `optional` **vaultMnemonicId**: `string`
 
 The vault mnemonic identifier.
 

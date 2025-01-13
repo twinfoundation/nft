@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/nft-connector-iota-rebased",
-	"version": "0.0.1-next.10",
+	"version": "0.0.1-next.11",
 	"description": "Implementation of the NFT connector using Iota Rebased",
 	"repository": {
 		"type": "git",
@@ -35,7 +35,7 @@
 		"@twin.org/crypto": "next",
 		"@twin.org/logging-models": "next",
 		"@twin.org/nameof": "next",
-		"@twin.org/nft-models": "0.0.1-next.10",
+		"@twin.org/nft-models": "0.0.1-next.11",
 		"@twin.org/vault-models": "next",
 		"@twin.org/wallet-models": "next",
 		"@twin.org/dlt-iota-rebased": "next"
