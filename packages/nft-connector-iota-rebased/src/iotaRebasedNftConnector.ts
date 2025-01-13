@@ -26,7 +26,6 @@ export class IotaRebasedNftConnector implements INftConnector {
 
 	/**
 	 * Runtime name for the class.
-	 * @internal
 	 */
 	public readonly CLASS_NAME: string = nameof<IotaRebasedNftConnector>();
 
