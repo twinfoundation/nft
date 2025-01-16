@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0.
 import path from "node:path";
 import { requestIotaFromFaucetV0 } from "@iota/iota-sdk/faucet";
-import { Ed25519Keypair } from "@iota/iota-sdk/keypairs/ed25519";
 import { Guards, Is } from "@twin.org/core";
+import { Bip39 } from "@twin.org/crypto";
+import { IotaRebased } from "@twin.org/dlt-iota-rebased";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { nameof } from "@twin.org/nameof";
@@ -89,14 +90,30 @@ export const TEST_CLIENT_OPTIONS = {
 
 export const TEST_COIN_TYPE = Number.parseInt(process.env.TEST_COIN_TYPE, 10);
 
-// Generate keypairs from mnemonics
-const keypair1 = Ed25519Keypair.deriveKeypair(process.env.TEST_MNEMONIC);
-const keypair2 = Ed25519Keypair.deriveKeypair(process.env.TEST_2_MNEMONIC);
-const keypair3 = Ed25519Keypair.deriveKeypair(process.env.TEST_NODE_MNEMONIC);
-
-export const TEST_ADDRESS = keypair1.getPublicKey().toIotaAddress();
-export const TEST_ADDRESS_2 = keypair2.getPublicKey().toIotaAddress();
-export const NODE_ADDRESS = keypair3.getPublicKey().toIotaAddress();
+const testAddresses = IotaRebased.getAddresses(
+	Bip39.mnemonicToSeed(process.env.TEST_MNEMONIC),
+	TEST_COIN_TYPE,
+	0,
+	0,
+	1
+);
+const testAddresses2 = IotaRebased.getAddresses(
+	Bip39.mnemonicToSeed(process.env.TEST_2_MNEMONIC),
+	TEST_COIN_TYPE,
+	0,
+	0,
+	1
+);
+const nodeAddresses = IotaRebased.getAddresses(
+	Bip39.mnemonicToSeed(process.env.TEST_NODE_MNEMONIC),
+	TEST_COIN_TYPE,
+	0,
+	0,
+	1
+);
+export const TEST_ADDRESS = testAddresses[0];
+export const TEST_ADDRESS_2 = testAddresses2[0];
+export const NODE_ADDRESS = nodeAddresses[0];
 
 // Store mnemonics in vault for node identity
 await TEST_VAULT_CONNECTOR.setSecret(
@@ -132,17 +149,19 @@ export async function setupTestEnv(): Promise<void> {
 		"Node Address",
 		`${process.env.TEST_EXPLORER_URL}address/${NODE_ADDRESS}?network=${TEST_NETWORK}`
 	);
-	// Request IOTA tokens from the faucet for both test accounts. 10 IOTA per request.
-	await requestIotaFromFaucetV0({
-		host: TEST_FAUCET_ENDPOINT,
-		recipient: NODE_ADDRESS
-	});
-	await requestIotaFromFaucetV0({
-		host: TEST_FAUCET_ENDPOINT,
-		recipient: TEST_ADDRESS
-	});
-	await requestIotaFromFaucetV0({
-		host: TEST_FAUCET_ENDPOINT,
-		recipient: TEST_ADDRESS_2
-	});
+	try {
+		// Request IOTA tokens from the faucet for both test accounts. 10 IOTA per request.
+		await requestIotaFromFaucetV0({
+			host: TEST_FAUCET_ENDPOINT,
+			recipient: NODE_ADDRESS
+		});
+		await requestIotaFromFaucetV0({
+			host: TEST_FAUCET_ENDPOINT,
+			recipient: TEST_ADDRESS
+		});
+		await requestIotaFromFaucetV0({
+			host: TEST_FAUCET_ENDPOINT,
+			recipient: TEST_ADDRESS_2
+		});
+	} catch {}
 }

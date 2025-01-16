@@ -623,7 +623,14 @@ export class IotaRebasedNftConnector implements INftConnector {
 	private async getControllerAddress(identity: string): Promise<string> {
 		const seed = await IotaRebased.getSeed(this._config, this._vaultConnector, identity);
 		const walletAddressIndex = this._config.walletAddressIndex ?? 0;
-		const addresses = IotaRebased.getAddresses(seed, this._config, 0, walletAddressIndex, 1, false);
+		const addresses = IotaRebased.getAddresses(
+			seed,
+			this._config.coinType ?? IotaRebased.DEFAULT_COIN_TYPE,
+			0,
+			walletAddressIndex,
+			1,
+			false
+		);
 
 		return addresses[0];
 	}
