@@ -11,6 +11,7 @@ jobs:
     env:
       TEST_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
       TEST_2_MNEMONIC: ${{ secrets.TEST_2_MNEMONIC }}
+      TEST_NODE_MNEMONIC: ${{ secrets.TEST_NODE_MNEMONIC }}
 
     if: github.ref == 'refs/heads/main'
 
