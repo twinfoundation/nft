@@ -5,6 +5,7 @@ import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { nameof } from "@twin.org/nameof";
 import { IotaNftConnector } from "@twin.org/nft-connector-iota";
 import { IotaRebasedNftConnector } from "@twin.org/nft-connector-iota-rebased";
+import type { INftConnector } from "@twin.org/nft-models";
 import {
 	EntityStorageVaultConnector,
 	type VaultKey,
@@ -12,7 +13,6 @@ import {
 	initSchema
 } from "@twin.org/vault-connector-entity-storage";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
-import type { INftConnector } from "../../../../packages/nft-models/dist/types/models/INftConnector";
 import { NftConnectorTypes } from "../models/nftConnectorTypes";
 
 /**
