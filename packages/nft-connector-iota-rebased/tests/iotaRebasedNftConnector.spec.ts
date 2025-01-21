@@ -80,6 +80,26 @@ async function waitForOwnerChange(id: string, newOwner: string): Promise<void> {
 	throw new Error("NFT owner change failed");
 }
 
+/**
+ * Wait for the NFT to have specific field in the data.
+ * @param resolveId The NFT ID.
+ * @param expectedData Data to look for.
+ */
+async function waitForData(resolveId: string, expectedData: unknown): Promise<void> {
+	for (let i = 0; i < 50; i++) {
+		try {
+			const data = await nftUserConnector.resolve(resolveId);
+			if (JSON.stringify(data.metadata) === JSON.stringify(expectedData)) {
+				return;
+			}
+		} catch {}
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
+	// eslint-disable-next-line no-restricted-syntax
+	throw new Error("NFT data lookup failed");
+}
+
 describe("IotaRebasedNftConnector", () => {
 	beforeAll(async () => {
 		await setupTestEnv();
@@ -183,7 +203,10 @@ describe("IotaRebasedNftConnector", () => {
 			updatedField: "newValue",
 			anotherField: "anotherValue"
 		});
-		await waitForResolution(nftId);
+		await waitForData(nftId, {
+			updatedField: "newValue",
+			anotherField: "anotherValue"
+		});
 		const response = await nftUserConnector.resolve(nftId);
 		expect(response.metadata).toEqual({
 			updatedField: "newValue",
