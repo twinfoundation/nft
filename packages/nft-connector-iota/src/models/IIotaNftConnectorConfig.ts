@@ -5,10 +5,5 @@ import type { IIotaConfig } from "@twin.org/dlt-iota";
 /**
  * Configuration for the IOTA NFT connector.
  */
-export interface IIotaNftConnectorConfig extends IIotaConfig {
-	/**
-	 * The wallet address index to use for funding and controlling the nfts.
-	 * @default 0
-	 */
-	walletAddressIndex?: number;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IIotaNftConnectorConfig extends IIotaConfig {}

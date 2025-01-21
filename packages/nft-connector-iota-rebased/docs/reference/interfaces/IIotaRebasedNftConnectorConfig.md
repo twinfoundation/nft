@@ -36,32 +36,14 @@ The gas budget to use for transactions.
 
 ***
 
-### walletAddressIndex?
+### packageControllerAddressIndex?
 
-> `optional` **walletAddressIndex**: `number`
+> `optional` **packageControllerAddressIndex**: `number`
 
-The wallet address index to use when deriving addresses.
+The package controller address index to use when creating package.
 
 #### Default
 
 ```ts
 0
 ```
-
-***
-
-### vaultMnemonicId?
-
-> `optional` **vaultMnemonicId**: `string`
-
-The vault mnemonic identifier.
-
-#### Default
-
-```ts
-mnemonic
-```
-
-#### Overrides
-
-`IIotaRebasedConfig.vaultMnemonicId`

@@ -1,11 +1,13 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import { CLIDisplay, CLIParam } from "@twin.org/cli-core";
-import { Converter, I18n, StringHelper } from "@twin.org/core";
-import { IotaNftConnector, IotaNftUtils } from "@twin.org/nft-connector-iota";
+import { Converter, I18n, Is, StringHelper } from "@twin.org/core";
+import { IotaNftUtils } from "@twin.org/nft-connector-iota";
+import { IotaRebasedNftUtils } from "@twin.org/nft-connector-iota-rebased";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
-import { Command } from "commander";
-import { setupVault } from "./setupCommands";
+import { Command, Option } from "commander";
+import { setupNftConnector, setupVault } from "./setupCommands";
+import { NftConnectorTypes } from "../models/nftConnectorTypes";
 
 /**
  * Build the nft transfer command for the CLI.
@@ -31,11 +33,25 @@ export function buildCommandNftTransfer(): Command {
 		);
 
 	command
+		.addOption(
+			new Option(
+				I18n.formatMessage("commands.common.options.connector.param"),
+				I18n.formatMessage("commands.common.options.connector.description")
+			)
+				.choices(Object.values(NftConnectorTypes))
+				.default(NftConnectorTypes.Iota)
+		)
 		.option(
 			I18n.formatMessage("commands.common.options.node.param"),
 			I18n.formatMessage("commands.common.options.node.description"),
 			"!NODE_URL"
 		)
+		.option(
+			I18n.formatMessage("commands.common.options.network.param"),
+			I18n.formatMessage("commands.common.options.network.description"),
+			"!NETWORK"
+		)
+
 		.option(
 			I18n.formatMessage("commands.common.options.explorer.param"),
 			I18n.formatMessage("commands.common.options.explorer.description"),
@@ -52,25 +68,39 @@ export function buildCommandNftTransfer(): Command {
  * @param opts.seed The seed required for signing by the issuer.
  * @param opts.id The id of the NFT to transfer in urn format.
  * @param opts.recipient The recipient address of the NFT.
+ * @param opts.connector The connector to perform the operations with.
  * @param opts.node The node URL.
+ * @param opts.network The network to use for rebased connector.
  * @param opts.explorer The explorer URL.
  */
 export async function actionCommandNftTransfer(opts: {
 	seed: string;
 	id: string;
 	recipient: string;
+	connector?: NftConnectorTypes;
 	node: string;
+	network?: string;
 	explorer: string;
 }): Promise<void> {
 	const seed: Uint8Array = CLIParam.hexBase64("seed", opts.seed);
 	const id: string = CLIParam.stringValue("id", opts.id);
-	const recipient: string = CLIParam.bech32("recipient", opts.recipient);
+	const recipient: string =
+		opts.connector === NftConnectorTypes.IotaRebased
+			? Converter.bytesToHex(CLIParam.hex("recipient", opts.recipient), true)
+			: CLIParam.bech32("recipient", opts.recipient);
 	const nodeEndpoint: string = CLIParam.url("node", opts.node);
+	const network: string | undefined =
+		opts.connector === NftConnectorTypes.IotaRebased
+			? CLIParam.stringValue("network", opts.network)
+			: undefined;
 	const explorerEndpoint: string = CLIParam.url("explorer", opts.explorer);
 
 	CLIDisplay.value(I18n.formatMessage("commands.nft-transfer.labels.nftId"), id);
 	CLIDisplay.value(I18n.formatMessage("commands.nft-transfer.labels.recipient"), recipient);
 	CLIDisplay.value(I18n.formatMessage("commands.common.labels.node"), nodeEndpoint);
+	if (Is.stringValue(network)) {
+		CLIDisplay.value(I18n.formatMessage("commands.common.labels.network"), network);
+	}
 	CLIDisplay.break();
 
 	setupVault();
@@ -81,28 +111,25 @@ export async function actionCommandNftTransfer(opts: {
 	const vaultConnector = VaultConnectorFactory.get("vault");
 	await vaultConnector.setSecret(`${localIdentity}/${vaultSeedId}`, Converter.bytesToBase64(seed));
 
-	const iotaNftConnector = new IotaNftConnector({
-		config: {
-			clientOptions: {
-				nodes: [nodeEndpoint],
-				localPow: true
-			},
-			vaultSeedId
-		}
-	});
+	const nftConnector = setupNftConnector({ nodeEndpoint, network, vaultSeedId }, opts.connector);
+	if (Is.function(nftConnector.start)) {
+		await nftConnector.start(localIdentity);
+	}
 
 	CLIDisplay.task(I18n.formatMessage("commands.nft-transfer.progress.transferringNft"));
 	CLIDisplay.break();
 
 	CLIDisplay.spinnerStart();
 
-	await iotaNftConnector.transfer(localIdentity, id, recipient);
+	await nftConnector.transfer(localIdentity, id, recipient);
 
 	CLIDisplay.spinnerStop();
 
 	CLIDisplay.value(
 		I18n.formatMessage("commands.common.labels.explore"),
-		`${StringHelper.trimTrailingSlashes(explorerEndpoint)}/addr/${IotaNftUtils.nftIdToAddress(id)}`
+		opts.connector === NftConnectorTypes.IotaRebased
+			? `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/object/${IotaRebasedNftUtils.nftIdToObjectId(id)}?network=${network}`
+			: `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/addr/${IotaNftUtils.nftIdToAddress(id)}`
 	);
 	CLIDisplay.break();
 

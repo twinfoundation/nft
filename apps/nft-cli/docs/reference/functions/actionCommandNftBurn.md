@@ -28,11 +28,23 @@ The issuer address of the NFT.
 
 The id of the NFT to burn in urn format.
 
+#### connector
+
+[`NftConnectorTypes`](../type-aliases/NftConnectorTypes.md)
+
+The connector to perform the operations with.
+
 #### node
 
 `string`
 
 The node URL.
+
+#### network
+
+`string`
+
+The network to use for rebased connector.
 
 #### explorer
 

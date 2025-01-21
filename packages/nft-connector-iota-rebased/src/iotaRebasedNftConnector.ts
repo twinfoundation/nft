@@ -9,6 +9,7 @@ import { nameof } from "@twin.org/nameof";
 import type { INftConnector } from "@twin.org/nft-models";
 import { VaultConnectorFactory, type IVaultConnector } from "@twin.org/vault-models";
 import compiledModulesJson from "./contracts/compiledModules/compiled-modules.json";
+import { IotaRebasedNftUtils } from "./iotaRebasedNftUtils";
 import type { IIotaRebasedNftConnectorConfig } from "./models/IIotaRebasedNftConnectorConfig";
 import type { IIotaRebasedNftConnectorConstructorOptions } from "./models/IIotaRebasedNftConnectorConstructorOptions";
 import type { IIotaRebasedNftMetadata } from "./models/IIotaRebasedNftMetadata";
@@ -180,7 +181,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 				dependencies: ["0x1", "0x2"]
 			});
 
-			const controllerAddress = await this.getControllerAddress(nodeIdentity);
+			const controllerAddress = await this.getPackageControllerAddress(nodeIdentity);
 
 			// Transfer the upgrade capability to the controller
 			txb.transferObjects([upgradeCap], txb.pure.address(controllerAddress));
@@ -191,6 +192,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 				nodeIdentity,
 				this._client,
 				{
+					owner: controllerAddress,
 					transaction: txb,
 					showEffects: true,
 					showEvents: true,
@@ -307,6 +309,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 				controller,
 				this._client,
 				{
+					owner: issuer,
 					transaction: txb,
 					showEffects: true,
 					showEvents: true,
@@ -320,7 +323,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 
 			const urn = new Urn(
 				"nft",
-				`${IotaRebasedNftConnector.NAMESPACE}:${this._config.network}:${result.createdObject.objectId}`
+				`${IotaRebasedNftConnector.NAMESPACE}:${this._config.network}:${this._packageId}:${result.createdObject.objectId}`
 			);
 
 			return urn.toString();
@@ -351,7 +354,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 		Guards.stringValue(this.CLASS_NAME, nameof(nftId), nftId);
 
 		try {
-			const objectId = this.extractObjectId(nftId);
+			const objectId = IotaRebasedNftUtils.nftIdToObjectId(nftId);
 			const object = await this._client.getObject({
 				id: objectId,
 				options: {
@@ -426,7 +429,6 @@ export class IotaRebasedNftConnector implements INftConnector {
 	 * @returns void.
 	 */
 	public async burn(controller: string, id: string): Promise<void> {
-		this.ensureStarted();
 		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 
@@ -442,9 +444,9 @@ export class IotaRebasedNftConnector implements INftConnector {
 			const txb = new Transaction();
 			txb.setGasBudget(this._gasBudget);
 
-			const objectId = this.extractObjectId(id);
+			const objectId = IotaRebasedNftUtils.nftIdToObjectId(id);
+			const packageId = IotaRebasedNftUtils.nftIdToPackageId(id);
 
-			const packageId = this._packageId;
 			const moduleName = this.getModuleName();
 
 			txb.moveCall({
@@ -452,12 +454,15 @@ export class IotaRebasedNftConnector implements INftConnector {
 				arguments: [txb.object(objectId)]
 			});
 
+			const details = await this.resolve(id);
+
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
 				this._vaultConnector,
 				controller,
 				this._client,
 				{
+					owner: details.owner,
 					transaction: txb,
 					showEffects: true,
 					showEvents: true,
@@ -494,7 +499,6 @@ export class IotaRebasedNftConnector implements INftConnector {
 		recipient: string,
 		metadata?: T
 	): Promise<void> {
-		this.ensureStarted();
 		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
 		Guards.stringValue(this.CLASS_NAME, nameof(nftId), nftId);
 		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
@@ -511,9 +515,9 @@ export class IotaRebasedNftConnector implements INftConnector {
 			const txb = new Transaction();
 			txb.setGasBudget(this._gasBudget);
 
-			const objectId = this.extractObjectId(nftId);
+			const objectId = IotaRebasedNftUtils.nftIdToObjectId(nftId);
+			const packageId = IotaRebasedNftUtils.nftIdToPackageId(nftId);
 
-			const packageId = this._packageId;
 			const moduleName = this.getModuleName();
 
 			txb.moveCall({
@@ -521,12 +525,15 @@ export class IotaRebasedNftConnector implements INftConnector {
 				arguments: [txb.object(objectId), txb.pure.address(recipient)]
 			});
 
+			const details = await this.resolve(nftId);
+
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
 				this._vaultConnector,
 				controller,
 				this._client,
 				{
+					owner: details.owner,
 					transaction: txb,
 					showEffects: true,
 					showEvents: true,
@@ -574,7 +581,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 			const txb = new Transaction();
 			txb.setGasBudget(this._gasBudget);
 
-			const objectId = this.extractObjectId(id);
+			const objectId = IotaRebasedNftUtils.nftIdToObjectId(id);
 
 			// Convert metadata to string for storage
 			const metadataString = JSON.stringify(metadata);
@@ -587,12 +594,15 @@ export class IotaRebasedNftConnector implements INftConnector {
 				arguments: [txb.object(objectId), txb.pure.string(metadataString)]
 			});
 
+			const details = await this.resolve(id);
+
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
 				this._vaultConnector,
 				controller,
 				this._client,
 				{
+					owner: details.owner,
 					transaction: txb,
 					showEffects: true,
 					showEvents: true,
@@ -616,13 +626,13 @@ export class IotaRebasedNftConnector implements INftConnector {
 	}
 
 	/**
-	 * Get the controller's address.
+	 * Get the package controller's address.
 	 * @param identity The identity of the user to access the vault keys.
 	 * @returns The controller's address.
 	 */
-	private async getControllerAddress(identity: string): Promise<string> {
+	private async getPackageControllerAddress(identity: string): Promise<string> {
 		const seed = await IotaRebased.getSeed(this._config, this._vaultConnector, identity);
-		const walletAddressIndex = this._config.walletAddressIndex ?? 0;
+		const walletAddressIndex = this._config.packageControllerAddressIndex ?? 0;
 		const addresses = IotaRebased.getAddresses(
 			seed,
 			this._config.coinType ?? IotaRebased.DEFAULT_COIN_TYPE,
@@ -633,23 +643,6 @@ export class IotaRebasedNftConnector implements INftConnector {
 		);
 
 		return addresses[0];
-	}
-
-	/**
-	 * Extract the object ID from an NFT URN.
-	 * @param nftId The NFT URN.
-	 * @returns The object ID.
-	 * @throws GeneralError if the NFT URN is invalid.
-	 */
-	private extractObjectId(nftId: string): string {
-		const urn = Urn.fromValidString(nftId);
-		const parts = urn.namespaceSpecificParts();
-		if (parts.length !== 3) {
-			throw new GeneralError(this.CLASS_NAME, "invalidNftIdFormat", {
-				id: nftId
-			});
-		}
-		return parts[2];
 	}
 
 	/**

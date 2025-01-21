@@ -60,6 +60,26 @@ async function waitForFailedResolution(resolveId: string): Promise<void> {
 	throw new Error("NFT resolution still working");
 }
 
+/**
+ * Wait for the owner to be change.
+ * @param id The NFT ID.
+ * @param newOwner The new owner.
+ */
+async function waitForOwnerChange(id: string, newOwner: string): Promise<void> {
+	for (let i = 0; i < 50; i++) {
+		try {
+			const resolved = await nftUserConnector.resolve(id);
+			if (resolved.owner === newOwner) {
+				return;
+			}
+		} catch {}
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
+	// eslint-disable-next-line no-restricted-syntax
+	throw new Error("NFT owner change failed");
+}
+
 describe("IotaRebasedNftConnector", () => {
 	beforeAll(async () => {
 		await setupTestEnv();
@@ -83,6 +103,7 @@ describe("IotaRebasedNftConnector", () => {
 		});
 		await nftUserConnector.start(TEST_NODE_IDENTITY);
 	});
+
 	test("Cannot mint an NFT before start", async () => {
 		const unstartedConnector = new IotaRebasedNftConnector({
 			config: {
@@ -95,6 +116,7 @@ describe("IotaRebasedNftConnector", () => {
 			unstartedConnector.mint(TEST_USER_IDENTITY_ID, TEST_ADDRESS, "test_tag")
 		).rejects.toThrow("connectorNotStarted");
 	});
+
 	test("Can mint an NFT", async () => {
 		const immutableMetadata = {
 			name: "Test NFT",
@@ -117,8 +139,10 @@ describe("IotaRebasedNftConnector", () => {
 		expect(specificParts[0]).toEqual("iota-rebased");
 		expect(specificParts[1]).toEqual(TEST_NETWORK);
 		expect(specificParts[2].length).toBeGreaterThan(0);
+		expect(specificParts[3].length).toBeGreaterThan(0);
 		await waitForResolution(nftId);
 	});
+
 	test("Can resolve an NFT", async () => {
 		const response = await nftUserConnector.resolve(nftId);
 		expect(response.issuer).toEqual(TEST_ADDRESS);
@@ -131,25 +155,29 @@ describe("IotaRebasedNftConnector", () => {
 			uri: "https://example.com/nft.png"
 		});
 	});
+
 	test("Can transfer an NFT", async () => {
 		await nftUserConnector.transfer(TEST_USER_IDENTITY_ID, nftId, TEST_ADDRESS_2);
-		await waitForResolution(nftId);
+		await waitForOwnerChange(nftId, TEST_ADDRESS_2);
 		const response = await nftUserConnector.resolve(nftId);
 		expect(response.issuer).toEqual(TEST_ADDRESS);
 		expect(response.owner).toEqual(TEST_ADDRESS_2);
 	});
+
 	test("Can transfer an NFT back to the original owner", async () => {
 		await nftUserConnector.transfer(TEST_USER_IDENTITY_ID_2, nftId, TEST_ADDRESS);
-		await waitForResolution(nftId);
+		await waitForOwnerChange(nftId, TEST_ADDRESS);
 		const response = await nftUserConnector.resolve(nftId);
 		expect(response.issuer).toEqual(TEST_ADDRESS);
 		expect(response.owner).toEqual(TEST_ADDRESS);
 	});
+
 	test("Throws error when unauthorized user attempts to transfer NFT", async () => {
 		await expect(
 			nftUserConnector.transfer("unauthorizedController", nftId, TEST_ADDRESS_2)
 		).rejects.toThrow("transferFailed");
 	});
+
 	test("Can update the mutable data of an NFT", async () => {
 		await nftUserConnector.update(TEST_USER_IDENTITY_ID, nftId, {
 			updatedField: "newValue",
@@ -162,22 +190,39 @@ describe("IotaRebasedNftConnector", () => {
 			anotherField: "anotherValue"
 		});
 	});
+
 	test("Can burn an NFT", async () => {
 		await nftUserConnector.burn(TEST_USER_IDENTITY_ID, nftId);
 		await waitForFailedResolution(nftId);
 		await expect(nftUserConnector.resolve(nftId)).rejects.toThrow();
 	});
+
 	test("Cannot transfer a burned NFT", async () => {
 		const burnTestNftId = await nftUserConnector.mint(
 			TEST_USER_IDENTITY_ID,
 			TEST_ADDRESS,
 			"burn_test"
 		);
+		await waitForResolution(burnTestNftId);
 		await nftUserConnector.burn(TEST_USER_IDENTITY_ID, burnTestNftId);
 		await expect(
 			nftUserConnector.transfer(TEST_USER_IDENTITY_ID, burnTestNftId, TEST_ADDRESS_2)
 		).rejects.toThrow("transferFailed");
 	});
+
+	test("Can burn an NFT on a transferred address", async () => {
+		const burnTestNftId = await nftUserConnector.mint(
+			TEST_USER_IDENTITY_ID,
+			TEST_ADDRESS,
+			"burn_test"
+		);
+		await waitForResolution(burnTestNftId);
+		await nftUserConnector.transfer(TEST_USER_IDENTITY_ID, burnTestNftId, TEST_ADDRESS_2);
+		await waitForOwnerChange(burnTestNftId, TEST_ADDRESS_2);
+		await nftUserConnector.burn(TEST_USER_IDENTITY_ID_2, burnTestNftId);
+		await waitForFailedResolution(burnTestNftId);
+	});
+
 	test("Can mint an NFT with complex metadata", async () => {
 		const immutableMetadata = {
 			name: "Complex NFT",

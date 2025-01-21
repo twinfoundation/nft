@@ -3,6 +3,8 @@
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { nameof } from "@twin.org/nameof";
+import { IotaNftConnector } from "@twin.org/nft-connector-iota";
+import { IotaRebasedNftConnector } from "@twin.org/nft-connector-iota-rebased";
 import {
 	EntityStorageVaultConnector,
 	type VaultKey,
@@ -10,6 +12,8 @@ import {
 	initSchema
 } from "@twin.org/vault-connector-entity-storage";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
+import type { INftConnector } from "../../../../packages/nft-models/dist/types/models/INftConnector";
+import { NftConnectorTypes } from "../models/nftConnectorTypes";
 
 /**
  * Setup the vault for use in the CLI commands.
@@ -34,4 +38,45 @@ export function setupVault(): void {
 
 	const vaultConnector = new EntityStorageVaultConnector();
 	VaultConnectorFactory.register("vault", () => vaultConnector);
+}
+
+/**
+ * Setup the NFT connector for use in the CLI commands.
+ * @param options The options for the NFT connector.
+ * @param options.nodeEndpoint The node endpoint.
+ * @param options.network The network.
+ * @param options.vaultSeedId The vault seed ID.
+ * @param connector The connector to use.
+ * @returns The NFT connector.
+ */
+export function setupNftConnector(
+	options: { nodeEndpoint: string; network?: string; vaultSeedId?: string },
+	connector?: NftConnectorTypes
+): INftConnector {
+	connector ??= NftConnectorTypes.Iota;
+
+	let instance: INftConnector;
+	if (connector === NftConnectorTypes.IotaRebased) {
+		instance = new IotaRebasedNftConnector({
+			config: {
+				clientOptions: {
+					url: options.nodeEndpoint
+				},
+				network: options.network ?? "",
+				vaultSeedId: options.vaultSeedId
+			}
+		});
+	} else {
+		instance = new IotaNftConnector({
+			config: {
+				clientOptions: {
+					nodes: [options.nodeEndpoint],
+					localPow: true
+				},
+				vaultSeedId: options.vaultSeedId
+			}
+		});
+	}
+
+	return instance;
 }

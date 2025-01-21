@@ -5,3 +5,5 @@ export * from "./commands/nftBurn";
 export * from "./commands/nftMint";
 export * from "./commands/nftResolve";
 export * from "./commands/nftTransfer";
+export * from "./commands/setupCommands";
+export * from "./models/nftConnectorTypes";

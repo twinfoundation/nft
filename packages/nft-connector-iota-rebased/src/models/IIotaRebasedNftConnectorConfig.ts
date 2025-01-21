@@ -19,14 +19,8 @@ export interface IIotaRebasedNftConnectorConfig extends IIotaRebasedConfig {
 	gasBudget?: number;
 
 	/**
-	 * The wallet address index to use when deriving addresses.
+	 * The package controller address index to use when creating package.
 	 * @default 0
 	 */
-	walletAddressIndex?: number;
-
-	/**
-	 * The vault mnemonic identifier.
-	 * @default mnemonic
-	 */
-	vaultMnemonicId?: string;
+	packageControllerAddressIndex?: number;
 }

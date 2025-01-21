@@ -10,7 +10,7 @@
 				},
 				"issuer": {
 					"param": "--issuer '<'issuer'>'",
-					"description": "The bech32 address of the NFT issuer, or start with ! to read environment variable."
+					"description": "The address of the NFT issuer, or start with ! to read environment variable."
 				},
 				"tag": {
 					"param": "--tag '<'tag'>'",
@@ -65,7 +65,7 @@
 				},
 				"issuer": {
 					"param": "--issuer '<'issuer'>'",
-					"description": "The bech32 address of the NFT issuer, or start with ! to read environment variable."
+					"description": "The address of the NFT issuer, or start with ! to read environment variable."
 				},
 				"id": {
 					"param": "--id '<'id'>'",
@@ -94,7 +94,7 @@
 				},
 				"recipient": {
 					"param": "--recipient '<'recipient'>'",
-					"description": "The bech32 address of the NFT recipient, or start with ! to read environment variable."
+					"description": "The address of the NFT recipient, or start with ! to read environment variable."
 				}
 			},
 			"progress": {
@@ -107,6 +107,14 @@
 		},
 		"common": {
 			"options": {
+				"connector": {
+					"param": "--connector '<'connector'>'",
+					"description": "The connector to use for the NFT operation."
+				},
+				"network": {
+					"param": "--network '<'network'>'",
+					"description": "The network to use for the NFT operation."
+				},
 				"node": {
 					"param": "--node '<'url'>'",
 					"description": "The url for the node endpoint, or an environment variable name containing the url."
@@ -116,7 +124,9 @@
 				"did": "DID",
 				"node": "Node",
 				"explorer": "Explorer",
-				"explore": "Explore"
+				"explore": "Explore",
+				"connector": "Connector",
+				"network": "Network"
 			}
 		}
 	}
