@@ -4,7 +4,7 @@ import type { IotaClient } from "@iota/iota-sdk/client";
 import { Transaction } from "@iota/iota-sdk/transactions";
 import { BaseError, Converter, GeneralError, Guards, Is, StringHelper, Urn } from "@twin.org/core";
 import { IotaRebased } from "@twin.org/dlt-iota-rebased";
-import { LoggingConnectorFactory } from "@twin.org/logging-models";
+import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import type { INftConnector } from "@twin.org/nft-models";
 import { VaultConnectorFactory, type IVaultConnector } from "@twin.org/vault-models";
@@ -66,6 +66,12 @@ export class IotaRebasedNftConnector implements INftConnector {
 	private _packageId?: string;
 
 	/**
+	 * The logger for the background task connector.
+	 * @internal
+	 */
+	private readonly _logging?: ILoggingConnector;
+
+	/**
 	 * Create a new instance of IotaRebasedNftConnector.
 	 * @param options The options for the connector.
 	 */
@@ -82,6 +88,8 @@ export class IotaRebasedNftConnector implements INftConnector {
 			options.config.clientOptions
 		);
 		this._vaultConnector = VaultConnectorFactory.get(options.vaultConnectorType ?? "vault");
+
+		this._logging = LoggingConnectorFactory.getIfExists(options?.loggingConnectorType ?? "logging");
 
 		this._config = options.config;
 
@@ -185,6 +193,11 @@ export class IotaRebasedNftConnector implements INftConnector {
 
 			// Transfer the upgrade capability to the controller
 			txb.transferObjects([upgradeCap], txb.pure.address(controllerAddress));
+
+			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
+			if (this._config.enableCostLogging) {
+				await this.dryRunTransaction(txb, nodeIdentity, "deploy");
+			}
 
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
@@ -302,6 +315,11 @@ export class IotaRebasedNftConnector implements INftConnector {
 					txb.pure.string(metadataString)
 				]
 			});
+
+			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
+			if (this._config.enableCostLogging) {
+				await this.dryRunTransaction(txb, controller, "mint");
+			}
 
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
@@ -446,7 +464,6 @@ export class IotaRebasedNftConnector implements INftConnector {
 
 			const objectId = IotaRebasedNftUtils.nftIdToObjectId(id);
 			const packageId = IotaRebasedNftUtils.nftIdToPackageId(id);
-
 			const moduleName = this.getModuleName();
 
 			txb.moveCall({
@@ -455,6 +472,10 @@ export class IotaRebasedNftConnector implements INftConnector {
 			});
 
 			const details = await this.resolve(id);
+			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
+			if (this._config.enableCostLogging) {
+				await this.dryRunTransaction(txb, controller, "burn");
+			}
 
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
@@ -502,6 +523,9 @@ export class IotaRebasedNftConnector implements INftConnector {
 		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
 		Guards.stringValue(this.CLASS_NAME, nameof(nftId), nftId);
 		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
+		if (!Is.undefined(metadata)) {
+			Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
+		}
 
 		const urnParsed = Urn.fromValidString(nftId);
 		if (urnParsed.namespaceMethod() !== IotaRebasedNftConnector.NAMESPACE) {
@@ -517,15 +541,43 @@ export class IotaRebasedNftConnector implements INftConnector {
 
 			const objectId = IotaRebasedNftUtils.nftIdToObjectId(nftId);
 			const packageId = IotaRebasedNftUtils.nftIdToPackageId(nftId);
-
 			const moduleName = this.getModuleName();
 
-			txb.moveCall({
-				target: `${packageId}::${moduleName}::transfer`,
-				arguments: [txb.object(objectId), txb.pure.address(recipient)]
+			const object = await this._client.getObject({
+				id: objectId,
+				options: {
+					showContent: true,
+					showType: true,
+					showOwner: true
+				}
 			});
 
 			const details = await this.resolve(nftId);
+			if (!object.data?.content) {
+				throw new GeneralError(this.CLASS_NAME, "nftNotFound", {
+					nftId
+				});
+			}
+
+			if (!Is.undefined(metadata)) {
+				// If metadata is provided, use transfer_with_metadata
+				const metadataString = JSON.stringify(metadata);
+				txb.moveCall({
+					target: `${packageId}::${moduleName}::transfer_with_metadata`,
+					arguments: [
+						txb.object(objectId),
+						txb.pure.address(recipient),
+						txb.pure.string(metadataString)
+					]
+				});
+			} else {
+				txb.transferObjects([txb.object(objectId)], txb.pure.address(recipient));
+			}
+
+			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
+			if (this._config.enableCostLogging) {
+				await this.dryRunTransaction(txb, controller, "transfer");
+			}
 
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
@@ -595,6 +647,10 @@ export class IotaRebasedNftConnector implements INftConnector {
 			});
 
 			const details = await this.resolve(id);
+			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
+			if (this._config.enableCostLogging) {
+				await this.dryRunTransaction(txb, controller, "update");
+			}
 
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
@@ -664,5 +720,67 @@ export class IotaRebasedNftConnector implements INftConnector {
 	 */
 	private getModuleName(): string {
 		return StringHelper.snakeCase(this._contractName);
+	}
+
+	/**
+	 * Dry run a transaction.
+	 * @param txb The transaction to dry run.
+	 * @param controller The controller of the transaction.
+	 * @param operation The operation to log.
+	 * @returns void.
+	 */
+	private async dryRunTransaction(
+		txb: Transaction,
+		controller: string,
+		operation: string
+	): Promise<void> {
+		try {
+			const controllerAddress = await this.getPackageControllerAddress(controller);
+
+			txb.setSender(controllerAddress);
+
+			const builtTx = await txb.build({
+				client: this._client,
+				onlyTransactionKind: false
+			});
+
+			const dryRunResult = await this._client.dryRunTransactionBlock({
+				transactionBlock: builtTx
+			});
+
+			if (dryRunResult.effects) {
+				await this._logging?.log({
+					level: "info",
+					source: this.CLASS_NAME,
+					ts: Date.now(),
+					message: "transactionCosts",
+					data: {
+						operation,
+						status: dryRunResult.effects.status,
+						costs: {
+							computationCost: dryRunResult.effects.gasUsed.computationCost,
+							computationCostBurned: dryRunResult.effects.gasUsed.computationCostBurned,
+							storageCost: dryRunResult.effects.gasUsed.storageCost,
+							storageRebate: dryRunResult.effects.gasUsed.storageRebate,
+							nonRefundableStorageFee: dryRunResult.effects.gasUsed.nonRefundableStorageFee
+						},
+						events: dryRunResult.events,
+						balanceChanges: dryRunResult.balanceChanges,
+						objectChanges: dryRunResult.objectChanges
+					}
+				});
+			}
+		} catch (error) {
+			await this._logging?.log({
+				level: "error",
+				source: this.CLASS_NAME,
+				ts: Date.now(),
+				message: "dryRunFailed",
+				error: BaseError.fromError(error),
+				data: {
+					operation
+				}
+			});
+		}
 	}
 }

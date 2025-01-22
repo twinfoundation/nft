@@ -23,4 +23,16 @@ export interface IIotaRebasedNftConnectorConfig extends IIotaRebasedConfig {
 	 * @default 0
 	 */
 	packageControllerAddressIndex?: number;
+
+	/**
+	 * The vault mnemonic identifier.
+	 * @default mnemonic
+	 */
+	vaultMnemonicId?: string;
+
+	/**
+	 * Enable cost logging.
+	 * @default false
+	 */
+	enableCostLogging?: boolean;
 }

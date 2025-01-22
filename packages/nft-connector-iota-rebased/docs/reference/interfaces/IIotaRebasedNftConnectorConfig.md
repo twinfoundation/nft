@@ -47,3 +47,35 @@ The package controller address index to use when creating package.
 ```ts
 0
 ```
+
+***
+
+### vaultMnemonicId?
+
+> `optional` **vaultMnemonicId**: `string`
+
+The vault mnemonic identifier.
+
+#### Default
+
+```ts
+mnemonic
+```
+
+#### Overrides
+
+`IIotaRebasedConfig.vaultMnemonicId`
+
+***
+
+### enableCostLogging?
+
+> `optional` **enableCostLogging**: `boolean`
+
+Enable cost logging.
+
+#### Default
+
+```ts
+false
+```

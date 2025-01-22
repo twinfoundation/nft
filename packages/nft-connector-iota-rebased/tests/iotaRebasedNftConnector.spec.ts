@@ -26,6 +26,32 @@ let nftUserConnector: IotaRebasedNftConnector;
  */
 
 /**
+ * Wait for metadata to be updated.
+ * @param connector The NFT connector instance.
+ * @param targetNftId The NFT ID to check.
+ * @param expectedMetadata The expected metadata.
+ * @param maxAttempts Maximum number of attempts (default: 10).
+ * @param delayMs Delay between attempts in milliseconds (default: 1000).
+ */
+async function waitForMetadataUpdate(
+	connector: IotaRebasedNftConnector,
+	targetNftId: string, // Renamed from nftId to targetNftId
+	expectedMetadata: unknown,
+	maxAttempts = 10,
+	delayMs = 1000
+): Promise<void> {
+	for (let attempt = 0; attempt < maxAttempts; attempt++) {
+		const response = await connector.resolve(targetNftId);
+		if (JSON.stringify(response.metadata) === JSON.stringify(expectedMetadata)) {
+			return;
+		}
+		await new Promise(resolve => setTimeout(resolve, delayMs));
+	}
+	// eslint-disable-next-line no-restricted-syntax
+	throw new Error("Metadata update timeout");
+}
+
+/**
  * Wait for the NFT to be resolved.
  * @param resolveId The NFT ID.
  */
@@ -40,6 +66,31 @@ async function waitForResolution(resolveId: string): Promise<void> {
 
 	// eslint-disable-next-line no-restricted-syntax
 	throw new Error("NFT resolution failed");
+}
+
+/**
+ * Wait for NFT ownership to change.
+ * @param id - The NFT ID.
+ * @param expectedOwner - The expected new owner.
+ */
+async function waitForOwnershipChange(id: string, expectedOwner: string): Promise<void> {
+	let retries = 0;
+	const maxRetries = 5;
+
+	while (retries < maxRetries) {
+		await waitForResolution(id);
+		const response = await nftUserConnector.resolve(id);
+
+		if (response.owner === expectedOwner) {
+			return;
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 500));
+		retries++;
+	}
+
+	// eslint-disable-next-line no-restricted-syntax
+	throw new Error(`NFT ownership change to ${expectedOwner} failed after ${maxRetries} attempts`);
 }
 
 /**
@@ -190,6 +241,49 @@ describe("IotaRebasedNftConnector", () => {
 		const response = await nftUserConnector.resolve(nftId);
 		expect(response.issuer).toEqual(TEST_ADDRESS);
 		expect(response.owner).toEqual(TEST_ADDRESS);
+	});
+
+	test("Can transfer an NFT with metadata update", async () => {
+		const testNftId = await nftUserConnector.mint(
+			TEST_USER_IDENTITY_ID,
+			TEST_ADDRESS,
+			"transfer_test",
+			{
+				name: "Transfer Test NFT",
+				description: "NFT for testing transfer with metadata",
+				uri: "https://example.com/transfer.png"
+			},
+			{
+				initialField: "initialValue"
+			}
+		);
+		await waitForResolution(testNftId);
+
+		// Prepare new metadata for transfer
+		const transferMetadata = {
+			updatedField: "transferValue",
+			timestamp: Date.now(),
+			transferInfo: {
+				previousOwner: TEST_ADDRESS,
+				transferDate: new Date().toISOString()
+			}
+		};
+
+		// Transfer with metadata update
+		await nftUserConnector.transfer(
+			TEST_USER_IDENTITY_ID,
+			testNftId,
+			TEST_ADDRESS_2,
+			transferMetadata
+		);
+
+		await waitForOwnershipChange(testNftId, TEST_ADDRESS_2);
+		await waitForMetadataUpdate(nftUserConnector, testNftId, transferMetadata);
+
+		const response = await nftUserConnector.resolve(testNftId);
+		expect(response.owner).toEqual(TEST_ADDRESS_2);
+		expect(response.metadata).toEqual(transferMetadata);
+		expect(response.issuer).toEqual(TEST_ADDRESS); // Issuer should remain unchanged
 	});
 
 	test("Throws error when unauthorized user attempts to transfer NFT", async () => {
