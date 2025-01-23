@@ -23,4 +23,10 @@ export interface IIotaRebasedNftConnectorConfig extends IIotaRebasedConfig {
 	 * @default 0
 	 */
 	packageControllerAddressIndex?: number;
+
+	/**
+	 * Enable cost logging.
+	 * @default false
+	 */
+	enableCostLogging?: boolean;
 }

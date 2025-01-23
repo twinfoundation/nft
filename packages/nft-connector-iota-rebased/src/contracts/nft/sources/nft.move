@@ -37,14 +37,20 @@ module 0x0::nft {
         transfer::transfer(nft, issuer);
     }
 
-    /// Transfer the NFT to a new owner.
-    public entry fun transfer(nft: NFT, recipient: address) {
-        transfer::public_transfer(nft, recipient);
-    }
-
     /// Update the mutable metadata of the NFT.
     public entry fun update_metadata(nft: &mut NFT, new_metadata: String) {
         nft.metadata = new_metadata;
+    }
+
+    /// Transfer with metadata update
+    public entry fun transfer_with_metadata(
+        nft: NFT, // Take ownership directly
+        recipient: address,
+        metadata: String
+    ) {
+        update_metadata(&mut nft, metadata);
+
+        transfer::public_transfer(nft, recipient);
     }
 
     /// Burn the NFT.
