@@ -46,6 +46,7 @@
 		"@twin.org/entity-storage-connector-memory": "next",
 		"@twin.org/nameof-transformer": "next",
 		"@twin.org/nameof-vitest-plugin": "next",
+		"@twin.org/move-to-json": "next",
 		"@twin.org/ts-to-schema": "next",
 		"@twin.org/vault-connector-entity-storage": "next",
 		"@types/node": "^22.10.7",
