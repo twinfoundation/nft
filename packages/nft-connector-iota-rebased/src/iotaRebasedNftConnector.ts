@@ -3,7 +3,7 @@
 import type { IotaClient } from "@iota/iota-sdk/client";
 import { Transaction } from "@iota/iota-sdk/transactions";
 import { BaseError, Converter, GeneralError, Guards, Is, StringHelper, Urn } from "@twin.org/core";
-import { IotaRebased } from "@twin.org/dlt-iota-rebased";
+import { IotaRebased, type IIotaDryRunResponse } from "@twin.org/dlt-iota-rebased";
 import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import type { INftConnector } from "@twin.org/nft-models";
@@ -733,9 +733,9 @@ export class IotaRebasedNftConnector implements INftConnector {
 		txb: Transaction,
 		controller: string,
 		operation: string
-	): Promise<void> {
+	): Promise<IIotaDryRunResponse> {
 		const controllerAddress = await this.getPackageControllerAddress(controller);
-		await IotaRebased.dryRunTransactionAndLog(
+		const dryRunResponse = await IotaRebased.dryRunTransaction(
 			this._client,
 			this._logging,
 			this.CLASS_NAME,
@@ -743,5 +743,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 			controllerAddress,
 			operation
 		);
+
+		return dryRunResponse;
 	}
 }
