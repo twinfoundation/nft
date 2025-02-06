@@ -24,10 +24,6 @@ export function buildCommandNftBurn(): Command {
 			I18n.formatMessage("commands.nft-burn.options.seed.description")
 		)
 		.requiredOption(
-			I18n.formatMessage("commands.nft-burn.options.issuer.param"),
-			I18n.formatMessage("commands.nft-burn.options.issuer.description")
-		)
-		.requiredOption(
 			I18n.formatMessage("commands.nft-burn.options.id.param"),
 			I18n.formatMessage("commands.nft-burn.options.id.description")
 		);
@@ -65,7 +61,6 @@ export function buildCommandNftBurn(): Command {
  * Action the nft burn command.
  * @param opts The options for the command.
  * @param opts.seed The seed required for signing by the issuer.
- * @param opts.issuer The issuer address of the NFT.
  * @param opts.id The id of the NFT to burn in urn format.
  * @param opts.connector The connector to perform the operations with.
  * @param opts.node The node URL.
@@ -74,7 +69,6 @@ export function buildCommandNftBurn(): Command {
  */
 export async function actionCommandNftBurn(opts: {
 	seed: string;
-	issuer: string;
 	id: string;
 	connector?: NftConnectorTypes;
 	node: string;
@@ -82,10 +76,6 @@ export async function actionCommandNftBurn(opts: {
 	explorer: string;
 }): Promise<void> {
 	const seed: Uint8Array = CLIParam.hexBase64("seed", opts.seed);
-	const issuer: string =
-		opts.connector === NftConnectorTypes.IotaRebased
-			? Converter.bytesToHex(CLIParam.hex("issuer", opts.issuer), true)
-			: CLIParam.bech32("issuer", opts.issuer);
 	const id: string = CLIParam.stringValue("id", opts.id);
 	const nodeEndpoint: string = CLIParam.url("node", opts.node);
 	const network: string | undefined =
@@ -94,7 +84,6 @@ export async function actionCommandNftBurn(opts: {
 			: undefined;
 	const explorerEndpoint: string = CLIParam.url("explorer", opts.explorer);
 
-	CLIDisplay.value(I18n.formatMessage("commands.nft-burn.labels.issuer"), issuer);
 	CLIDisplay.value(I18n.formatMessage("commands.nft-burn.labels.nftId"), id);
 	CLIDisplay.value(I18n.formatMessage("commands.common.labels.node"), nodeEndpoint);
 	if (Is.stringValue(network)) {

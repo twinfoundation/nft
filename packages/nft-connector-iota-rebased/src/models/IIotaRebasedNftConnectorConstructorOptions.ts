@@ -18,6 +18,12 @@ export interface IIotaRebasedNftConnectorConstructorOptions {
 	vaultConnectorType?: string;
 
 	/**
+	 * The wallet connector type to use.
+	 * @default "wallet"
+	 */
+	walletConnectorType?: string;
+
+	/**
 	 * The logging connector type.
 	 * @default logging
 	 */

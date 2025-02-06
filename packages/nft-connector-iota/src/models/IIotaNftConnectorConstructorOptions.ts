@@ -13,6 +13,12 @@ export interface IIotaNftConnectorConstructorOptions {
 	vaultConnectorType?: string;
 
 	/**
+	 * The type of the wallet connector.
+	 * @default wallet
+	 */
+	walletConnectorType?: string;
+
+	/**
 	 * The configuration for the connector.
 	 */
 	config: IIotaNftConnectorConfig;

@@ -15,7 +15,7 @@ import {
 } from "@twin.org/vault-connector-entity-storage";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
 import { IotaFaucetConnector, IotaWalletConnector } from "@twin.org/wallet-connector-iota";
-import { FaucetConnectorFactory } from "@twin.org/wallet-models";
+import { FaucetConnectorFactory, WalletConnectorFactory } from "@twin.org/wallet-models";
 import * as dotenv from "dotenv";
 
 console.debug("Setting up test environment from .env and .env.dev files");
@@ -76,6 +76,7 @@ export const TEST_CLIENT_OPTIONS: IClientOptions = {
 export const TEST_SEED = Bip39.mnemonicToSeed(process.env.TEST_MNEMONIC);
 export const TEST_COIN_TYPE = Number.parseInt(process.env.TEST_COIN_TYPE, 10);
 export const TEST_BECH32_HRP = process.env.TEST_BECH32_HRP;
+export const TEST_WALLET_ADDRESS_INDEX = 1;
 
 export const TEST_FAUCET_CONNECTOR = new IotaFaucetConnector({
 	config: {
@@ -94,6 +95,8 @@ export const TEST_WALLET_CONNECTOR = new IotaWalletConnector({
 	}
 });
 
+WalletConnectorFactory.register("wallet", () => TEST_WALLET_CONNECTOR);
+
 await TEST_VAULT_CONNECTOR.setSecret(
 	`${TEST_IDENTITY_ID}/${TEST_MNEMONIC_NAME}`,
 	process.env.TEST_MNEMONIC
@@ -104,10 +107,20 @@ await TEST_VAULT_CONNECTOR.setSecret(
 	process.env.TEST_2_MNEMONIC
 );
 
-const addresses = await TEST_WALLET_CONNECTOR.getAddresses(TEST_IDENTITY_ID, 0, 1, 1);
+const addresses = await TEST_WALLET_CONNECTOR.getAddresses(
+	TEST_IDENTITY_ID,
+	0,
+	TEST_WALLET_ADDRESS_INDEX,
+	1
+);
 export const TEST_NFT_ADDRESS_BECH32 = addresses[0];
 
-const addresses2 = await TEST_WALLET_CONNECTOR.getAddresses(TEST_IDENTITY_ID_2, 0, 1, 1);
+const addresses2 = await TEST_WALLET_CONNECTOR.getAddresses(
+	TEST_IDENTITY_ID_2,
+	0,
+	TEST_WALLET_ADDRESS_INDEX,
+	1
+);
 export const TEST_NFT_ADDRESS_2_BECH32 = addresses2[0];
 
 /**

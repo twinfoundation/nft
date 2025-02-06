@@ -16,12 +16,6 @@ The options for the command.
 
 The seed required for signing by the issuer.
 
-#### issuer
-
-`string`
-
-The issuer address of the NFT.
-
 #### id
 
 `string`

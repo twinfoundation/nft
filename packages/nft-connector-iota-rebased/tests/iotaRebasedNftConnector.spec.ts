@@ -10,7 +10,8 @@ import {
 	TEST_USER_IDENTITY_ID,
 	TEST_NODE_IDENTITY,
 	TEST_NETWORK,
-	TEST_MNEMONIC_NAME
+	TEST_MNEMONIC_NAME,
+	TEST_VAULT_CONNECTOR
 } from "./setupTestEnv";
 import { IotaRebasedNftConnector } from "../src/iotaRebasedNftConnector";
 
@@ -183,9 +184,9 @@ describe("IotaRebasedNftConnector", () => {
 				network: TEST_NETWORK
 			}
 		});
-		await expect(
-			unstartedConnector.mint(TEST_USER_IDENTITY_ID, TEST_ADDRESS, "test_tag")
-		).rejects.toThrow("connectorNotStarted");
+		await expect(unstartedConnector.mint(TEST_USER_IDENTITY_ID, "test_tag")).rejects.toThrow(
+			"connectorNotStarted"
+		);
 	});
 
 	test("Can mint an NFT", async () => {
@@ -195,15 +196,9 @@ describe("IotaRebasedNftConnector", () => {
 			uri: "https://example.com/nft.png"
 		};
 		const tag = "test_tag";
-		nftId = await nftUserConnector.mint(
-			TEST_USER_IDENTITY_ID,
-			TEST_ADDRESS,
-			tag,
-			immutableMetadata,
-			{
-				customField: "customValue"
-			}
-		);
+		nftId = await nftUserConnector.mint(TEST_USER_IDENTITY_ID, tag, immutableMetadata, {
+			customField: "customValue"
+		});
 		const urn = Urn.fromValidString(nftId);
 		expect(urn.namespaceIdentifier()).toEqual("nft");
 		const specificParts = urn.namespaceSpecificParts();
@@ -212,12 +207,15 @@ describe("IotaRebasedNftConnector", () => {
 		expect(specificParts[2].length).toBeGreaterThan(0);
 		expect(specificParts[3].length).toBeGreaterThan(0);
 		await waitForResolution(nftId);
+		const response = await nftUserConnector.resolve(nftId);
+		expect(response.issuer).toEqual(TEST_USER_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_USER_IDENTITY_ID);
 	});
 
 	test("Can resolve an NFT", async () => {
 		const response = await nftUserConnector.resolve(nftId);
-		expect(response.issuer).toEqual(TEST_ADDRESS);
-		expect(response.owner).toEqual(TEST_ADDRESS);
+		expect(response.issuer).toEqual(TEST_USER_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_USER_IDENTITY_ID);
 		expect(response.tag).toEqual("test_tag");
 		expect(response.metadata).toEqual({ customField: "customValue" });
 		expect(response.immutableMetadata).toEqual({
@@ -228,25 +226,34 @@ describe("IotaRebasedNftConnector", () => {
 	});
 
 	test("Can transfer an NFT", async () => {
-		await nftUserConnector.transfer(TEST_USER_IDENTITY_ID, nftId, TEST_ADDRESS_2);
-		await waitForOwnerChange(nftId, TEST_ADDRESS_2);
+		await nftUserConnector.transfer(
+			TEST_USER_IDENTITY_ID,
+			nftId,
+			TEST_USER_IDENTITY_ID_2,
+			TEST_ADDRESS_2
+		);
+		await waitForOwnerChange(nftId, TEST_USER_IDENTITY_ID_2);
 		const response = await nftUserConnector.resolve(nftId);
-		expect(response.issuer).toEqual(TEST_ADDRESS);
-		expect(response.owner).toEqual(TEST_ADDRESS_2);
+		expect(response.issuer).toEqual(TEST_USER_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_USER_IDENTITY_ID_2);
 	});
 
 	test("Can transfer an NFT back to the original owner", async () => {
-		await nftUserConnector.transfer(TEST_USER_IDENTITY_ID_2, nftId, TEST_ADDRESS);
-		await waitForOwnerChange(nftId, TEST_ADDRESS);
+		await nftUserConnector.transfer(
+			TEST_USER_IDENTITY_ID_2,
+			nftId,
+			TEST_USER_IDENTITY_ID,
+			TEST_ADDRESS
+		);
+		await waitForOwnerChange(nftId, TEST_USER_IDENTITY_ID);
 		const response = await nftUserConnector.resolve(nftId);
-		expect(response.issuer).toEqual(TEST_ADDRESS);
-		expect(response.owner).toEqual(TEST_ADDRESS);
+		expect(response.issuer).toEqual(TEST_USER_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_USER_IDENTITY_ID);
 	});
 
 	test("Can transfer an NFT with metadata update", async () => {
 		const testNftId = await nftUserConnector.mint(
 			TEST_USER_IDENTITY_ID,
-			TEST_ADDRESS,
 			"transfer_test",
 			{
 				name: "Transfer Test NFT",
@@ -273,22 +280,33 @@ describe("IotaRebasedNftConnector", () => {
 		await nftUserConnector.transfer(
 			TEST_USER_IDENTITY_ID,
 			testNftId,
+			TEST_USER_IDENTITY_ID_2,
 			TEST_ADDRESS_2,
 			transferMetadata
 		);
 
-		await waitForOwnershipChange(testNftId, TEST_ADDRESS_2);
+		await waitForOwnershipChange(testNftId, TEST_USER_IDENTITY_ID_2);
 		await waitForMetadataUpdate(nftUserConnector, testNftId, transferMetadata);
 
 		const response = await nftUserConnector.resolve(testNftId);
-		expect(response.owner).toEqual(TEST_ADDRESS_2);
+		expect(response.owner).toEqual(TEST_USER_IDENTITY_ID_2);
 		expect(response.metadata).toEqual(transferMetadata);
-		expect(response.issuer).toEqual(TEST_ADDRESS); // Issuer should remain unchanged
+		expect(response.issuer).toEqual(TEST_USER_IDENTITY_ID); // Issuer should remain unchanged
 	});
 
 	test("Throws error when unauthorized user attempts to transfer NFT", async () => {
+		await TEST_VAULT_CONNECTOR.setSecret(
+			`unauthorizedController/${TEST_MNEMONIC_NAME}`,
+			process.env.TEST_NODE_MNEMONIC
+		);
+
 		await expect(
-			nftUserConnector.transfer("unauthorizedController", nftId, TEST_ADDRESS_2)
+			nftUserConnector.transfer(
+				"unauthorizedController",
+				nftId,
+				TEST_USER_IDENTITY_ID_2,
+				TEST_ADDRESS_2
+			)
 		).rejects.toThrow("transferFailed");
 	});
 
@@ -323,7 +341,12 @@ describe("IotaRebasedNftConnector", () => {
 		await waitForResolution(burnTestNftId);
 		await nftUserConnector.burn(TEST_USER_IDENTITY_ID, burnTestNftId);
 		await expect(
-			nftUserConnector.transfer(TEST_USER_IDENTITY_ID, burnTestNftId, TEST_ADDRESS_2)
+			nftUserConnector.transfer(
+				TEST_USER_IDENTITY_ID,
+				burnTestNftId,
+				TEST_USER_IDENTITY_ID_2,
+				TEST_ADDRESS_2
+			)
 		).rejects.toThrow("transferFailed");
 	});
 
@@ -334,8 +357,13 @@ describe("IotaRebasedNftConnector", () => {
 			"burn_test"
 		);
 		await waitForResolution(burnTestNftId);
-		await nftUserConnector.transfer(TEST_USER_IDENTITY_ID, burnTestNftId, TEST_ADDRESS_2);
-		await waitForOwnerChange(burnTestNftId, TEST_ADDRESS_2);
+		await nftUserConnector.transfer(
+			TEST_USER_IDENTITY_ID,
+			burnTestNftId,
+			TEST_USER_IDENTITY_ID_2,
+			TEST_ADDRESS_2
+		);
+		await waitForOwnerChange(burnTestNftId, TEST_USER_IDENTITY_ID_2);
 		await nftUserConnector.burn(TEST_USER_IDENTITY_ID_2, burnTestNftId);
 		await waitForFailedResolution(burnTestNftId);
 	});
@@ -355,7 +383,6 @@ describe("IotaRebasedNftConnector", () => {
 		};
 		nftId = await nftUserConnector.mint(
 			TEST_USER_IDENTITY_ID,
-			TEST_ADDRESS,
 			"complex_tag",
 			immutableMetadata,
 			complexMetadata

@@ -57,7 +57,6 @@ export function generateRestRoutesNft(baseRouteName: string, componentName: stri
 					id: "nftMintExample",
 					request: {
 						body: {
-							issuer: "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv",
 							tag: "MY-NFT",
 							immutableMetadata: {
 								docName: "bill-of-lading",
@@ -120,8 +119,10 @@ export function generateRestRoutesNft(baseRouteName: string, componentName: stri
 						id: "nftResolveResponseExample",
 						response: {
 							body: {
-								issuer: "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv",
-								owner: "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv",
+								issuer:
+									"did:iota:tst:0x85ef62ea94fc4eeeeeddf6acc3b566e988e613081d0b93cc54ed831ed4c18d44",
+								owner:
+									"did:iota:tst:0x85ef62ea94fc4eeeeeddf6acc3b566e988e613081d0b93cc54ed831ed4c18d44",
 								tag: "MY-NFT",
 								immutableMetadata: {
 									docName: "bill-of-lading",
@@ -185,7 +186,9 @@ export function generateRestRoutesNft(baseRouteName: string, componentName: stri
 							id: "nft:iota:aW90YS1uZnQ6dHN0OjB4NzYyYjljNDllYTg2OWUwZWJkYTliYmZhNzY5Mzk0NDdhNDI4ZGNmMTc4YzVkMTVhYjQ0N2UyZDRmYmJiNGViMg=="
 						},
 						body: {
-							recipient: "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv",
+							recipientIdentity:
+								"did:iota:tst:0x85ef62ea94fc4eeeeeddf6acc3b566e988e613081d0b93cc54ed831ed4c18d44",
+							recipientAddress: "tst1prctjk5ck0dutnsunnje6u90jk5htx03qznjjmkd6843pzltlgz87srjzzv",
 							metadata: {
 								data: "AAAAA"
 							}
@@ -251,11 +254,9 @@ export async function nftMint(
 ): Promise<ICreatedResponse> {
 	Guards.object<INftMintRequest>(ROUTES_SOURCE, nameof(request), request);
 	Guards.object<INftMintRequest["body"]>(ROUTES_SOURCE, nameof(request.body), request.body);
-	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.issuer), request.body.issuer);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.tag), request.body.tag);
 	const component = ComponentFactory.get<INftComponent>(componentName);
 	const id = await component.mint(
-		request.body.issuer,
 		request.body.tag,
 		request.body.immutableMetadata,
 		request.body.metadata,
@@ -345,12 +346,22 @@ export async function nftTransfer(
 	);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 	Guards.object<INftTransferRequest["body"]>(ROUTES_SOURCE, nameof(request.body), request.body);
-	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.recipient), request.body.recipient);
+	Guards.stringValue(
+		ROUTES_SOURCE,
+		nameof(request.body.recipientAddress),
+		request.body.recipientAddress
+	);
+	Guards.stringValue(
+		ROUTES_SOURCE,
+		nameof(request.body.recipientIdentity),
+		request.body.recipientIdentity
+	);
 
 	const component = ComponentFactory.get<INftComponent>(componentName);
 	await component.transfer(
 		request.pathParams.id,
-		request.body.recipient,
+		request.body.recipientAddress,
+		request.body.recipientIdentity,
 		request.body.metadata,
 		httpRequestContext.userIdentity
 	);

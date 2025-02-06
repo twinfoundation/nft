@@ -38,4 +38,12 @@ export interface INftFields {
 	 * The issuer of the NFT.
 	 */
 	issuer: string;
+	/**
+	 * The issuer identity of the NFT.
+	 */
+	issuerIdentity: string;
+	/**
+	 * The owner identity of the NFT.
+	 */
+	ownerIdentity: string;
 }

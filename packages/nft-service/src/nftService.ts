@@ -40,7 +40,6 @@ export class NftService implements INftComponent {
 
 	/**
 	 * Mint an NFT.
-	 * @param issuer The issuer for the NFT, will also be the initial owner.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
@@ -49,14 +48,12 @@ export class NftService implements INftComponent {
 	 * @returns The id of the created NFT in urn format.
 	 */
 	public async mint<T = unknown, U = unknown>(
-		issuer: string,
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U,
 		namespace?: string,
 		identity?: string
 	): Promise<string> {
-		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 		Guards.stringValue(this.CLASS_NAME, nameof(identity), identity);
 
@@ -65,7 +62,7 @@ export class NftService implements INftComponent {
 
 			const nftConnector = NftConnectorFactory.get<INftConnector>(connectorNamespace);
 
-			const nftUrn = await nftConnector.mint(identity, issuer, tag, immutableMetadata, metadata);
+			const nftUrn = await nftConnector.mint(identity, tag, immutableMetadata, metadata);
 
 			return nftUrn;
 		} catch (error) {
@@ -120,24 +117,27 @@ export class NftService implements INftComponent {
 	/**
 	 * Transfer an NFT.
 	 * @param id The id of the NFT to transfer in urn format.
-	 * @param recipient The recipient of the NFT.
+	 * @param recipientIdentity The recipient identity for the NFT.
+	 * @param recipientAddress The recipient address for the NFT.
 	 * @param metadata Optional mutable data to include during the transfer.
 	 * @param identity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
-	public async transfer<T = unknown>(
+	public async transfer<U = unknown>(
 		id: string,
-		recipient: string,
-		metadata?: T,
+		recipientIdentity: string,
+		recipientAddress: string,
+		metadata?: U,
 		identity?: string
 	): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
-		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipientIdentity), recipientIdentity);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipientAddress), recipientAddress);
 		Guards.stringValue(this.CLASS_NAME, nameof(identity), identity);
 
 		try {
 			const nftConnector = this.getConnector(id);
-			await nftConnector.transfer(identity, id, recipient, metadata);
+			await nftConnector.transfer(identity, id, recipientIdentity, recipientAddress, metadata);
 		} catch (error) {
 			throw new GeneralError(this.CLASS_NAME, "transferFailed", undefined, error);
 		}
@@ -150,7 +150,7 @@ export class NftService implements INftComponent {
 	 * @param identity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
-	public async update<T = unknown>(id: string, metadata: T, identity?: string): Promise<void> {
+	public async update<U = unknown>(id: string, metadata: U, identity?: string): Promise<void> {
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
 		Guards.stringValue(this.CLASS_NAME, nameof(identity), identity);

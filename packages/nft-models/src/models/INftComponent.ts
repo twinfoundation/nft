@@ -8,7 +8,6 @@ import type { IComponent } from "@twin.org/core";
 export interface INftComponent extends IComponent {
 	/**
 	 * Mint an NFT.
-	 * @param issuer The issuer for the NFT, will also be the initial owner.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
@@ -17,7 +16,6 @@ export interface INftComponent extends IComponent {
 	 * @returns The id of the created NFT in urn format.
 	 */
 	mint<T = unknown, U = unknown>(
-		issuer: string,
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U,
@@ -28,12 +26,12 @@ export interface INftComponent extends IComponent {
 	/**
 	 * Resolve an NFT.
 	 * @param id The id of the NFT to resolve.
-	 * @param identity The identity to perform the nft operation on.
+	 * @param controllerIdentity The identity to perform the nft operation on.
 	 * @returns The data for the NFT.
 	 */
 	resolve<T = unknown, U = unknown>(
 		id: string,
-		identity?: string
+		controllerIdentity?: string
 	): Promise<{
 		issuer: string;
 		owner: string;
@@ -45,32 +43,34 @@ export interface INftComponent extends IComponent {
 	/**
 	 * Burn an NFT.
 	 * @param id The id of the NFT to burn in urn format.
-	 * @param identity The identity to perform the nft operation on.
+	 * @param controllerIdentity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
-	burn(id: string, identity?: string): Promise<void>;
+	burn(id: string, controllerIdentity?: string): Promise<void>;
 
 	/**
 	 * Transfer an NFT.
 	 * @param id The id of the NFT to transfer in urn format.
-	 * @param recipient The recipient of the NFT.
+	 * @param recipientIdentity The recipient identity for the NFT.
+	 * @param recipientAddress The recipient address for the NFT.
 	 * @param metadata Optional mutable data to include during the transfer.
-	 * @param identity The identity to perform the nft operation on.
+	 * @param controllerIdentity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
-	transfer<T = unknown>(
+	transfer<U = unknown>(
 		id: string,
-		recipient: string,
-		metadata?: T,
-		identity?: string
+		recipientIdentity: string,
+		recipientAddress: string,
+		metadata?: U,
+		controllerIdentity?: string
 	): Promise<void>;
 
 	/**
 	 * Update the mutable data of the NFT.
 	 * @param id The id of the NFT to update in urn format.
 	 * @param metadata The mutable data to update.
-	 * @param identity The identity to perform the nft operation on.
+	 * @param controllerIdentity The identity to perform the nft operation on.
 	 * @returns Nothing.
 	 */
-	update<T = unknown>(id: string, metadata: T, identity?: string): Promise<void>;
+	update<U = unknown>(id: string, metadata: U, controllerIdentity?: string): Promise<void>;
 }

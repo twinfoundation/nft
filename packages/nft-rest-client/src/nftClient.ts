@@ -34,7 +34,6 @@ export class NftClient extends BaseRestClient implements INftComponent {
 
 	/**
 	 * Mint an NFT.
-	 * @param issuer The issuer for the NFT, will also be the initial owner.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
@@ -42,18 +41,15 @@ export class NftClient extends BaseRestClient implements INftComponent {
 	 * @returns The id of the created NFT in urn format.
 	 */
 	public async mint<T = unknown, U = unknown>(
-		issuer: string,
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U,
 		namespace?: string
 	): Promise<string> {
-		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
 		const response = await this.fetch<INftMintRequest, ICreatedResponse>("/", "POST", {
 			body: {
-				issuer,
 				tag,
 				immutableMetadata,
 				metadata,
@@ -113,20 +109,28 @@ export class NftClient extends BaseRestClient implements INftComponent {
 	/**
 	 * Transfer an NFT.
 	 * @param id The id of the NFT to transfer in urn format.
-	 * @param recipient The recipient of the NFT.
+	 * @param recipientIdentity The recipient identity for the NFT.
+	 * @param recipientAddress The recipient address for the NFT.
 	 * @param metadata Optional mutable data to include during the transfer.
 	 * @returns Nothing.
 	 */
-	public async transfer<T = unknown>(id: string, recipient: string, metadata?: T): Promise<void> {
+	public async transfer<T = unknown>(
+		id: string,
+		recipientIdentity: string,
+		recipientAddress: string,
+		metadata?: T
+	): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
-		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipientIdentity), recipientIdentity);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipientAddress), recipientAddress);
 
 		await this.fetch<INftTransferRequest, never>("/:id/transfer", "POST", {
 			pathParams: {
 				id
 			},
 			body: {
-				recipient,
+				recipientIdentity,
+				recipientAddress,
 				metadata
 			}
 		});
@@ -138,7 +142,7 @@ export class NftClient extends BaseRestClient implements INftComponent {
 	 * @param metadata The mutable data to update.
 	 * @returns Nothing.
 	 */
-	public async update<T = unknown>(id: string, metadata: T): Promise<void> {
+	public async update<U = unknown>(id: string, metadata: U): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
 		Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
 

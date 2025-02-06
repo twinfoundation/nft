@@ -8,10 +8,6 @@
 					"param": "--seed '<'seed'>'",
 					"description": "The seed for the issuer address in hex or base64 used to fund the minting, or start with ! to read environment variable."
 				},
-				"issuer": {
-					"param": "--issuer '<'issuer'>'",
-					"description": "The address of the NFT issuer, or start with ! to read environment variable."
-				},
 				"tag": {
 					"param": "--tag '<'tag'>'",
 					"description": "The tag for the NFT."
@@ -29,7 +25,6 @@
 				"mintingNft": "Minting NFT"
 			},
 			"labels": {
-				"issuer": "Issuer",
 				"tag": "Tag",
 				"immutableJsonFilename": "Immutable JSON Filename",
 				"mutableJsonFilename": "Mutable JSON Filename",
@@ -63,10 +58,6 @@
 					"param": "--seed '<'seed'>'",
 					"description": "The seed for the issuer address in hex or base64 used to fund the burning, or start with ! to read environment variable."
 				},
-				"issuer": {
-					"param": "--issuer '<'issuer'>'",
-					"description": "The address of the NFT issuer, or start with ! to read environment variable."
-				},
 				"id": {
 					"param": "--id '<'id'>'",
 					"description": "The id for the NFT in urn format."
@@ -92,8 +83,12 @@
 					"param": "--id '<'id'>'",
 					"description": "The id for the NFT in urn format."
 				},
-				"recipient": {
-					"param": "--recipient '<'recipient'>'",
+				"recipientIdentity": {
+					"param": "--recipientIdentity '<'recipientIdentity'>'",
+					"description": "The identity of the NFT issuer, or start with ! to read environment variable."
+				},
+				"recipientAddress": {
+					"param": "--recipientAddress '<'recipientAddress'>'",
 					"description": "The address of the NFT recipient, or start with ! to read environment variable."
 				}
 			},
@@ -101,7 +96,8 @@
 				"transferringNft": "Transferring NFT"
 			},
 			"labels": {
-				"recipient": "Recipient",
+				"recipientAddress": "Recipient Address",
+				"recipientIdentity": "Recipient Identity",
 				"nftId": "NFT Id"
 			}
 		},

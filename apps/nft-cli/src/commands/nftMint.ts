@@ -31,10 +31,6 @@ export function buildCommandNftMint(): Command {
 			I18n.formatMessage("commands.nft-mint.options.seed.description")
 		)
 		.requiredOption(
-			I18n.formatMessage("commands.nft-mint.options.issuer.param"),
-			I18n.formatMessage("commands.nft-mint.options.issuer.description")
-		)
-		.requiredOption(
 			I18n.formatMessage("commands.nft-mint.options.tag.param"),
 			I18n.formatMessage("commands.nft-mint.options.tag.description")
 		)
@@ -89,7 +85,6 @@ export function buildCommandNftMint(): Command {
  * Action the nft mint command.
  * @param opts The options for the command.
  * @param opts.seed The seed required for signing by the issuer.
- * @param opts.issuer The issuer address of the NFT.
  * @param opts.tag The tag for the NFT.
  * @param opts.immutableJson Filename of the immutable JSON data.
  * @param opts.mutableJson Filename of the mutable JSON data.
@@ -101,7 +96,6 @@ export function buildCommandNftMint(): Command {
 export async function actionCommandNftMint(
 	opts: {
 		seed: string;
-		issuer: string;
 		tag: string;
 		immutableJson?: string;
 		mutableJson?: string;
@@ -112,10 +106,6 @@ export async function actionCommandNftMint(
 	} & CliOutputOptions
 ): Promise<void> {
 	const seed: Uint8Array = CLIParam.hexBase64("seed", opts.seed);
-	const issuer: string =
-		opts.connector === NftConnectorTypes.IotaRebased
-			? Converter.bytesToHex(CLIParam.hex("issuer", opts.issuer), true)
-			: CLIParam.bech32("issuer", opts.issuer);
 	const tag: string = CLIParam.stringValue("tag", opts.tag);
 	const immutableJson: string | undefined = opts.immutableJson
 		? path.resolve(opts.immutableJson)
@@ -130,7 +120,6 @@ export async function actionCommandNftMint(
 			: undefined;
 	const explorerEndpoint: string = CLIParam.url("explorer", opts.explorer);
 
-	CLIDisplay.value(I18n.formatMessage("commands.nft-mint.labels.issuer"), issuer);
 	CLIDisplay.value(I18n.formatMessage("commands.nft-mint.labels.tag"), tag);
 	if (Is.stringValue(immutableJson)) {
 		CLIDisplay.value(
@@ -187,13 +176,7 @@ export async function actionCommandNftMint(
 
 	CLIDisplay.spinnerStart();
 
-	const nftId = await nftConnector.mint(
-		localIdentity,
-		issuer,
-		tag,
-		immutableJsonData,
-		mutableJsonData
-	);
+	const nftId = await nftConnector.mint(localIdentity, tag, immutableJsonData, mutableJsonData);
 
 	CLIDisplay.spinnerStop();
 

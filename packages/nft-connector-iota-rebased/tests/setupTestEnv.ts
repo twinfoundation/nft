@@ -3,8 +3,6 @@
 import path from "node:path";
 import { requestIotaFromFaucetV0 } from "@iota/iota-sdk/faucet";
 import { Guards, Is } from "@twin.org/core";
-import { Bip39 } from "@twin.org/crypto";
-import { IotaRebased } from "@twin.org/dlt-iota-rebased";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { nameof } from "@twin.org/nameof";
@@ -15,6 +13,8 @@ import {
 	initSchema
 } from "@twin.org/vault-connector-entity-storage";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
+import { IotaRebasedWalletConnector } from "@twin.org/wallet-connector-iota-rebased";
+import { WalletConnectorFactory } from "@twin.org/wallet-models";
 import dotenv from "dotenv";
 
 console.debug("Setting up test environment from .env and .env.dev files");
@@ -83,38 +83,6 @@ EntityStorageConnectorFactory.register("vault-secret", () => secretEntityStorage
 export const TEST_VAULT_CONNECTOR = new EntityStorageVaultConnector();
 VaultConnectorFactory.register("vault", () => TEST_VAULT_CONNECTOR);
 
-// Setup client options
-export const TEST_CLIENT_OPTIONS = {
-	url: process.env.TEST_NODE_ENDPOINT
-};
-
-export const TEST_COIN_TYPE = Number.parseInt(process.env.TEST_COIN_TYPE, 10);
-
-const testAddresses = IotaRebased.getAddresses(
-	Bip39.mnemonicToSeed(process.env.TEST_MNEMONIC),
-	TEST_COIN_TYPE,
-	0,
-	0,
-	1
-);
-const testAddresses2 = IotaRebased.getAddresses(
-	Bip39.mnemonicToSeed(process.env.TEST_2_MNEMONIC),
-	TEST_COIN_TYPE,
-	0,
-	0,
-	1
-);
-const nodeAddresses = IotaRebased.getAddresses(
-	Bip39.mnemonicToSeed(process.env.TEST_NODE_MNEMONIC),
-	TEST_COIN_TYPE,
-	0,
-	0,
-	1
-);
-export const TEST_ADDRESS = testAddresses[0];
-export const TEST_ADDRESS_2 = testAddresses2[0];
-export const NODE_ADDRESS = nodeAddresses[0];
-
 // Store mnemonics in vault for node identity
 await TEST_VAULT_CONNECTOR.setSecret(
 	`${TEST_NODE_IDENTITY}/${TEST_MNEMONIC_NAME}`,
@@ -132,6 +100,32 @@ await TEST_VAULT_CONNECTOR.setSecret(
 	`${TEST_USER_IDENTITY_ID_2}/${TEST_MNEMONIC_NAME}`,
 	process.env.TEST_2_MNEMONIC
 );
+
+// Setup client options
+export const TEST_CLIENT_OPTIONS = {
+	url: process.env.TEST_NODE_ENDPOINT
+};
+
+export const TEST_COIN_TYPE = Number.parseInt(process.env.TEST_COIN_TYPE, 10);
+
+export const TEST_WALLET_CONNECTOR = new IotaRebasedWalletConnector({
+	config: {
+		clientOptions: TEST_CLIENT_OPTIONS,
+		vaultMnemonicId: TEST_MNEMONIC_NAME,
+		coinType: TEST_COIN_TYPE,
+		network: TEST_NETWORK
+	}
+});
+
+WalletConnectorFactory.register("wallet", () => TEST_WALLET_CONNECTOR);
+
+const testAddresses = await TEST_WALLET_CONNECTOR.getAddresses(TEST_USER_IDENTITY_ID, 0, 0, 1);
+const testAddresses2 = await TEST_WALLET_CONNECTOR.getAddresses(TEST_USER_IDENTITY_ID_2, 0, 0, 1);
+const nodeAddresses = await TEST_WALLET_CONNECTOR.getAddresses(TEST_NODE_IDENTITY, 0, 0, 1);
+
+export const TEST_ADDRESS = testAddresses[0];
+export const TEST_ADDRESS_2 = testAddresses2[0];
+export const NODE_ADDRESS = nodeAddresses[0];
 
 /**
  * Setup the test environment.

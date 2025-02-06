@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IotaClient } from "@iota/iota-sdk/client";
+import type { IotaClient, IotaObjectResponse } from "@iota/iota-sdk/client";
 import { Transaction } from "@iota/iota-sdk/transactions";
 import { BaseError, Converter, GeneralError, Guards, Is, StringHelper, Urn } from "@twin.org/core";
 import { IotaRebased, type IIotaDryRun } from "@twin.org/dlt-iota-rebased";
@@ -8,6 +8,7 @@ import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/loggi
 import { nameof } from "@twin.org/nameof";
 import type { INftConnector } from "@twin.org/nft-models";
 import { VaultConnectorFactory, type IVaultConnector } from "@twin.org/vault-models";
+import { type IWalletConnector, WalletConnectorFactory } from "@twin.org/wallet-models";
 import compiledModulesJson from "./contracts/compiledModules/compiled-modules.json";
 import { IotaRebasedNftUtils } from "./iotaRebasedNftUtils";
 import type { IIotaRebasedNftConnectorConfig } from "./models/IIotaRebasedNftConnectorConfig";
@@ -40,6 +41,12 @@ export class IotaRebasedNftConnector implements INftConnector {
 	 * @internal
 	 */
 	private readonly _vaultConnector: IVaultConnector;
+
+	/**
+	 * Connector for wallet operations.
+	 * @internal
+	 */
+	private readonly _walletConnector: IWalletConnector;
 
 	/**
 	 * The configuration for the connector.
@@ -88,6 +95,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 			options.config.clientOptions
 		);
 		this._vaultConnector = VaultConnectorFactory.get(options.vaultConnectorType ?? "vault");
+		this._walletConnector = WalletConnectorFactory.get(options.walletConnectorType ?? "wallet");
 
 		this._logging = LoggingConnectorFactory.getIfExists(options?.loggingConnectorType ?? "logging");
 
@@ -263,28 +271,34 @@ export class IotaRebasedNftConnector implements INftConnector {
 
 	/**
 	 * Mint an NFT.
-	 * @param controller The identity of the user to access the vault keys.
-	 * @param issuer The issuer for the NFT, will also be the initial owner.
+	 * @param controllerIdentity The identity of the user to access the vault keys.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
 	 * @returns The id of the created NFT in urn format.
 	 */
 	public async mint<T = unknown, U = unknown>(
-		controller: string,
-		issuer: string,
+		controllerIdentity: string,
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U
 	): Promise<string> {
 		this.ensureStarted();
-		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
-		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
+		Guards.stringValue(this.CLASS_NAME, nameof(controllerIdentity), controllerIdentity);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
 		try {
 			const txb = new Transaction();
 			txb.setGasBudget(this._gasBudget);
+
+			const walletAddressIndex = this._config.walletAddressIndex ?? 0;
+			const addresses = await this._walletConnector.getAddresses(
+				controllerIdentity,
+				0,
+				walletAddressIndex,
+				1
+			);
+			const address = addresses[0];
 
 			// Convert mutable metadata to string
 			const metadataString = metadata ? JSON.stringify(metadata) : "";
@@ -311,23 +325,25 @@ export class IotaRebasedNftConnector implements INftConnector {
 					txb.pure.string(description),
 					txb.pure.string(uri),
 					txb.pure.string(tag),
-					txb.pure.address(issuer),
-					txb.pure.string(metadataString)
+					txb.pure.address(address),
+					txb.pure.string(metadataString),
+					txb.pure.string(controllerIdentity),
+					txb.pure.string(controllerIdentity)
 				]
 			});
 
 			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
 			if (this._config.enableCostLogging) {
-				await this.dryRunTransaction(txb, controller, "mint");
+				await this.dryRunTransaction(txb, controllerIdentity, "mint");
 			}
 
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
 				this._vaultConnector,
-				controller,
+				controllerIdentity,
 				this._client,
 				{
-					owner: issuer,
+					owner: address,
 					transaction: txb,
 					showEffects: true,
 					showEvents: true,
@@ -395,19 +411,6 @@ export class IotaRebasedNftConnector implements INftConnector {
 
 			const content = parsedData.fields;
 
-			// Add owner information to the returned object
-			const owner = object.data.owner;
-			let ownerAddress: string | null = null;
-
-			if (Is.object(owner)) {
-				if ("AddressOwner" in owner) {
-					ownerAddress = owner.AddressOwner;
-				} else if ("ObjectOwner" in owner) {
-					ownerAddress = owner.ObjectOwner;
-				}
-				// Shared ownership is handled as null
-			}
-
 			// Extract immutable metadata
 			const immutableMetadata = {
 				name: content.name,
@@ -424,8 +427,8 @@ export class IotaRebasedNftConnector implements INftConnector {
 			}
 
 			return {
-				issuer: content.issuer?.toString(),
-				owner: ownerAddress ?? "",
+				issuer: content.issuerIdentity?.toString(),
+				owner: content.ownerIdentity?.toString(),
 				tag: content.tag?.toString(),
 				immutableMetadata,
 				metadata
@@ -442,12 +445,12 @@ export class IotaRebasedNftConnector implements INftConnector {
 
 	/**
 	 * Burn an NFT.
-	 * @param controller The controller of the NFT who can make changes.
+	 * @param controllerIdentity The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @returns void.
 	 */
-	public async burn(controller: string, id: string): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
+	public async burn(controllerIdentity: string, id: string): Promise<void> {
+		Guards.stringValue(this.CLASS_NAME, nameof(controllerIdentity), controllerIdentity);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 
 		const urnParsed = Urn.fromValidString(id);
@@ -471,19 +474,29 @@ export class IotaRebasedNftConnector implements INftConnector {
 				arguments: [txb.object(objectId)]
 			});
 
-			const details = await this.resolve(id);
+			const object = await this._client.getObject({
+				id: objectId,
+				options: {
+					showContent: true,
+					showType: true,
+					showOwner: true
+				}
+			});
+
+			const ownerAddress = this.getOwnerAddress(id, object);
+
 			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
 			if (this._config.enableCostLogging) {
-				await this.dryRunTransaction(txb, controller, "burn");
+				await this.dryRunTransaction(txb, controllerIdentity, "burn");
 			}
 
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
 				this._vaultConnector,
-				controller,
+				controllerIdentity,
 				this._client,
 				{
-					owner: details.owner,
+					owner: ownerAddress,
 					transaction: txb,
 					showEffects: true,
 					showEvents: true,
@@ -510,19 +523,22 @@ export class IotaRebasedNftConnector implements INftConnector {
 	 * Transfer an NFT to a new owner.
 	 * @param controller The identity of the user to access the vault keys.
 	 * @param nftId The id of the NFT to transfer.
-	 * @param recipient The address to transfer the NFT to.
+	 * @param recipientIdentity The recipient identity for the NFT.
+	 * @param recipientAddress The recipient address for the NFT.
 	 * @param metadata Optional metadata to update during transfer.
 	 * @returns void.
 	 */
-	public async transfer<T = unknown>(
+	public async transfer<U = unknown>(
 		controller: string,
 		nftId: string,
-		recipient: string,
-		metadata?: T
+		recipientIdentity: string,
+		recipientAddress: string,
+		metadata?: U
 	): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
 		Guards.stringValue(this.CLASS_NAME, nameof(nftId), nftId);
-		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipientIdentity), recipientIdentity);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipientAddress), recipientAddress);
 		if (!Is.undefined(metadata)) {
 			Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
 		}
@@ -552,12 +568,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 				}
 			});
 
-			const details = await this.resolve(nftId);
-			if (!object.data?.content) {
-				throw new GeneralError(this.CLASS_NAME, "nftNotFound", {
-					nftId
-				});
-			}
+			const ownerAddress = this.getOwnerAddress(nftId, object);
 
 			if (!Is.undefined(metadata)) {
 				// If metadata is provided, use transfer_with_metadata
@@ -566,12 +577,20 @@ export class IotaRebasedNftConnector implements INftConnector {
 					target: `${packageId}::${moduleName}::transfer_with_metadata`,
 					arguments: [
 						txb.object(objectId),
-						txb.pure.address(recipient),
+						txb.pure.address(recipientAddress),
+						txb.pure.string(recipientIdentity),
 						txb.pure.string(metadataString)
 					]
 				});
 			} else {
-				txb.transferObjects([txb.object(objectId)], txb.pure.address(recipient));
+				txb.moveCall({
+					target: `${packageId}::${moduleName}::transfer`,
+					arguments: [
+						txb.object(objectId),
+						txb.pure.address(recipientAddress),
+						txb.pure.string(recipientIdentity)
+					]
+				});
 			}
 
 			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
@@ -585,7 +604,7 @@ export class IotaRebasedNftConnector implements INftConnector {
 				controller,
 				this._client,
 				{
-					owner: details.owner,
+					owner: ownerAddress,
 					transaction: txb,
 					showEffects: true,
 					showEvents: true,
@@ -610,14 +629,18 @@ export class IotaRebasedNftConnector implements INftConnector {
 
 	/**
 	 * Update the mutable data of an NFT.
-	 * @param controller The controller of the NFT who can make changes.
+	 * @param controllerIdentity The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to update in urn format.
 	 * @param metadata The new metadata for the NFT.
 	 * @returns void.
 	 */
-	public async update<T = unknown>(controller: string, id: string, metadata: T): Promise<void> {
+	public async update<U = unknown>(
+		controllerIdentity: string,
+		id: string,
+		metadata: U
+	): Promise<void> {
 		this.ensureStarted();
-		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
+		Guards.stringValue(this.CLASS_NAME, nameof(controllerIdentity), controllerIdentity);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 		Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
 
@@ -646,19 +669,29 @@ export class IotaRebasedNftConnector implements INftConnector {
 				arguments: [txb.object(objectId), txb.pure.string(metadataString)]
 			});
 
-			const details = await this.resolve(id);
+			const object = await this._client.getObject({
+				id: objectId,
+				options: {
+					showContent: true,
+					showType: true,
+					showOwner: true
+				}
+			});
+
+			const ownerAddress = this.getOwnerAddress(id, object);
+
 			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
 			if (this._config.enableCostLogging) {
-				await this.dryRunTransaction(txb, controller, "update");
+				await this.dryRunTransaction(txb, controllerIdentity, "update");
 			}
 
 			const result = await IotaRebased.prepareAndPostNftTransaction(
 				this._config,
 				this._vaultConnector,
-				controller,
+				controllerIdentity,
 				this._client,
 				{
-					owner: details.owner,
+					owner: ownerAddress,
 					transaction: txb,
 					showEffects: true,
 					showEvents: true,
@@ -687,17 +720,8 @@ export class IotaRebasedNftConnector implements INftConnector {
 	 * @returns The controller's address.
 	 */
 	private async getPackageControllerAddress(identity: string): Promise<string> {
-		const seed = await IotaRebased.getSeed(this._config, this._vaultConnector, identity);
-		const walletAddressIndex = this._config.packageControllerAddressIndex ?? 0;
-		const addresses = IotaRebased.getAddresses(
-			seed,
-			this._config.coinType ?? IotaRebased.DEFAULT_COIN_TYPE,
-			0,
-			walletAddressIndex,
-			1,
-			false
-		);
-
+		const addressIndex = this._config.packageControllerAddressIndex ?? 0;
+		const addresses = await this._walletConnector.getAddresses(identity, 0, addressIndex, 1);
 		return addresses[0];
 	}
 
@@ -745,5 +769,29 @@ export class IotaRebasedNftConnector implements INftConnector {
 		);
 
 		return dryRunResponse;
+	}
+
+	/**
+	 * Get the owner address of an NFT.
+	 * @param nftId The id of the NFT.
+	 * @param object The object to get the owner from.
+	 * @returns The owner address.
+	 * @internal
+	 */
+	private getOwnerAddress(nftId: string, object?: IotaObjectResponse): string {
+		const owner = object?.data?.owner;
+
+		if (Is.object(owner)) {
+			if ("AddressOwner" in owner) {
+				return owner.AddressOwner;
+			} else if ("ObjectOwner" in owner) {
+				return owner.ObjectOwner;
+			}
+			// Shared ownership is handled as null
+		}
+
+		throw new GeneralError(this.CLASS_NAME, "nftOwnerNftFound", {
+			nftId
+		});
 	}
 }

@@ -11,6 +11,7 @@ import {
 	TEST_MNEMONIC_NAME,
 	TEST_NFT_ADDRESS_2_BECH32,
 	TEST_NFT_ADDRESS_BECH32,
+	TEST_WALLET_ADDRESS_INDEX,
 	setupTestEnv
 } from "./setupTestEnv";
 import { IotaNftConnector } from "../src/iotaNftConnector";
@@ -28,7 +29,8 @@ describe("IotaNftConnector", () => {
 			config: {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
-				coinType: TEST_COIN_TYPE
+				coinType: TEST_COIN_TYPE,
+				walletAddressIndex: TEST_WALLET_ADDRESS_INDEX
 			}
 		});
 		const immutableMetadata: IIrc27Metadata = {
@@ -41,13 +43,9 @@ describe("IotaNftConnector", () => {
 			issuerName: "Test Issuer",
 			description: "Test Description"
 		};
-		const idUrn = await connector.mint(
-			TEST_IDENTITY_ID,
-			TEST_NFT_ADDRESS_BECH32,
-			"footag",
-			immutableMetadata,
-			{ bar: "foo" }
-		);
+		const idUrn = await connector.mint(TEST_IDENTITY_ID, "footag", immutableMetadata, {
+			bar: "foo"
+		});
 		const urn = Urn.fromValidString(idUrn);
 
 		const nftAddress = IotaNftUtils.nftIdToAddress(idUrn);
@@ -73,8 +71,8 @@ describe("IotaNftConnector", () => {
 		});
 		const response = await connector.resolve(nftId);
 
-		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
-		expect(response.owner).toEqual(TEST_NFT_ADDRESS_BECH32);
+		expect(response.issuer).toEqual(TEST_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_IDENTITY_ID);
 		expect(response.tag).toEqual("footag");
 		expect(response.metadata).toEqual({ bar: "foo" });
 		expect(response.immutableMetadata).toEqual({
@@ -98,12 +96,17 @@ describe("IotaNftConnector", () => {
 			}
 		});
 
-		await connector.transfer(TEST_IDENTITY_ID, nftId, TEST_NFT_ADDRESS_2_BECH32);
+		await connector.transfer(
+			TEST_IDENTITY_ID,
+			nftId,
+			TEST_IDENTITY_ID_2,
+			TEST_NFT_ADDRESS_2_BECH32
+		);
 
 		const response = await connector.resolve(nftId);
 
-		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
-		expect(response.owner).toEqual(TEST_NFT_ADDRESS_2_BECH32);
+		expect(response.issuer).toEqual(TEST_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_IDENTITY_ID_2);
 	});
 
 	test("Can return transfer an NFT", async () => {
@@ -115,12 +118,12 @@ describe("IotaNftConnector", () => {
 			}
 		});
 
-		await connector.transfer(TEST_IDENTITY_ID_2, nftId, TEST_NFT_ADDRESS_BECH32);
+		await connector.transfer(TEST_IDENTITY_ID_2, nftId, TEST_IDENTITY_ID, TEST_NFT_ADDRESS_BECH32);
 
 		const response = await connector.resolve(nftId);
 
-		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
-		expect(response.owner).toEqual(TEST_NFT_ADDRESS_BECH32);
+		expect(response.issuer).toEqual(TEST_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_IDENTITY_ID);
 	});
 
 	test("Can transfer an NFT with a larger mutable payload", async () => {
@@ -132,14 +135,23 @@ describe("IotaNftConnector", () => {
 			}
 		});
 
-		await connector.transfer(TEST_IDENTITY_ID, nftId, TEST_NFT_ADDRESS_2_BECH32, {
-			payload: "a".repeat(128)
-		});
+		await connector.transfer(
+			TEST_IDENTITY_ID,
+			nftId,
+			TEST_IDENTITY_ID_2,
+			TEST_NFT_ADDRESS_2_BECH32,
+			{
+				payload: "a".repeat(128)
+			}
+		);
 
 		const response = await connector.resolve(nftId);
 
-		expect(response.issuer).toEqual(TEST_NFT_ADDRESS_BECH32);
-		expect(response.owner).toEqual(TEST_NFT_ADDRESS_2_BECH32);
+		expect(response.issuer).toEqual(TEST_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_IDENTITY_ID_2);
+		expect(response.metadata).toEqual({
+			payload: "a".repeat(128)
+		});
 	});
 
 	test("Can update the mutable data of an NFT", async () => {
@@ -151,6 +163,16 @@ describe("IotaNftConnector", () => {
 			}
 		});
 		await connector.update(TEST_IDENTITY_ID_2, nftId, {
+			payload1: "a".repeat(128),
+			payload2: "b".repeat(128),
+			payload3: "c".repeat(128)
+		});
+
+		const response = await connector.resolve(nftId);
+
+		expect(response.issuer).toEqual(TEST_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_IDENTITY_ID_2);
+		expect(response.metadata).toEqual({
 			payload1: "a".repeat(128),
 			payload2: "b".repeat(128),
 			payload3: "c".repeat(128)

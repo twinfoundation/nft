@@ -25,6 +25,12 @@ export interface IIotaRebasedNftConnectorConfig extends IIotaRebasedConfig {
 	packageControllerAddressIndex?: number;
 
 	/**
+	 * The wallet address index to use when creating NFT.
+	 * @default 0
+	 */
+	walletAddressIndex?: number;
+
+	/**
 	 * Enable cost logging.
 	 * @default false
 	 */

@@ -23,6 +23,7 @@ import { Iota } from "@twin.org/dlt-iota";
 import { nameof } from "@twin.org/nameof";
 import type { INftConnector } from "@twin.org/nft-models";
 import { VaultConnectorFactory, type IVaultConnector } from "@twin.org/vault-models";
+import { type IWalletConnector, WalletConnectorFactory } from "@twin.org/wallet-models";
 import type { IIotaNftConnectorConfig } from "./models/IIotaNftConnectorConfig";
 import type { IIotaNftConnectorConstructorOptions } from "./models/IIotaNftConnectorConstructorOptions";
 
@@ -47,6 +48,12 @@ export class IotaNftConnector implements INftConnector {
 	private readonly _vaultConnector: IVaultConnector;
 
 	/**
+	 * Connector for wallet operations.
+	 * @internal
+	 */
+	private readonly _walletConnector: IWalletConnector;
+
+	/**
 	 * The configuration for the connector.
 	 * @internal
 	 */
@@ -65,54 +72,59 @@ export class IotaNftConnector implements INftConnector {
 			options.config.clientOptions
 		);
 		this._vaultConnector = VaultConnectorFactory.get(options.vaultConnectorType ?? "vault");
+		this._walletConnector = WalletConnectorFactory.get(options.walletConnectorType ?? "wallet");
 		this._config = options.config;
 		Iota.populateConfig(this._config);
 	}
 
 	/**
 	 * Mint an NFT.
-	 * @param controller The identity of the user to access the vault keys.
-	 * @param issuer The issuer for the NFT, will also be the initial owner.
+	 * @param controllerIdentity The identity of the user to access the vault keys.
 	 * @param tag The tag for the NFT.
 	 * @param immutableMetadata The immutable metadata for the NFT.
 	 * @param metadata The metadata for the NFT.
 	 * @returns The id of the created NFT in urn format.
 	 */
 	public async mint<T = unknown, U = unknown>(
-		controller: string,
-		issuer: string,
+		controllerIdentity: string,
 		tag: string,
 		immutableMetadata?: T,
 		metadata?: U
 	): Promise<string> {
-		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
-		Guards.stringValue(this.CLASS_NAME, nameof(issuer), issuer);
+		Guards.stringValue(this.CLASS_NAME, nameof(controllerIdentity), controllerIdentity);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
 		try {
+			const addressIndex = this._config.walletAddressIndex ?? 0;
+			const addresses = await this._walletConnector.getAddresses(
+				controllerIdentity,
+				0,
+				addressIndex,
+				1
+			);
+
+			const address = new Ed25519Address(Utils.bech32ToHex(addresses[0]));
+
 			const buildParams: NftOutputBuilderParams = {
 				nftId: "0x0000000000000000000000000000000000000000000000000000000000000000",
-				unlockConditions: [
-					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(issuer)))
-				],
-				immutableFeatures: [new IssuerFeature(new Ed25519Address(Utils.bech32ToHex(issuer)))],
-				features: [
-					new SenderFeature(new Ed25519Address(Utils.bech32ToHex(issuer))),
-					new TagFeature(Converter.utf8ToHex(tag, true))
-				]
+				unlockConditions: [new AddressUnlockCondition(address)],
+				immutableFeatures: [new IssuerFeature(address)],
+				features: [new SenderFeature(address), new TagFeature(Converter.utf8ToHex(tag, true))]
 			};
 
-			if (Is.object(metadata)) {
-				buildParams.features?.push(
-					new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
-				);
-			}
+			const finalImmutable = (immutableMetadata ?? {}) as T & { issuerIdentity: string };
+			const finalMutable = (metadata ?? {}) as U & { ownerIdentity: string };
 
-			if (Is.object(immutableMetadata)) {
-				buildParams.immutableFeatures?.push(
-					new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(immutableMetadata), true))
-				);
-			}
+			finalImmutable.issuerIdentity = controllerIdentity;
+			finalMutable.ownerIdentity = controllerIdentity;
+
+			buildParams.features?.push(
+				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
+			);
+
+			buildParams.immutableFeatures?.push(
+				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(immutableMetadata), true))
+			);
 
 			const client = new Client(this._config.clientOptions);
 
@@ -121,7 +133,7 @@ export class IotaNftConnector implements INftConnector {
 			const blockDetails = await Iota.prepareAndPostTransaction(
 				this._config,
 				this._vaultConnector,
-				controller,
+				controllerIdentity,
 				client,
 				{
 					outputs: [nftOutput]
@@ -173,7 +185,6 @@ export class IotaNftConnector implements INftConnector {
 			const client = new Client(this._config.clientOptions);
 			const nftParts = urnParsed.namespaceSpecificParts(1);
 
-			const hrp = nftParts[0];
 			const nftId = nftParts[1];
 			Guards.stringHexLength(this.CLASS_NAME, "nftId", nftId, 64, true);
 
@@ -181,24 +192,11 @@ export class IotaNftConnector implements INftConnector {
 			const nftOutputResponse = await client.getOutput(nftOutputId);
 			const nftOutput = nftOutputResponse.output as NftOutput;
 
-			const unlockConditions = nftOutput.unlockConditions?.filter(
-				f => f.type === UnlockConditionType.Address
-			);
-			const issuerFeatures = nftOutput.immutableFeatures?.filter(
-				f => f.type === FeatureType.Issuer
-			);
 			const immutableFeatures = nftOutput.immutableFeatures?.filter(
 				f => f.type === FeatureType.Metadata
 			);
 			const metadataFeatures = nftOutput.features?.filter(f => f.type === FeatureType.Metadata);
 			const tagFeatures = nftOutput.features?.filter(f => f.type === FeatureType.Tag);
-
-			const owner = Is.arrayValue(unlockConditions)
-				? ((unlockConditions[0] as AddressUnlockCondition).address as Ed25519Address).pubKeyHash
-				: "";
-			const issuer = Is.arrayValue(issuerFeatures)
-				? ((issuerFeatures[0] as IssuerFeature).address as Ed25519Address).pubKeyHash
-				: "";
 			const immutableMetadata = Is.arrayValue(immutableFeatures)
 				? Converter.hexToUtf8((immutableFeatures[0] as MetadataFeature).data)
 				: "";
@@ -209,14 +207,22 @@ export class IotaNftConnector implements INftConnector {
 				? Converter.hexToUtf8((metadataFeatures[0] as MetadataFeature).data)
 				: "";
 
+			const immutable: T & { issuerIdentity: string } = Is.stringValue(immutableMetadata)
+				? JSON.parse(immutableMetadata)
+				: {};
+			const mutable: U & { ownerIdentity: string } = Is.stringValue(metadata)
+				? JSON.parse(metadata)
+				: {};
+
+			const issuerIdentity = ObjectHelper.extractProperty<string>(immutable, ["issuerIdentity"]);
+			const ownerIdentity = ObjectHelper.extractProperty<string>(mutable, ["ownerIdentity"]);
+
 			return {
-				issuer: Utils.hexToBech32(issuer, hrp),
-				owner: Utils.hexToBech32(owner, hrp),
+				issuer: issuerIdentity ?? "",
+				owner: ownerIdentity ?? "",
 				tag,
-				immutableMetadata: Is.stringValue(immutableMetadata)
-					? JSON.parse(immutableMetadata)
-					: undefined,
-				metadata: Is.stringValue(metadata) ? JSON.parse(metadata) : undefined
+				immutableMetadata: immutable,
+				metadata: mutable
 			};
 		} catch (error) {
 			throw new GeneralError(
@@ -230,12 +236,12 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Burn an NFT.
-	 * @param controller The controller of the NFT who can make changes.
+	 * @param controllerIdentity The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to burn in urn format.
 	 * @returns Nothing.
 	 */
-	public async burn(controller: string, id: string): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
+	public async burn(controllerIdentity: string, id: string): Promise<void> {
+		Guards.stringValue(this.CLASS_NAME, nameof(controllerIdentity), controllerIdentity);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
 
 		const urnParsed = Urn.fromValidString(id);
@@ -267,24 +273,30 @@ export class IotaNftConnector implements INftConnector {
 				: "";
 			const currentOwnerAddressBech32 = Utils.hexToBech32(currentOwner, hrp);
 
-			await Iota.prepareAndPostTransaction(this._config, this._vaultConnector, controller, client, {
-				burn: {
-					nfts: [nftId]
-				},
-				inputs: [
-					new UTXOInput(
-						nftOutputResponse.metadata.transactionId,
-						nftOutputResponse.metadata.outputIndex
-					)
-				],
-				outputs: [
-					new BasicOutput(nftOutputResponse.output.getAmount(), [
-						new AddressUnlockCondition(
-							new Ed25519Address(Utils.bech32ToHex(currentOwnerAddressBech32))
+			await Iota.prepareAndPostTransaction(
+				this._config,
+				this._vaultConnector,
+				controllerIdentity,
+				client,
+				{
+					burn: {
+						nfts: [nftId]
+					},
+					inputs: [
+						new UTXOInput(
+							nftOutputResponse.metadata.transactionId,
+							nftOutputResponse.metadata.outputIndex
 						)
-					])
-				]
-			});
+					],
+					outputs: [
+						new BasicOutput(nftOutputResponse.output.getAmount(), [
+							new AddressUnlockCondition(
+								new Ed25519Address(Utils.bech32ToHex(currentOwnerAddressBech32))
+							)
+						])
+					]
+				}
+			);
 		} catch (error) {
 			throw new GeneralError(
 				this.CLASS_NAME,
@@ -297,21 +309,24 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Transfer an NFT.
-	 * @param controller The controller of the NFT who can make changes.
+	 * @param controllerIdentity The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to transfer in urn format.
-	 * @param recipient The recipient of the NFT.
+	 * @param recipientIdentity The recipient identity for the NFT.
+	 * @param recipientAddress The recipient address for the NFT.
 	 * @param metadata Optional mutable data to include during the transfer.
 	 * @returns Nothing.
 	 */
-	public async transfer<T = unknown>(
-		controller: string,
+	public async transfer<U = unknown>(
+		controllerIdentity: string,
 		id: string,
-		recipient: string,
-		metadata?: T
+		recipientIdentity: string,
+		recipientAddress: string,
+		metadata?: U
 	): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
+		Guards.stringValue(this.CLASS_NAME, nameof(controllerIdentity), controllerIdentity);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
-		Guards.stringValue(this.CLASS_NAME, nameof(recipient), recipient);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipientIdentity), recipientIdentity);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipientAddress), recipientAddress);
 
 		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceMethod() !== IotaNftConnector.NAMESPACE) {
@@ -344,18 +359,34 @@ export class IotaNftConnector implements INftConnector {
 			const mutableFeatures: Feature[] = [new SenderFeature(new Ed25519Address(currentOwner))];
 
 			if (Is.object(metadata)) {
+				// We have new metadata so add the owner identity to the metadata.
+				const mutable = metadata as U & { ownerIdentity: string };
+				mutable.ownerIdentity = recipientIdentity;
+
 				mutableFeatures.push(
-					new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
+					new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(mutable), true))
 				);
 			} else {
-				const currentMetadata = mutableFeatures.filter(m => m.type === FeatureType.Metadata);
-				mutableFeatures.push(...currentMetadata);
+				// No new metadata so we need to keep the existing metadata and replace the owner identity.
+				const metadataFeatures = nftOutput.features?.filter(f => f.type === FeatureType.Metadata);
+				const currentMetadata = Is.arrayValue(metadataFeatures)
+					? Converter.hexToUtf8((metadataFeatures[0] as MetadataFeature).data)
+					: "";
+
+				const mutable: U & { ownerIdentity: string } = Is.stringValue(currentMetadata)
+					? JSON.parse(currentMetadata)
+					: {};
+				mutable.ownerIdentity = recipientIdentity;
+
+				mutableFeatures.push(
+					new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(mutable), true))
+				);
 			}
 
 			const recipientNftOutput = await client.buildNftOutput({
 				nftId,
 				unlockConditions: [
-					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(recipient)))
+					new AddressUnlockCondition(new Ed25519Address(Utils.bech32ToHex(recipientAddress)))
 				],
 				immutableFeatures: nftOutput.immutableFeatures,
 				features: mutableFeatures
@@ -367,16 +398,22 @@ export class IotaNftConnector implements INftConnector {
 				recipientNftOutput.getAmount()
 			);
 
-			await Iota.prepareAndPostTransaction(this._config, this._vaultConnector, controller, client, {
-				inputs: [
-					new UTXOInput(
-						nftOutputResponse.metadata.transactionId,
-						nftOutputResponse.metadata.outputIndex
-					),
-					...additionalInputs
-				],
-				outputs: [recipientNftOutput]
-			});
+			await Iota.prepareAndPostTransaction(
+				this._config,
+				this._vaultConnector,
+				controllerIdentity,
+				client,
+				{
+					inputs: [
+						new UTXOInput(
+							nftOutputResponse.metadata.transactionId,
+							nftOutputResponse.metadata.outputIndex
+						),
+						...additionalInputs
+					],
+					outputs: [recipientNftOutput]
+				}
+			);
 		} catch (error) {
 			throw new GeneralError(
 				this.CLASS_NAME,
@@ -389,15 +426,19 @@ export class IotaNftConnector implements INftConnector {
 
 	/**
 	 * Update the data of the NFT.
-	 * @param controller The controller of the NFT who can make changes.
+	 * @param controllerIdentity The controller of the NFT who can make changes.
 	 * @param id The id of the NFT to update in urn format.
 	 * @param metadata The mutable data to update.
 	 * @returns Nothing.
 	 */
-	public async update<T = unknown>(controller: string, id: string, metadata: T): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(controller), controller);
+	public async update<U = unknown>(
+		controllerIdentity: string,
+		id: string,
+		metadata: U
+	): Promise<void> {
+		Guards.stringValue(this.CLASS_NAME, nameof(controllerIdentity), controllerIdentity);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
-		Guards.object<T>(this.CLASS_NAME, nameof(metadata), metadata);
+		Guards.object<U>(this.CLASS_NAME, nameof(metadata), metadata);
 
 		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceMethod() !== IotaNftConnector.NAMESPACE) {
@@ -427,9 +468,22 @@ export class IotaNftConnector implements INftConnector {
 				: "";
 			const currentOwnerAddressBech32 = Utils.hexToBech32(currentOwner, hrp);
 
+			const metadataFeatures = nftOutput.features?.filter(f => f.type === FeatureType.Metadata);
+			const currentMetadata = Is.arrayValue(metadataFeatures)
+				? Converter.hexToUtf8((metadataFeatures[0] as MetadataFeature).data)
+				: "";
+
+			const currentMutable: U & { ownerIdentity: string } = Is.stringValue(currentMetadata)
+				? JSON.parse(currentMetadata)
+				: {};
+
+			// We have new metadata so add the owner identity to the metadata.
+			const mutable = metadata as U & { ownerIdentity: string };
+			mutable.ownerIdentity = currentMutable.ownerIdentity;
+
 			const mutableFeatures: Feature[] = [
 				new SenderFeature(new Ed25519Address(currentOwner)),
-				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
+				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(mutable), true))
 			];
 
 			const recipientNftOutput = await client.buildNftOutput({
@@ -445,16 +499,22 @@ export class IotaNftConnector implements INftConnector {
 				recipientNftOutput.getAmount()
 			);
 
-			await Iota.prepareAndPostTransaction(this._config, this._vaultConnector, controller, client, {
-				inputs: [
-					new UTXOInput(
-						nftOutputResponse.metadata.transactionId,
-						nftOutputResponse.metadata.outputIndex
-					),
-					...additionalInputs
-				],
-				outputs: [recipientNftOutput]
-			});
+			await Iota.prepareAndPostTransaction(
+				this._config,
+				this._vaultConnector,
+				controllerIdentity,
+				client,
+				{
+					inputs: [
+						new UTXOInput(
+							nftOutputResponse.metadata.transactionId,
+							nftOutputResponse.metadata.outputIndex
+						),
+						...additionalInputs
+					],
+					outputs: [recipientNftOutput]
+				}
+			);
 		} catch (error) {
 			throw new GeneralError(
 				this.CLASS_NAME,

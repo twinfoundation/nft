@@ -10,11 +10,6 @@ export interface INftMintRequest {
 	 */
 	body: {
 		/**
-		 * The issuer for the NFT, will also be the initial owner.
-		 */
-		issuer: string;
-
-		/**
 		 * The tag for the NFT.
 		 */
 		tag: string;

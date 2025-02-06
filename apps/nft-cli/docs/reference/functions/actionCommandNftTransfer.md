@@ -22,7 +22,13 @@ The seed required for signing by the issuer.
 
 The id of the NFT to transfer in urn format.
 
-#### recipient
+#### recipientIdentity
+
+`string`
+
+The recipient address of the NFT.
+
+#### recipientAddress
 
 `string`
 

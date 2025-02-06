@@ -28,8 +28,12 @@ export function buildCommandNftTransfer(): Command {
 			I18n.formatMessage("commands.nft-transfer.options.id.description")
 		)
 		.requiredOption(
-			I18n.formatMessage("commands.nft-transfer.options.recipient.param"),
-			I18n.formatMessage("commands.nft-transfer.options.recipient.description")
+			I18n.formatMessage("commands.nft-transfer.options.recipientIdentity.param"),
+			I18n.formatMessage("commands.nft-transfer.options.recipientIdentity.description")
+		)
+		.requiredOption(
+			I18n.formatMessage("commands.nft-transfer.options.recipientAddress.param"),
+			I18n.formatMessage("commands.nft-transfer.options.recipientAddress.description")
 		);
 
 	command
@@ -67,7 +71,8 @@ export function buildCommandNftTransfer(): Command {
  * @param opts The options for the command.
  * @param opts.seed The seed required for signing by the issuer.
  * @param opts.id The id of the NFT to transfer in urn format.
- * @param opts.recipient The recipient address of the NFT.
+ * @param opts.recipientIdentity The recipient address of the NFT.
+ * @param opts.recipientAddress The recipient address of the NFT.
  * @param opts.connector The connector to perform the operations with.
  * @param opts.node The node URL.
  * @param opts.network The network to use for rebased connector.
@@ -76,7 +81,8 @@ export function buildCommandNftTransfer(): Command {
 export async function actionCommandNftTransfer(opts: {
 	seed: string;
 	id: string;
-	recipient: string;
+	recipientIdentity: string;
+	recipientAddress: string;
 	connector?: NftConnectorTypes;
 	node: string;
 	network?: string;
@@ -84,10 +90,14 @@ export async function actionCommandNftTransfer(opts: {
 }): Promise<void> {
 	const seed: Uint8Array = CLIParam.hexBase64("seed", opts.seed);
 	const id: string = CLIParam.stringValue("id", opts.id);
-	const recipient: string =
+	const recipientIdentity: string = CLIParam.stringValue(
+		"recipientIdentity",
+		opts.recipientIdentity
+	);
+	const recipientAddress: string =
 		opts.connector === NftConnectorTypes.IotaRebased
-			? Converter.bytesToHex(CLIParam.hex("recipient", opts.recipient), true)
-			: CLIParam.bech32("recipient", opts.recipient);
+			? Converter.bytesToHex(CLIParam.hex("recipientAddress", opts.recipientAddress), true)
+			: CLIParam.bech32("recipientAddress", opts.recipientAddress);
 	const nodeEndpoint: string = CLIParam.url("node", opts.node);
 	const network: string | undefined =
 		opts.connector === NftConnectorTypes.IotaRebased
@@ -96,7 +106,14 @@ export async function actionCommandNftTransfer(opts: {
 	const explorerEndpoint: string = CLIParam.url("explorer", opts.explorer);
 
 	CLIDisplay.value(I18n.formatMessage("commands.nft-transfer.labels.nftId"), id);
-	CLIDisplay.value(I18n.formatMessage("commands.nft-transfer.labels.recipient"), recipient);
+	CLIDisplay.value(
+		I18n.formatMessage("commands.nft-transfer.labels.recipientIdentity"),
+		recipientIdentity
+	);
+	CLIDisplay.value(
+		I18n.formatMessage("commands.nft-transfer.labels.recipientAddress"),
+		recipientAddress
+	);
 	CLIDisplay.value(I18n.formatMessage("commands.common.labels.node"), nodeEndpoint);
 	if (Is.stringValue(network)) {
 		CLIDisplay.value(I18n.formatMessage("commands.common.labels.network"), network);
@@ -121,7 +138,7 @@ export async function actionCommandNftTransfer(opts: {
 
 	CLIDisplay.spinnerStart();
 
-	await nftConnector.transfer(localIdentity, id, recipient);
+	await nftConnector.transfer(localIdentity, id, recipientIdentity, recipientAddress);
 
 	CLIDisplay.spinnerStop();
 

@@ -14,12 +14,6 @@ export class Nft {
 	public id!: string;
 
 	/**
-	 * The controller of the NFT.
-	 */
-	@property({ type: "string" })
-	public controller!: string;
-
-	/**
 	 * The issuer of the NFT.
 	 */
 	@property({ type: "string" })
