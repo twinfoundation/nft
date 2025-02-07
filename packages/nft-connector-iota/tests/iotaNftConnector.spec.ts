@@ -24,6 +24,29 @@ describe("IotaNftConnector", () => {
 		await setupTestEnv();
 	});
 
+	test("Can mint an NFT with no data", async () => {
+		const connector = new IotaNftConnector({
+			config: {
+				clientOptions: TEST_CLIENT_OPTIONS,
+				vaultMnemonicId: TEST_MNEMONIC_NAME,
+				coinType: TEST_COIN_TYPE,
+				walletAddressIndex: TEST_WALLET_ADDRESS_INDEX
+			}
+		});
+		const idUrn = await connector.mint(TEST_IDENTITY_ID, "footag");
+		const urn = Urn.fromValidString(idUrn);
+
+		const nftAddress = IotaNftUtils.nftIdToAddress(idUrn);
+		console.debug("Minted NFT Id", idUrn.toString());
+		console.debug("Minted NFT", `${process.env.TEST_EXPLORER_URL}addr/${nftAddress}`);
+		expect(urn.namespaceIdentifier()).toEqual("nft");
+
+		const specificParts = urn.namespaceSpecificParts();
+		expect(specificParts[0]).toEqual("iota");
+		expect(specificParts[1]).toEqual(TEST_BECH32_HRP);
+		expect(specificParts[2].length).toEqual(66);
+	});
+
 	test("Can mint an NFT", async () => {
 		const connector = new IotaNftConnector({
 			config: {

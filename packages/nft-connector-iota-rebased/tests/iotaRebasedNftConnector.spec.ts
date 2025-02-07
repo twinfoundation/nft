@@ -189,6 +189,22 @@ describe("IotaRebasedNftConnector", () => {
 		);
 	});
 
+	test("Can mint an NFT with no data", async () => {
+		const tag = "test_tag";
+		nftId = await nftUserConnector.mint(TEST_USER_IDENTITY_ID, tag);
+		const urn = Urn.fromValidString(nftId);
+		expect(urn.namespaceIdentifier()).toEqual("nft");
+		const specificParts = urn.namespaceSpecificParts();
+		expect(specificParts[0]).toEqual("iota-rebased");
+		expect(specificParts[1]).toEqual(TEST_NETWORK);
+		expect(specificParts[2].length).toBeGreaterThan(0);
+		expect(specificParts[3].length).toBeGreaterThan(0);
+		await waitForResolution(nftId);
+		const response = await nftUserConnector.resolve(nftId);
+		expect(response.issuer).toEqual(TEST_USER_IDENTITY_ID);
+		expect(response.owner).toEqual(TEST_USER_IDENTITY_ID);
+	});
+
 	test("Can mint an NFT", async () => {
 		const immutableMetadata = {
 			name: "Test NFT",

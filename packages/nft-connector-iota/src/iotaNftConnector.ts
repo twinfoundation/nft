@@ -119,11 +119,11 @@ export class IotaNftConnector implements INftConnector {
 			finalMutable.ownerIdentity = controllerIdentity;
 
 			buildParams.features?.push(
-				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(metadata), true))
+				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(finalMutable), true))
 			);
 
 			buildParams.immutableFeatures?.push(
-				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(immutableMetadata), true))
+				new MetadataFeature(Converter.bytesToHex(ObjectHelper.toBytes(finalImmutable), true))
 			);
 
 			const client = new Client(this._config.clientOptions);

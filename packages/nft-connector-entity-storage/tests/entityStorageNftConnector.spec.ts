@@ -11,6 +11,27 @@ import { EntityStorageNftConnector } from "../src/entityStorageNftConnector";
 let nftId: string;
 
 describe("EntityStorageNftConnector", () => {
+	test("Can mint an NFT with no data", async () => {
+		const connector = new EntityStorageNftConnector();
+		const idUrn = await connector.mint(TEST_IDENTITY_ID, "footag");
+		const urn = Urn.fromValidString(idUrn);
+
+		expect(urn.namespaceIdentifier()).toEqual("nft");
+		expect(urn.namespaceMethod()).toEqual("entity-storage");
+		expect(urn.namespaceSpecific(1).length).toEqual(64);
+
+		const store =
+			EntityStorageConnectorFactory.get<MemoryEntityStorageConnector<Nft>>("nft").getStore();
+		expect(store?.[0].id).toEqual(urn.namespaceSpecific(1));
+		expect(store?.[0].owner).toEqual(TEST_IDENTITY_ID);
+		expect(store?.[0].issuer).toEqual(TEST_IDENTITY_ID);
+		expect(store?.[0].tag).toEqual("footag");
+		expect(store?.[0].immutableMetadata).toEqual(undefined);
+		expect(store?.[0].metadata).toEqual(undefined);
+
+		await connector.burn(TEST_IDENTITY_ID, idUrn);
+	});
+
 	test("Can mint an NFT", async () => {
 		const connector = new EntityStorageNftConnector();
 		const immutableMetadata: IIrc27Metadata = {
