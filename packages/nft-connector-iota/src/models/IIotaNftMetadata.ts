@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0.
 
 /**
- * Metadata for an Iota Rebased NFT.
+ * Metadata for an Iota NFT.
  */
-export interface IIotaRebasedNftMetadata {
+export interface IIotaNftMetadata {
 	/**
 	 * The name of the NFT.
 	 */

@@ -3,23 +3,29 @@
 import type { IIotaNftConnectorConfig } from "./IIotaNftConnectorConfig";
 
 /**
- * Options for the IOTA nft connector constructor.
+ * Options for the IotaNftConnector.
  */
 export interface IIotaNftConnectorConstructorOptions {
 	/**
-	 * The type of the vault connector.
-	 * @default vault
+	 * The configuration to use for the connector.
+	 */
+	config: IIotaNftConnectorConfig;
+
+	/**
+	 * The vault connector type to use.
+	 * @default "vault"
 	 */
 	vaultConnectorType?: string;
 
 	/**
-	 * The type of the wallet connector.
-	 * @default wallet
+	 * The wallet connector type to use.
+	 * @default "wallet"
 	 */
 	walletConnectorType?: string;
 
 	/**
-	 * The configuration for the connector.
+	 * The logging connector type.
+	 * @default logging
 	 */
-	config: IIotaNftConnectorConfig;
+	loggingConnectorType?: string;
 }

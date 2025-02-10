@@ -4,7 +4,7 @@ import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { nameof } from "@twin.org/nameof";
 import { IotaNftConnector } from "@twin.org/nft-connector-iota";
-import { IotaRebasedNftConnector } from "@twin.org/nft-connector-iota-rebased";
+import { IotaStardustNftConnector } from "@twin.org/nft-connector-iota-stardust";
 import type { INftConnector } from "@twin.org/nft-models";
 import {
 	EntityStorageVaultConnector,
@@ -56,8 +56,8 @@ export function setupNftConnector(
 	connector ??= NftConnectorTypes.Iota;
 
 	let instance: INftConnector;
-	if (connector === NftConnectorTypes.IotaRebased) {
-		instance = new IotaRebasedNftConnector({
+	if (connector === NftConnectorTypes.Iota) {
+		instance = new IotaNftConnector({
 			config: {
 				clientOptions: {
 					url: options.nodeEndpoint
@@ -67,7 +67,7 @@ export function setupNftConnector(
 			}
 		});
 	} else {
-		instance = new IotaNftConnector({
+		instance = new IotaStardustNftConnector({
 			config: {
 				clientOptions: {
 					nodes: [options.nodeEndpoint],

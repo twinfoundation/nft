@@ -3,7 +3,7 @@
 import { CLIDisplay, CLIParam } from "@twin.org/cli-core";
 import { Converter, I18n, Is, StringHelper } from "@twin.org/core";
 import { IotaNftUtils } from "@twin.org/nft-connector-iota";
-import { IotaRebasedNftUtils } from "@twin.org/nft-connector-iota-rebased";
+import { IotaStardustNftUtils } from "@twin.org/nft-connector-iota-stardust";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
 import { Command, Option } from "commander";
 import { setupNftConnector, setupVault } from "./setupCommands";
@@ -75,7 +75,7 @@ export function buildCommandNftTransfer(): Command {
  * @param opts.recipientAddress The recipient address of the NFT.
  * @param opts.connector The connector to perform the operations with.
  * @param opts.node The node URL.
- * @param opts.network The network to use for rebased connector.
+ * @param opts.network The network to use for connector.
  * @param opts.explorer The explorer URL.
  */
 export async function actionCommandNftTransfer(opts: {
@@ -95,12 +95,12 @@ export async function actionCommandNftTransfer(opts: {
 		opts.recipientIdentity
 	);
 	const recipientAddress: string =
-		opts.connector === NftConnectorTypes.IotaRebased
+		opts.connector === NftConnectorTypes.Iota
 			? Converter.bytesToHex(CLIParam.hex("recipientAddress", opts.recipientAddress), true)
 			: CLIParam.bech32("recipientAddress", opts.recipientAddress);
 	const nodeEndpoint: string = CLIParam.url("node", opts.node);
 	const network: string | undefined =
-		opts.connector === NftConnectorTypes.IotaRebased
+		opts.connector === NftConnectorTypes.Iota
 			? CLIParam.stringValue("network", opts.network)
 			: undefined;
 	const explorerEndpoint: string = CLIParam.url("explorer", opts.explorer);
@@ -144,9 +144,9 @@ export async function actionCommandNftTransfer(opts: {
 
 	CLIDisplay.value(
 		I18n.formatMessage("commands.common.labels.explore"),
-		opts.connector === NftConnectorTypes.IotaRebased
-			? `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/object/${IotaRebasedNftUtils.nftIdToObjectId(id)}?network=${network}`
-			: `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/addr/${IotaNftUtils.nftIdToAddress(id)}`
+		opts.connector === NftConnectorTypes.Iota
+			? `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/object/${IotaNftUtils.nftIdToObjectId(id)}?network=${network}`
+			: `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/addr/${IotaStardustNftUtils.nftIdToAddress(id)}`
 	);
 	CLIDisplay.break();
 

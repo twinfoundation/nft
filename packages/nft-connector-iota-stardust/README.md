@@ -1,11 +1,11 @@
-# TWIN NFT Connector IOTA Rebased
+# TWIN NFT Connector IOTA
 
-Implementation of the NFT connector using IOTA Rebased.
+Implementation of the NFT connector using IOTA.
 
 ## Installation
 
 ```shell
-npm install @twin.org/nft-connector-iota-rebased
+npm install @twin.org/nft-connector-iota
 ```
 
 ## Examples

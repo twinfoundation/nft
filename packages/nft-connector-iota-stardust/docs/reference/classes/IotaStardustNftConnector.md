@@ -1,6 +1,6 @@
-# Class: IotaRebasedNftConnector
+# Class: IotaStardustNftConnector
 
-Class for performing NFT operations on IOTA Rebased.
+Class for performing NFT operations on IOTA Stardust.
 
 ## Implements
 
@@ -8,29 +8,29 @@ Class for performing NFT operations on IOTA Rebased.
 
 ## Constructors
 
-### new IotaRebasedNftConnector()
+### new IotaStardustNftConnector()
 
-> **new IotaRebasedNftConnector**(`options`): [`IotaRebasedNftConnector`](IotaRebasedNftConnector.md)
+> **new IotaStardustNftConnector**(`options`): [`IotaStardustNftConnector`](IotaStardustNftConnector.md)
 
-Create a new instance of IotaRebasedNftConnector.
+Create a new instance of IotaNftConnector.
 
 #### Parameters
 
 ##### options
 
-[`IIotaRebasedNftConnectorConstructorOptions`](../interfaces/IIotaRebasedNftConnectorConstructorOptions.md)
+[`IIotaStardustNftConnectorConstructorOptions`](../interfaces/IIotaStardustNftConnectorConstructorOptions.md)
 
 The options for the connector.
 
 #### Returns
 
-[`IotaRebasedNftConnector`](IotaRebasedNftConnector.md)
+[`IotaStardustNftConnector`](IotaStardustNftConnector.md)
 
 ## Properties
 
 ### NAMESPACE
 
-> `readonly` `static` **NAMESPACE**: `string` = `"iota-rebased"`
+> `readonly` `static` **NAMESPACE**: `string` = `"iota-stardust"`
 
 The namespace supported by the nft connector.
 
@@ -47,42 +47,6 @@ Runtime name for the class.
 `INftConnector.CLASS_NAME`
 
 ## Methods
-
-### start()
-
-> **start**(`nodeIdentity`, `nodeLoggingConnectorType`?, `componentState`?): `Promise`\<`void`\>
-
-Bootstrap the NFT contract.
-
-#### Parameters
-
-##### nodeIdentity
-
-`string`
-
-The identity of the node.
-
-##### nodeLoggingConnectorType?
-
-`string`
-
-The node logging connector type, defaults to "node-logging".
-
-##### componentState?
-
-The component state.
-
-#### Returns
-
-`Promise`\<`void`\>
-
-void.
-
-#### Implementation of
-
-`INftConnector.start`
-
-***
 
 ### mint()
 
@@ -136,9 +100,9 @@ The id of the created NFT in urn format.
 
 ### resolve()
 
-> **resolve**\<`T`, `U`\>(`nftId`): `Promise`\<\{ `issuer`: `string`; `owner`: `string`; `tag`: `string`; `immutableMetadata`: `T`; `metadata`: `U`; \}\>
+> **resolve**\<`T`, `U`\>(`id`): `Promise`\<\{ `issuer`: `string`; `owner`: `string`; `tag`: `string`; `immutableMetadata`: `T`; `metadata`: `U`; \}\>
 
-Resolve an NFT to get its details.
+Resolve an NFT.
 
 #### Type Parameters
 
@@ -148,7 +112,7 @@ Resolve an NFT to get its details.
 
 #### Parameters
 
-##### nftId
+##### id
 
 `string`
 
@@ -158,7 +122,7 @@ The id of the NFT to resolve.
 
 `Promise`\<\{ `issuer`: `string`; `owner`: `string`; `tag`: `string`; `immutableMetadata`: `T`; `metadata`: `U`; \}\>
 
-The NFT details.
+The data for the NFT.
 
 #### Implementation of
 
@@ -190,7 +154,7 @@ The id of the NFT to burn in urn format.
 
 `Promise`\<`void`\>
 
-void.
+Nothing.
 
 #### Implementation of
 
@@ -200,9 +164,9 @@ void.
 
 ### transfer()
 
-> **transfer**\<`U`\>(`controller`, `nftId`, `recipientIdentity`, `recipientAddress`, `metadata`?): `Promise`\<`void`\>
+> **transfer**\<`U`\>(`controllerIdentity`, `id`, `recipientIdentity`, `recipientAddress`, `metadata`?): `Promise`\<`void`\>
 
-Transfer an NFT to a new owner.
+Transfer an NFT.
 
 #### Type Parameters
 
@@ -210,17 +174,17 @@ Transfer an NFT to a new owner.
 
 #### Parameters
 
-##### controller
+##### controllerIdentity
 
 `string`
 
-The identity of the user to access the vault keys.
+The controller of the NFT who can make changes.
 
-##### nftId
+##### id
 
 `string`
 
-The id of the NFT to transfer.
+The id of the NFT to transfer in urn format.
 
 ##### recipientIdentity
 
@@ -238,13 +202,13 @@ The recipient address for the NFT.
 
 `U`
 
-Optional metadata to update during transfer.
+Optional mutable data to include during the transfer.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-void.
+Nothing.
 
 #### Implementation of
 
@@ -256,7 +220,7 @@ void.
 
 > **update**\<`U`\>(`controllerIdentity`, `id`, `metadata`): `Promise`\<`void`\>
 
-Update the mutable data of an NFT.
+Update the data of the NFT.
 
 #### Type Parameters
 
@@ -280,13 +244,13 @@ The id of the NFT to update in urn format.
 
 `U`
 
-The new metadata for the NFT.
+The mutable data to update.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-void.
+Nothing.
 
 #### Implementation of
 

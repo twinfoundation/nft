@@ -10,7 +10,7 @@ import {
 } from "@twin.org/cli-core";
 import { Converter, I18n, Is, StringHelper } from "@twin.org/core";
 import { IotaNftUtils } from "@twin.org/nft-connector-iota";
-import { IotaRebasedNftUtils } from "@twin.org/nft-connector-iota-rebased";
+import { IotaStardustNftUtils } from "@twin.org/nft-connector-iota-stardust";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
 import { Command, Option } from "commander";
 import { setupNftConnector, setupVault } from "./setupCommands";
@@ -90,7 +90,7 @@ export function buildCommandNftMint(): Command {
  * @param opts.mutableJson Filename of the mutable JSON data.
  * @param opts.connector The connector to perform the operations with.
  * @param opts.node The node URL.
- * @param opts.network The network to use for rebased connector.
+ * @param opts.network The network to use for connector.
  * @param opts.explorer The explorer URL.
  */
 export async function actionCommandNftMint(
@@ -115,7 +115,7 @@ export async function actionCommandNftMint(
 		: undefined;
 	const nodeEndpoint: string = CLIParam.url("node", opts.node);
 	const network: string | undefined =
-		opts.connector === NftConnectorTypes.IotaRebased
+		opts.connector === NftConnectorTypes.Iota
 			? CLIParam.stringValue("network", opts.network)
 			: undefined;
 	const explorerEndpoint: string = CLIParam.url("explorer", opts.explorer);
@@ -194,9 +194,9 @@ export async function actionCommandNftMint(
 
 	CLIDisplay.value(
 		I18n.formatMessage("commands.common.labels.explore"),
-		opts.connector === NftConnectorTypes.IotaRebased
-			? `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/object/${IotaRebasedNftUtils.nftIdToObjectId(nftId)}?network=${network}`
-			: `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/addr/${IotaNftUtils.nftIdToAddress(nftId)}`
+		opts.connector === NftConnectorTypes.Iota
+			? `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/object/${IotaNftUtils.nftIdToObjectId(nftId)}?network=${network}`
+			: `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/addr/${IotaStardustNftUtils.nftIdToAddress(nftId)}`
 	);
 	CLIDisplay.break();
 

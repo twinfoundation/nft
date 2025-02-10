@@ -3,12 +3,36 @@
 import type { IIotaConfig } from "@twin.org/dlt-iota";
 
 /**
- * Configuration for the IOTA NFT connector.
+ * Configuration for the IOTA NFT Connector.
  */
 export interface IIotaNftConnectorConfig extends IIotaConfig {
 	/**
-	 * The wallet address index to use to store the NFTs on.
+	 * The name of the contract to use.
+	 * @default "nft"
+	 */
+	contractName?: string;
+
+	/**
+	 * The gas budget to use for transactions.
+	 * @default 1_000_000_000
+	 */
+	gasBudget?: number;
+
+	/**
+	 * The package controller address index to use when creating package.
+	 * @default 0
+	 */
+	packageControllerAddressIndex?: number;
+
+	/**
+	 * The wallet address index to use when creating NFT.
 	 * @default 0
 	 */
 	walletAddressIndex?: number;
+
+	/**
+	 * Enable cost logging.
+	 * @default false
+	 */
+	enableCostLogging?: boolean;
 }
