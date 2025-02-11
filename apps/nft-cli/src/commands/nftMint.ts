@@ -140,13 +140,13 @@ export async function actionCommandNftMint(
 	const explorerEndpoint: string = CLIParam.url("explorer", opts.explorer);
 
 	CLIDisplay.value(I18n.formatMessage("commands.nft-mint.labels.issuer"), issuer);
-	if (Is.number(walletAddressIndex)) {
-		CLIDisplay.value(I18n.formatMessage("commands.nft-mint.labels.tag"), tag);
+	if (Is.integer(walletAddressIndex)) {
+		CLIDisplay.value(
+			I18n.formatMessage("commands.nft-mint.labels.walletAddressIndex"),
+			walletAddressIndex
+		);
 	}
-	CLIDisplay.value(
-		I18n.formatMessage("commands.nft-mint.labels.walletAddressIndex"),
-		walletAddressIndex
-	);
+	CLIDisplay.value(I18n.formatMessage("commands.nft-mint.labels.tag"), tag);
 	if (Is.stringValue(immutableJson)) {
 		CLIDisplay.value(
 			I18n.formatMessage("commands.nft-mint.labels.immutableJsonFilename"),
