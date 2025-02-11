@@ -10,6 +10,8 @@ import {
 import { I18n, Is, StringHelper } from "@twin.org/core";
 import { IotaNftUtils } from "@twin.org/nft-connector-iota";
 import { IotaStardustNftUtils } from "@twin.org/nft-connector-iota-stardust";
+import { setupWalletConnector } from "@twin.org/wallet-cli";
+import { WalletConnectorFactory } from "@twin.org/wallet-models";
 import { Command, Option } from "commander";
 import { setupNftConnector, setupVault } from "./setupCommands";
 import { NftConnectorTypes } from "../models/nftConnectorTypes";
@@ -100,6 +102,12 @@ export async function actionCommandNftResolve(
 	CLIDisplay.break();
 
 	setupVault();
+
+	const walletConnector = setupWalletConnector(
+		{ nodeEndpoint, network },
+		opts.connector
+	);
+	WalletConnectorFactory.register("wallet", () => walletConnector);
 
 	const nftConnector = setupNftConnector({ nodeEndpoint, network }, opts.connector);
 

@@ -28,6 +28,12 @@ The network.
 
 The vault seed ID.
 
+#### walletAddressIndex?
+
+`number`
+
+The wallet address index.
+
 ### connector?
 
 [`NftConnectorTypes`](../type-aliases/NftConnectorTypes.md)

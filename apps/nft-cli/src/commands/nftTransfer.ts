@@ -5,6 +5,8 @@ import { Converter, I18n, Is, StringHelper } from "@twin.org/core";
 import { IotaNftUtils } from "@twin.org/nft-connector-iota";
 import { IotaStardustNftUtils } from "@twin.org/nft-connector-iota-stardust";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
+import { setupWalletConnector } from "@twin.org/wallet-cli";
+import { WalletConnectorFactory } from "@twin.org/wallet-models";
 import { Command, Option } from "commander";
 import { setupNftConnector, setupVault } from "./setupCommands";
 import { NftConnectorTypes } from "../models/nftConnectorTypes";
@@ -28,12 +30,12 @@ export function buildCommandNftTransfer(): Command {
 			I18n.formatMessage("commands.nft-transfer.options.id.description")
 		)
 		.requiredOption(
-			I18n.formatMessage("commands.nft-transfer.options.recipientIdentity.param"),
-			I18n.formatMessage("commands.nft-transfer.options.recipientIdentity.description")
+			I18n.formatMessage("commands.nft-transfer.options.recipient-identity.param"),
+			I18n.formatMessage("commands.nft-transfer.options.recipient-identity.description")
 		)
 		.requiredOption(
-			I18n.formatMessage("commands.nft-transfer.options.recipientAddress.param"),
-			I18n.formatMessage("commands.nft-transfer.options.recipientAddress.description")
+			I18n.formatMessage("commands.nft-transfer.options.recipient-address.param"),
+			I18n.formatMessage("commands.nft-transfer.options.recipient-address.description")
 		);
 
 	command
@@ -121,6 +123,12 @@ export async function actionCommandNftTransfer(opts: {
 	CLIDisplay.break();
 
 	setupVault();
+
+	const walletConnector = setupWalletConnector(
+		{ nodeEndpoint, network },
+		opts.connector
+	);
+	WalletConnectorFactory.register("wallet", () => walletConnector);
 
 	const localIdentity = "local";
 	const vaultSeedId = "local-seed";

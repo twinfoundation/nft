@@ -5,6 +5,8 @@ import { Converter, I18n, Is, StringHelper } from "@twin.org/core";
 import { IotaNftUtils } from "@twin.org/nft-connector-iota";
 import { IotaStardustNftUtils } from "@twin.org/nft-connector-iota-stardust";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
+import { setupWalletConnector } from "@twin.org/wallet-cli";
+import { WalletConnectorFactory } from "@twin.org/wallet-models";
 import { Command, Option } from "commander";
 import { setupNftConnector, setupVault } from "./setupCommands";
 import { NftConnectorTypes } from "../models/nftConnectorTypes";
@@ -98,6 +100,12 @@ export async function actionCommandNftBurn(opts: {
 
 	const vaultConnector = VaultConnectorFactory.get("vault");
 	await vaultConnector.setSecret(`${localIdentity}/${vaultSeedId}`, Converter.bytesToBase64(seed));
+
+	const walletConnector = setupWalletConnector(
+		{ nodeEndpoint, network, vaultSeedId },
+		opts.connector
+	);
+	WalletConnectorFactory.register("wallet", () => walletConnector);
 
 	const nftConnector = setupNftConnector({ nodeEndpoint, network, vaultSeedId }, opts.connector);
 	if (Is.function(nftConnector.start)) {

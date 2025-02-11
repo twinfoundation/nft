@@ -12,6 +12,8 @@ import { Converter, I18n, Is, StringHelper } from "@twin.org/core";
 import { IotaNftUtils } from "@twin.org/nft-connector-iota";
 import { IotaStardustNftUtils } from "@twin.org/nft-connector-iota-stardust";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
+import { setupWalletConnector } from "@twin.org/wallet-cli";
+import { WalletConnectorFactory } from "@twin.org/wallet-models";
 import { Command, Option } from "commander";
 import { setupNftConnector, setupVault } from "./setupCommands";
 import { NftConnectorTypes } from "../models/nftConnectorTypes";
@@ -29,6 +31,15 @@ export function buildCommandNftMint(): Command {
 		.requiredOption(
 			I18n.formatMessage("commands.nft-mint.options.seed.param"),
 			I18n.formatMessage("commands.nft-mint.options.seed.description")
+		)
+		.requiredOption(
+			I18n.formatMessage("commands.nft-mint.options.issuer.param"),
+			I18n.formatMessage("commands.nft-mint.options.issuer.description")
+		)
+		.option(
+			I18n.formatMessage("commands.nft-mint.options.wallet-address-index.param"),
+			I18n.formatMessage("commands.nft-mint.options.wallet-address-index.description"),
+			"0"
 		)
 		.requiredOption(
 			I18n.formatMessage("commands.nft-mint.options.tag.param"),
@@ -85,6 +96,8 @@ export function buildCommandNftMint(): Command {
  * Action the nft mint command.
  * @param opts The options for the command.
  * @param opts.seed The seed required for signing by the issuer.
+ * @param opts.issuer The identity of the issuer.
+ * @param opts.walletAddressIndex The wallet address index.
  * @param opts.tag The tag for the NFT.
  * @param opts.immutableJson Filename of the immutable JSON data.
  * @param opts.mutableJson Filename of the mutable JSON data.
@@ -96,6 +109,8 @@ export function buildCommandNftMint(): Command {
 export async function actionCommandNftMint(
 	opts: {
 		seed: string;
+		issuer: string;
+		walletAddressIndex?: string;
 		tag: string;
 		immutableJson?: string;
 		mutableJson?: string;
@@ -106,6 +121,10 @@ export async function actionCommandNftMint(
 	} & CliOutputOptions
 ): Promise<void> {
 	const seed: Uint8Array = CLIParam.hexBase64("seed", opts.seed);
+	const issuer: string = CLIParam.stringValue("issuer", opts.issuer);
+	const walletAddressIndex = Is.empty(opts.walletAddressIndex)
+		? undefined
+		: CLIParam.integer("wallet-address-index", opts.walletAddressIndex);
 	const tag: string = CLIParam.stringValue("tag", opts.tag);
 	const immutableJson: string | undefined = opts.immutableJson
 		? path.resolve(opts.immutableJson)
@@ -120,7 +139,14 @@ export async function actionCommandNftMint(
 			: undefined;
 	const explorerEndpoint: string = CLIParam.url("explorer", opts.explorer);
 
-	CLIDisplay.value(I18n.formatMessage("commands.nft-mint.labels.tag"), tag);
+	CLIDisplay.value(I18n.formatMessage("commands.nft-mint.labels.issuer"), issuer);
+	if (Is.number(walletAddressIndex)) {
+		CLIDisplay.value(I18n.formatMessage("commands.nft-mint.labels.tag"), tag);
+	}
+	CLIDisplay.value(
+		I18n.formatMessage("commands.nft-mint.labels.walletAddressIndex"),
+		walletAddressIndex
+	);
 	if (Is.stringValue(immutableJson)) {
 		CLIDisplay.value(
 			I18n.formatMessage("commands.nft-mint.labels.immutableJsonFilename"),
@@ -141,13 +167,22 @@ export async function actionCommandNftMint(
 
 	setupVault();
 
-	const localIdentity = "local";
+	const localIdentity = issuer;
 	const vaultSeedId = "local-seed";
 
 	const vaultConnector = VaultConnectorFactory.get("vault");
 	await vaultConnector.setSecret(`${localIdentity}/${vaultSeedId}`, Converter.bytesToBase64(seed));
 
-	const nftConnector = setupNftConnector({ nodeEndpoint, network, vaultSeedId }, opts.connector);
+	const walletConnector = setupWalletConnector(
+		{ nodeEndpoint, network, vaultSeedId },
+		opts.connector
+	);
+	WalletConnectorFactory.register("wallet", () => walletConnector);
+
+	const nftConnector = setupNftConnector(
+		{ nodeEndpoint, network, vaultSeedId, walletAddressIndex },
+		opts.connector
+	);
 	if (Is.function(nftConnector.start)) {
 		await nftConnector.start(localIdentity);
 	}

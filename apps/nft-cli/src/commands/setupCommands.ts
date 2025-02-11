@@ -46,11 +46,17 @@ export function setupVault(): void {
  * @param options.nodeEndpoint The node endpoint.
  * @param options.network The network.
  * @param options.vaultSeedId The vault seed ID.
+ * @param options.walletAddressIndex The wallet address index.
  * @param connector The connector to use.
  * @returns The NFT connector.
  */
 export function setupNftConnector(
-	options: { nodeEndpoint: string; network?: string; vaultSeedId?: string },
+	options: {
+		nodeEndpoint: string;
+		network?: string;
+		vaultSeedId?: string;
+		walletAddressIndex?: number;
+	},
 	connector?: NftConnectorTypes
 ): INftConnector {
 	connector ??= NftConnectorTypes.Iota;
@@ -63,7 +69,8 @@ export function setupNftConnector(
 					url: options.nodeEndpoint
 				},
 				network: options.network ?? "",
-				vaultSeedId: options.vaultSeedId
+				vaultSeedId: options.vaultSeedId,
+				walletAddressIndex: options.walletAddressIndex ?? 0
 			}
 		});
 	} else {
@@ -73,7 +80,8 @@ export function setupNftConnector(
 					nodes: [options.nodeEndpoint],
 					localPow: true
 				},
-				vaultSeedId: options.vaultSeedId
+				vaultSeedId: options.vaultSeedId,
+				walletAddressIndex: options.walletAddressIndex ?? 0
 			}
 		});
 	}
