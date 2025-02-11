@@ -19,10 +19,10 @@
 			"nftOwnerNftFound": "The owner for NFT \"{nftId}\" was not found",
 			"startFailed": "Failed to start the IOTA NFT connector",
 			"deployTransactionFailed": "Deploying the contract failed with error: \"{error}\"",
-			"connectorNotStarted": "Please call start() before using this connector. Package ID: \"{packageId}\" is missing."
+			"connectorNotStarted": "Please call start() before using this connector. Package ID: \"{packageId}\" is missing.",
+			"invalidImmutableMetadata": "The immutable metadata for NFT \"{nftId, error}\" is invalid",
+			"invalidMetadata": "The metadata for NFT \"{nftId, error}\" is invalid"
 		},
-		"iotaNftUtils": {
-			"invalidNftIdFormat": "The NFT ID \"{id}\" has an invalid format"
-		}
+		"iotaNftUtils": { "invalidNftIdFormat": "The NFT ID \"{id}\" has an invalid format" }
 	}
 }

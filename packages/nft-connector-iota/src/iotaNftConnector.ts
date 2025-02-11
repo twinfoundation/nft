@@ -13,7 +13,6 @@ import compiledModulesJson from "./contracts/compiledModules/compiled-modules.js
 import { IotaNftUtils } from "./iotaNftUtils";
 import type { IIotaNftConnectorConfig } from "./models/IIotaNftConnectorConfig";
 import type { IIotaNftConnectorConstructorOptions } from "./models/IIotaNftConnectorConstructorOptions";
-import type { IIotaNftMetadata } from "./models/IIotaNftMetadata";
 import type { INftFields } from "./models/INftFields";
 
 /**
@@ -103,9 +102,7 @@ export class IotaNftConnector implements INftConnector {
 		this._gasBudget = this._config.gasBudget ?? 1_000_000_000;
 		Guards.number(this.CLASS_NAME, nameof(this._gasBudget), this._gasBudget);
 		if (this._gasBudget <= 0) {
-			throw new GeneralError(this.CLASS_NAME, "invalidGasBudget", {
-				gasBudget: this._gasBudget
-			});
+			throw new GeneralError(this.CLASS_NAME, "invalidGasBudget", { gasBudget: this._gasBudget });
 		}
 
 		Iota.populateConfig(this._config);
@@ -160,11 +157,7 @@ export class IotaNftConnector implements INftConnector {
 						source: this.CLASS_NAME,
 						ts: Date.now(),
 						message: "contractAlreadyDeployed",
-						data: {
-							network: this._config.network,
-							nodeIdentity,
-							packageId: this._packageId
-						}
+						data: { network: this._config.network, nodeIdentity, packageId: this._packageId }
 					});
 				}
 			}
@@ -175,20 +168,14 @@ export class IotaNftConnector implements INftConnector {
 				source: this.CLASS_NAME,
 				ts: Date.now(),
 				message: "contractDeploymentStarted",
-				data: {
-					network: this._config.network,
-					nodeIdentity
-				}
+				data: { network: this._config.network, nodeIdentity }
 			});
 
 			const txb = new Transaction();
 			txb.setGasBudget(this._gasBudget);
 
 			// Publish the compiled modules
-			const [upgradeCap] = txb.publish({
-				modules: compiledModules,
-				dependencies: ["0x1", "0x2"]
-			});
+			const [upgradeCap] = txb.publish({ modules: compiledModules, dependencies: ["0x1", "0x2"] });
 
 			const controllerAddress = await this.getPackageControllerAddress(nodeIdentity);
 
@@ -225,9 +212,7 @@ export class IotaNftConnector implements INftConnector {
 
 			const packageId = packageObject?.reference?.objectId;
 			if (!packageId) {
-				throw new GeneralError(this.CLASS_NAME, "packageIdNotFound", {
-					packageId
-				});
+				throw new GeneralError(this.CLASS_NAME, "packageIdNotFound", { packageId });
 			}
 
 			this._packageId = packageId;
@@ -241,9 +226,7 @@ export class IotaNftConnector implements INftConnector {
 				source: this.CLASS_NAME,
 				ts: Date.now(),
 				message: "contractDeploymentCompleted",
-				data: {
-					packageId: this._packageId
-				}
+				data: { packageId: this._packageId }
 			});
 		} catch (error) {
 			await nodeLogging?.log({
@@ -252,10 +235,7 @@ export class IotaNftConnector implements INftConnector {
 				ts: Date.now(),
 				message: "startFailed",
 				error: BaseError.fromError(error),
-				data: {
-					network: this._config.network,
-					nodeIdentity
-				}
+				data: { network: this._config.network, nodeIdentity }
 			});
 
 			throw error;
@@ -293,19 +273,8 @@ export class IotaNftConnector implements INftConnector {
 			);
 			const address = addresses[0];
 
-			// Convert mutable metadata to string
 			const metadataString = metadata ? JSON.stringify(metadata) : "";
-
-			let name = "";
-			let description = "";
-			let uri = "";
-
-			if (Is.object(immutableMetadata)) {
-				const meta = immutableMetadata as unknown as IIotaNftMetadata;
-				name = meta.name;
-				description = meta.description;
-				uri = meta.uri;
-			}
+			const immutableMetadataString = immutableMetadata ? JSON.stringify(immutableMetadata) : "";
 
 			const packageId = this._packageId;
 			const moduleName = this.getModuleName();
@@ -314,9 +283,7 @@ export class IotaNftConnector implements INftConnector {
 			txb.moveCall({
 				target: `${packageId}::${moduleName}::mint`,
 				arguments: [
-					txb.pure.string(name),
-					txb.pure.string(description),
-					txb.pure.string(uri),
+					txb.pure.string(immutableMetadataString),
 					txb.pure.string(tag),
 					txb.pure.address(address),
 					txb.pure.string(metadataString),
@@ -371,52 +338,42 @@ export class IotaNftConnector implements INftConnector {
 	 */
 	public async resolve<T = unknown, U = unknown>(
 		nftId: string
-	): Promise<{
-		issuer: string;
-		owner: string;
-		tag: string;
-		immutableMetadata?: T;
-		metadata?: U;
-	}> {
+	): Promise<{ issuer: string; owner: string; tag: string; immutableMetadata?: T; metadata?: U }> {
 		Guards.stringValue(this.CLASS_NAME, nameof(nftId), nftId);
 
 		try {
 			const objectId = IotaNftUtils.nftIdToObjectId(nftId);
 			const object = await this._client.getObject({
 				id: objectId,
-				options: {
-					showContent: true,
-					showType: true,
-					showOwner: true
-				}
+				options: { showContent: true, showType: true, showOwner: true }
 			});
 
 			if (!object.data?.content) {
-				throw new GeneralError(this.CLASS_NAME, "nftNotFound", {
-					nftId
-				});
+				throw new GeneralError(this.CLASS_NAME, "nftNotFound", { nftId });
 			}
 
 			// Because object.data.content is of type IotaParsedData
-			const parsedData = object.data.content as unknown as {
-				fields: INftFields;
-			};
+			const parsedData = object.data.content as unknown as { fields: INftFields };
 
 			const content = parsedData.fields;
 
-			// Extract immutable metadata
-			const immutableMetadata = {
-				name: content.name,
-				description: content.description,
-				uri: content.uri
-			} as T;
+			let immutableMetadata: T | undefined;
+			if (content.immutable_metadata) {
+				try {
+					immutableMetadata = JSON.parse(content.immutable_metadata) as T;
+				} catch (error) {
+					throw new GeneralError(this.CLASS_NAME, "invalidImmutableMetadata", { nftId, error });
+				}
+			}
 
 			// Parse mutable metadata if it's JSON
 			let metadata: U | undefined;
 			if (content.metadata) {
 				try {
 					metadata = JSON.parse(content.metadata) as U;
-				} catch {}
+				} catch (error) {
+					throw new GeneralError(this.CLASS_NAME, "invalidMetadata", { nftId, error });
+				}
 			}
 
 			return {
@@ -469,11 +426,7 @@ export class IotaNftConnector implements INftConnector {
 
 			const object = await this._client.getObject({
 				id: objectId,
-				options: {
-					showContent: true,
-					showType: true,
-					showOwner: true
-				}
+				options: { showContent: true, showType: true, showOwner: true }
 			});
 
 			const ownerAddress = this.getOwnerAddress(id, object);
@@ -554,11 +507,7 @@ export class IotaNftConnector implements INftConnector {
 
 			const object = await this._client.getObject({
 				id: objectId,
-				options: {
-					showContent: true,
-					showType: true,
-					showOwner: true
-				}
+				options: { showContent: true, showType: true, showOwner: true }
 			});
 
 			const ownerAddress = this.getOwnerAddress(nftId, object);
@@ -664,11 +613,7 @@ export class IotaNftConnector implements INftConnector {
 
 			const object = await this._client.getObject({
 				id: objectId,
-				options: {
-					showContent: true,
-					showType: true,
-					showOwner: true
-				}
+				options: { showContent: true, showType: true, showOwner: true }
 			});
 
 			const ownerAddress = this.getOwnerAddress(id, object);
@@ -783,8 +728,6 @@ export class IotaNftConnector implements INftConnector {
 			// Shared ownership is handled as null
 		}
 
-		throw new GeneralError(this.CLASS_NAME, "nftOwnerNftFound", {
-			nftId
-		});
+		throw new GeneralError(this.CLASS_NAME, "nftOwnerNftFound", { nftId });
 	}
 }

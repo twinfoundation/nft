@@ -103,10 +103,7 @@ export async function actionCommandNftResolve(
 
 	setupVault();
 
-	const walletConnector = setupWalletConnector(
-		{ nodeEndpoint, network },
-		opts.connector
-	);
+	const walletConnector = setupWalletConnector({ nodeEndpoint, network }, opts.connector);
 	WalletConnectorFactory.register("wallet", () => walletConnector);
 
 	const nftConnector = setupNftConnector({ nodeEndpoint, network }, opts.connector);

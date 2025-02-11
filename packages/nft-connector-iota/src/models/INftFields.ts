@@ -15,17 +15,9 @@ export interface INftFields {
 		id: string; // UID is an object with an 'id' field
 	};
 	/**
-	 * The name of the NFT.
+	 * The immutable metadata of the NFT.
 	 */
-	name: string;
-	/**
-	 * The description of the NFT.
-	 */
-	description: string;
-	/**
-	 * The URI of the NFT.
-	 */
-	uri: string;
+	immutable_metadata: string;
 	/**
 	 * The tag of the NFT.
 	 */
