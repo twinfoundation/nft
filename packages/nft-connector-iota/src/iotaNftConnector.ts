@@ -361,8 +361,8 @@ export class IotaNftConnector implements INftConnector {
 			if (content.immutable_metadata) {
 				try {
 					immutableMetadata = JSON.parse(content.immutable_metadata) as T;
-				} catch {
-					throw new GeneralError(this.CLASS_NAME, "invalidImmutableMetadata", { nftId });
+				} catch (error) {
+					throw new GeneralError(this.CLASS_NAME, "invalidImmutableMetadata", { nftId }, error);
 				}
 			}
 
@@ -371,8 +371,8 @@ export class IotaNftConnector implements INftConnector {
 			if (content.metadata) {
 				try {
 					metadata = JSON.parse(content.metadata) as U;
-				} catch {
-					throw new GeneralError(this.CLASS_NAME, "invalidMetadata", { nftId });
+				} catch (error) {
+					throw new GeneralError(this.CLASS_NAME, "invalidMetadata", { nftId }, error);
 				}
 			}
 
