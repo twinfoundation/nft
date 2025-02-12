@@ -203,6 +203,8 @@ describe("IotaNftConnector", () => {
 		const response = await nftUserConnector.resolve(nftId);
 		expect(response.issuer).toEqual(TEST_USER_IDENTITY_ID);
 		expect(response.owner).toEqual(TEST_USER_IDENTITY_ID);
+
+		expect(response.immutableMetadata).toBeUndefined();
 	});
 
 	test("Can mint an NFT", async () => {
@@ -276,9 +278,7 @@ describe("IotaNftConnector", () => {
 				description: "NFT for testing transfer with metadata",
 				uri: "https://example.com/transfer.png"
 			},
-			{
-				initialField: "initialValue"
-			}
+			{ initialField: "initialValue" }
 		);
 		await waitForResolution(testNftId);
 
@@ -286,10 +286,7 @@ describe("IotaNftConnector", () => {
 		const transferMetadata = {
 			updatedField: "transferValue",
 			timestamp: Date.now(),
-			transferInfo: {
-				previousOwner: TEST_ADDRESS,
-				transferDate: new Date().toISOString()
-			}
+			transferInfo: { previousOwner: TEST_ADDRESS, transferDate: new Date().toISOString() }
 		};
 
 		// Transfer with metadata update
@@ -331,15 +328,9 @@ describe("IotaNftConnector", () => {
 			updatedField: "newValue",
 			anotherField: "anotherValue"
 		});
-		await waitForData(nftId, {
-			updatedField: "newValue",
-			anotherField: "anotherValue"
-		});
+		await waitForData(nftId, { updatedField: "newValue", anotherField: "anotherValue" });
 		const response = await nftUserConnector.resolve(nftId);
-		expect(response.metadata).toEqual({
-			updatedField: "newValue",
-			anotherField: "anotherValue"
-		});
+		expect(response.metadata).toEqual({ updatedField: "newValue", anotherField: "anotherValue" });
 	});
 
 	test("Can burn an NFT", async () => {
@@ -390,13 +381,7 @@ describe("IotaNftConnector", () => {
 			description: "NFT with complex metadata",
 			uri: "https://example.com/nft.png"
 		};
-		const complexMetadata = {
-			level1: {
-				level2: {
-					key: "value"
-				}
-			}
-		};
+		const complexMetadata = { level1: { level2: { key: "value" } } };
 		nftId = await nftUserConnector.mint(
 			TEST_USER_IDENTITY_ID,
 			"complex_tag",

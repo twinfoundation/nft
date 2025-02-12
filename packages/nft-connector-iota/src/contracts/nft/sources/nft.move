@@ -7,38 +7,32 @@ module 0x0::nft {
     /// The NFT struct representing our NFT object.
     struct NFT has key, store {
         id: UID,
-        name: String,
-        description: String,
-        uri: String,
+        immutable_metadata: String, // All immutable data as JSON,
         tag: String,
         metadata: String, // Mutable metadata
         issuer: address,
-		issuerIdentity: String,
-		ownerIdentity: String
+        issuerIdentity: String,
+        ownerIdentity: String
     }
 
     /// Mint a new NFT and transfer it to the issuer.
     public entry fun mint(
-        name: String,
-        description: String,
-        uri: String,
+        immutable_metadata: String,
         tag: String,
         issuer: address,
         metadata: String,
-		issuerIdentity: String,
-		ownerIdentity: String,
+        issuerIdentity: String,
+        ownerIdentity: String,
         ctx: &mut TxContext
     ) {
         let nft = NFT {
             id: object::new(ctx),
-            name,
-            description,
-            uri,
+            immutable_metadata,
             tag,
             metadata,
             issuer,
-			issuerIdentity,
-			ownerIdentity
+            issuerIdentity,
+            ownerIdentity
         };
         transfer::transfer(nft, issuer);
     }
@@ -48,13 +42,13 @@ module 0x0::nft {
         nft.metadata = new_metadata;
     }
 
-	/// Transfer without metadata update
+    /// Transfer without metadata update
     public entry fun transfer(
         nft: NFT, // Take ownership directly
         recipient: address,
-		recipientIdentity: String
+        recipientIdentity: String
     ) {
-		nft.ownerIdentity = recipientIdentity;
+        nft.ownerIdentity = recipientIdentity;
 
         transfer::public_transfer(nft, recipient);
     }
@@ -63,10 +57,10 @@ module 0x0::nft {
     public entry fun transfer_with_metadata(
         nft: NFT, // Take ownership directly
         recipient: address,
-		recipientIdentity: String,
+        recipientIdentity: String,
         metadata: String
     ) {
-		nft.ownerIdentity = recipientIdentity;
+        nft.ownerIdentity = recipientIdentity;
 
         update_metadata(&mut nft, metadata);
 
@@ -77,14 +71,12 @@ module 0x0::nft {
     public entry fun burn(nft: NFT) {
         let NFT {
             id,
-            name: _,
-            description: _,
-            uri: _,
+            immutable_metadata: _,
             tag: _,
             metadata: _,
             issuer: _,
-			issuerIdentity: _,
-			ownerIdentity: _
+            issuerIdentity: _,
+            ownerIdentity: _
         } = nft;
         object::delete(id);
     }
