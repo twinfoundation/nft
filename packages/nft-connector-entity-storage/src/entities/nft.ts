@@ -34,12 +34,12 @@ export class Nft {
 	/**
 	 * The immutable metadata.
 	 */
-	@property({ type: "object" })
-	public immutableMetadata!: unknown;
+	@property({ type: "object", optional: true })
+	public immutableMetadata?: unknown;
 
 	/**
 	 * The mutable metadata.
 	 */
-	@property({ type: "object" })
-	public metadata!: unknown;
+	@property({ type: "object", optional: true })
+	public metadata?: unknown;
 }
