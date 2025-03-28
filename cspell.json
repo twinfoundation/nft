@@ -19,7 +19,7 @@
 		"**/scripts/**",
 		"**/contracts/**"
 	],
-	"words": ["bech", "Faucet", "TWIN", "nameof", "Stiftung", "utxo", "devnet", "Stdlib"],
+	"words": ["abbrev", "bech", "Faucet", "TWIN", "nameof", "Stiftung", "utxo", "devnet", "Stdlib"],
 	"ignoreRegExpList": [
 		"/from\\s+(['\"]).*\\1/",
 		"/eslint-disable.*/",
