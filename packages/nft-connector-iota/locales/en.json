@@ -21,7 +21,11 @@
 			"deployTransactionFailed": "Deploying the contract failed with error: \"{error}\"",
 			"connectorNotStarted": "Please call start() before using this connector. Package ID: \"{packageId}\" is missing.",
 			"invalidImmutableMetadata": "The immutable metadata for NFT \"{nftId}\" is invalid",
-			"invalidMetadata": "The metadata for NFT \"{nftId}\" is invalid"
+			"invalidMetadata": "The metadata for NFT \"{nftId}\" is invalid",
+			"nftBurnTimeout": "The NFT \"{nftId}\" was not burned after {maxAttempts} attempts",
+			"nftOwnerChangeTimeout": "The NFT \"{nftId}\" was not transferred to \"{expectedOwner}\" after {maxAttempts} attempts",
+			"nftResolutionTimeout": "The NFT \"{nftId}\" was not resolvable after {maxAttempts} attempts",
+			"unknownError": "An unknown error occurred: {error}"
 		},
 		"iotaNftUtils": { "invalidNftIdFormat": "The NFT ID \"{id}\" has an invalid format" }
 	}
