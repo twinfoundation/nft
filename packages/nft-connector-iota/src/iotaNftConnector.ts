@@ -229,8 +229,6 @@ export class IotaNftConnector implements INftConnector {
 				data: { packageId: this._packageId }
 			});
 		} catch (error) {
-			// eslint-disable-next-line no-console
-			console.log(error);
 			await nodeLogging?.log({
 				level: "error",
 				source: this.CLASS_NAME,
@@ -264,7 +262,8 @@ export class IotaNftConnector implements INftConnector {
 
 		// Wrap the entire minting operation in a retry mechanism to handle sequence number mismatches
 		// that can occur due to transaction timing issues in the network
-		return this.executeWithRetry(async () => {
+		try {
+			// return this.executeWithRetry(async () => {
 			const txb = new Transaction();
 			txb.setGasBudget(this._gasBudget);
 
@@ -323,13 +322,16 @@ export class IotaNftConnector implements INftConnector {
 				"nft",
 				`${IotaNftConnector.NAMESPACE}:${this._config.network}:${this._packageId}:${result.createdObject.objectId}`
 			);
-			const nftId = urn.toString();
 
-			// Wait for the NFT to be resolvable before proceeding
-			await this.waitForResolution(nftId);
-
-			return nftId;
-		});
+			return urn.toString();
+		} catch (error) {
+			throw new GeneralError(
+				this.CLASS_NAME,
+				"mintingFailed",
+				undefined,
+				Iota.extractPayloadError(error)
+			);
+		}
 	}
 
 	/**
@@ -385,8 +387,6 @@ export class IotaNftConnector implements INftConnector {
 				metadata
 			};
 		} catch (error) {
-			// eslint-disable-next-line no-console
-			console.log(error);
 			throw new GeneralError(
 				this.CLASS_NAME,
 				"resolvingFailed",
@@ -458,12 +458,7 @@ export class IotaNftConnector implements INftConnector {
 					error: result.effects?.status?.error
 				});
 			}
-
-			// Wait for the NFT to be burned (fail resolution)
-			await this.waitForFailedResolution(id);
 		} catch (error) {
-			// eslint-disable-next-line no-console
-			console.log(error);
 			throw new GeneralError(
 				this.CLASS_NAME,
 				"burningFailed",
@@ -576,12 +571,7 @@ export class IotaNftConnector implements INftConnector {
 					error: result.effects?.status?.error
 				});
 			}
-
-			// Wait for the ownership change to be reflected on the network
-			await this.waitForOwnerChange(nftId, recipientIdentity);
 		} catch (error) {
-			// eslint-disable-next-line no-console
-			console.log(error);
 			throw new GeneralError(
 				this.CLASS_NAME,
 				"transferFailed",
@@ -664,12 +654,7 @@ export class IotaNftConnector implements INftConnector {
 					error: result.effects?.status?.error
 				});
 			}
-
-			// Wait for the metadata update to be reflected on the network
-			await this.waitForMetadataUpdate(id, metadata);
 		} catch (error) {
-			// eslint-disable-next-line no-console
-			console.log(error);
 			throw new GeneralError(
 				this.CLASS_NAME,
 				"updateFailed",
@@ -756,121 +741,6 @@ export class IotaNftConnector implements INftConnector {
 		}
 
 		throw new GeneralError(this.CLASS_NAME, "nftOwnerNftFound", { nftId });
-	}
-
-	/**
-	 * Wait for the NFT to be resolvable.
-	 * @param nftId The NFT ID to check.
-	 * @param maxAttempts Maximum number of attempts (default: 50).
-	 * @param delayMs Delay between attempts in milliseconds (default: 100).
-	 * @internal
-	 */
-	private async waitForResolution(nftId: string, maxAttempts = 50, delayMs = 500): Promise<void> {
-		let resolved = false;
-		let attempts = 0;
-
-		while (!resolved && attempts < maxAttempts) {
-			try {
-				await this.resolve(nftId);
-				resolved = true;
-			} catch {
-				attempts++;
-				if (attempts >= maxAttempts) {
-					throw new GeneralError(this.CLASS_NAME, "nftResolutionTimeout", {
-						nftId,
-						maxAttempts
-					});
-				}
-				await new Promise(resolve => setTimeout(resolve, delayMs));
-			}
-		}
-	}
-
-	/**
-	 * Wait for the NFT ownership to change.
-	 * @param nftId The NFT ID to check.
-	 * @param expectedOwner The expected new owner.
-	 * @param maxAttempts Maximum number of attempts (default: 50).
-	 * @param delayMs Delay between attempts in milliseconds (default: 100).
-	 * @internal
-	 */
-	private async waitForOwnerChange(
-		nftId: string,
-		expectedOwner: string,
-		maxAttempts = 50,
-		delayMs = 100
-	): Promise<void> {
-		for (let i = 0; i < maxAttempts; i++) {
-			try {
-				const resolved = await this.resolve(nftId);
-				if (resolved.owner === expectedOwner) {
-					return;
-				}
-			} catch {}
-			await new Promise(resolve => setTimeout(resolve, delayMs));
-		}
-		throw new GeneralError(this.CLASS_NAME, "nftOwnerChangeTimeout", {
-			nftId,
-			expectedOwner,
-			maxAttempts
-		});
-	}
-
-	/**
-	 * Wait for the NFT to fail resolution (be burned).
-	 * @param nftId The NFT ID to check.
-	 * @param maxAttempts Maximum number of attempts (default: 50).
-	 * @param delayMs Delay between attempts in milliseconds (default: 100).
-	 * @internal
-	 */
-	private async waitForFailedResolution(
-		nftId: string,
-		maxAttempts = 50,
-		delayMs = 100
-	): Promise<void> {
-		for (let i = 0; i < maxAttempts; i++) {
-			try {
-				await this.resolve(nftId);
-			} catch {
-				// If resolution fails, it means the NFT is burned
-				return;
-			}
-			await new Promise(resolve => setTimeout(resolve, delayMs));
-		}
-		throw new GeneralError(this.CLASS_NAME, "nftBurnTimeout", {
-			nftId,
-			maxAttempts
-		});
-	}
-
-	/**
-	 * Wait for the NFT metadata to be updated.
-	 * @param nftId The NFT ID to check.
-	 * @param expectedMetadata The expected metadata.
-	 * @param maxAttempts Maximum number of attempts (default: 50).
-	 * @param delayMs Delay between attempts in milliseconds (default: 100).
-	 * @internal
-	 */
-	private async waitForMetadataUpdate<U = unknown>(
-		nftId: string,
-		expectedMetadata: U,
-		maxAttempts = 50,
-		delayMs = 100
-	): Promise<void> {
-		for (let i = 0; i < maxAttempts; i++) {
-			try {
-				const resolved = await this.resolve(nftId);
-				if (JSON.stringify(resolved.metadata) === JSON.stringify(expectedMetadata)) {
-					return;
-				}
-			} catch {}
-			await new Promise(resolve => setTimeout(resolve, delayMs));
-		}
-		throw new GeneralError(this.CLASS_NAME, "nftMetadataUpdateTimeout", {
-			nftId,
-			expectedMetadata,
-			maxAttempts
-		});
 	}
 
 	/**
