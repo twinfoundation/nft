@@ -260,10 +260,7 @@ export class IotaNftConnector implements INftConnector {
 		Guards.stringValue(this.CLASS_NAME, nameof(controllerIdentity), controllerIdentity);
 		Guards.stringValue(this.CLASS_NAME, nameof(tag), tag);
 
-		// Wrap the entire minting operation in a retry mechanism to handle sequence number mismatches
-		// that can occur due to transaction timing issues in the network
 		try {
-			// return this.executeWithRetry(async () => {
 			const txb = new Transaction();
 			txb.setGasBudget(this._gasBudget);
 
@@ -741,65 +738,5 @@ export class IotaNftConnector implements INftConnector {
 		}
 
 		throw new GeneralError(this.CLASS_NAME, "nftOwnerNftFound", { nftId });
-	}
-
-	/**
-	 * Execute a transaction with retry logic for sequence number mismatches.
-	 * @param operation The operation to execute.
-	 * @param maxRetries Maximum number of retries.
-	 * @param retryDelay Delay between retries in milliseconds.
-	 * @returns The result of the operation.
-	 * @internal
-	 */
-	private async executeWithRetry<T>(
-		operation: () => Promise<T>,
-		maxRetries = 10,
-		retryDelay = 1000
-	): Promise<T> {
-		let lastError: Error | undefined;
-
-		for (let retries = 0; retries <= maxRetries; retries++) {
-			try {
-				return await operation();
-			} catch (error) {
-				// eslint-disable-next-line no-console
-				console.log(error);
-
-				if (error instanceof Error) {
-					lastError = error;
-				} else {
-					throw new GeneralError(this.CLASS_NAME, "unknownError", { error });
-				}
-
-				const isSequenceError =
-					lastError.message.includes("SequenceNumber") &&
-					lastError.message.includes("is not available for consumption");
-
-				// message: 'Transaction execution failed due to issues with transaction inputs, please review the errors and try again: Object (0x00005743232de3f8cc98b036917f325ee9e5177a8b18927d01ab5ca7ca2211f8, SequenceNumber(222063441), o#2pJvDRDuucqtrJv3PywFkqwDaf72mGgdvQLBtenqHB23) is not available for consumption, its current version: SequenceNumber(222063442).'
-
-				if (isSequenceError && retries < maxRetries) {
-					await new Promise(resolve => setTimeout(resolve, retryDelay));
-				} else if (!isSequenceError) {
-					throw new GeneralError(
-						this.CLASS_NAME,
-						"mintingFailed",
-						undefined,
-						Iota.extractPayloadError(lastError)
-					);
-				}
-			}
-		}
-
-		// If we've exhausted all retries with sequence number errors
-		throw new GeneralError(
-			this.CLASS_NAME,
-			"sequenceNumberError",
-			{
-				maxRetries,
-				retryDelay,
-				lastError: lastError?.message
-			},
-			Iota.extractPayloadError(lastError)
-		);
 	}
 }
