@@ -498,6 +498,15 @@ export class IotaNftConnector implements INftConnector {
 		}
 
 		try {
+			// Verify ownership before attempting transfer
+			const currentNft = await this.resolve(nftId);
+			if (currentNft.owner !== controller) {
+				throw new GeneralError(this.CLASS_NAME, "transferFailed", {
+					currentOwner: currentNft.owner,
+					controller
+				});
+			}
+
 			const txb = new Transaction();
 			txb.setGasBudget(this._gasBudget);
 
