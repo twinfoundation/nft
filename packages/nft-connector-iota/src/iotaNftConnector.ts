@@ -159,6 +159,8 @@ export class IotaNftConnector implements INftConnector {
 						message: "contractAlreadyDeployed",
 						data: { network: this._config.network, nodeIdentity, packageId: this._packageId }
 					});
+
+					return;
 				}
 			}
 
