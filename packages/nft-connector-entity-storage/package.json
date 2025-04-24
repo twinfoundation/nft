@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/nft-connector-entity-storage",
-	"version": "0.0.1-next.26",
+	"version": "0.0.1-next.27",
 	"description": "Implementation of the NFT connector using entity storage",
 	"repository": {
 		"type": "git",
@@ -35,7 +35,7 @@
 		"@twin.org/entity": "next",
 		"@twin.org/entity-storage-models": "next",
 		"@twin.org/nameof": "next",
-		"@twin.org/nft-models": "0.0.1-next.26"
+		"@twin.org/nft-models": "0.0.1-next.27"
 	},
 	"devDependencies": {
 		"@twin.org/nameof-transformer": "next",
