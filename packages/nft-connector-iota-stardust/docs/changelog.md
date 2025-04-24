@@ -1,5 +1,19 @@
 # @twin.org/nft-connector-iota-stardust - Changelog
 
+## [0.0.1-next.27](https://github.com/twinfoundation/nft/compare/nft-connector-iota-stardust-v0.0.1-next.26...nft-connector-iota-stardust-v0.0.1-next.27) (2025-04-24)
+
+
+### Miscellaneous Chores
+
+* **nft-connector-iota-stardust:** Synchronize repo versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/nft-models bumped from 0.0.1-next.26 to 0.0.1-next.27
+
 ## [0.0.1-next.26](https://github.com/twinfoundation/nft/compare/nft-connector-iota-stardust-v0.0.1-next.25...nft-connector-iota-stardust-v0.0.1-next.26) (2025-04-17)
 
 
