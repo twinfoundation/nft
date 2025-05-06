@@ -1,5 +1,19 @@
 # @twin.org/nft-cli - Changelog
 
+## [0.0.1-next.28](https://github.com/twinfoundation/nft/compare/nft-cli-v0.0.1-next.27...nft-cli-v0.0.1-next.28) (2025-05-06)
+
+
+### Features
+
+* iota rebased release ([8d05d1f](https://github.com/twinfoundation/nft/commit/8d05d1f58c1aacac983c100697ab40a314ad34ea))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/nft-connector-iota bumped from 0.0.1-next.27 to 0.0.1-next.28
+
 ## [0.0.1-next.27](https://github.com/twinfoundation/nft/compare/nft-cli-v0.0.1-next.26...nft-cli-v0.0.1-next.27) (2025-04-24)
 
 
