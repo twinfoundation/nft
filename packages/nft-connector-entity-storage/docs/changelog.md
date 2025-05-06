@@ -1,5 +1,19 @@
 # @twin.org/nft-connector-entity-storage - Changelog
 
+## [0.0.1-next.28](https://github.com/twinfoundation/nft/compare/nft-connector-entity-storage-v0.0.1-next.27...nft-connector-entity-storage-v0.0.1-next.28) (2025-05-06)
+
+
+### Features
+
+* iota rebased release ([bfdd233](https://github.com/twinfoundation/nft/commit/bfdd23330e168962f7ad0a6fcd2c9c9a38a11697))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/nft-models bumped from 0.0.1-next.27 to 0.0.1-next.28
+
 ## [0.0.1-next.27](https://github.com/twinfoundation/nft/compare/nft-connector-entity-storage-v0.0.1-next.26...nft-connector-entity-storage-v0.0.1-next.27) (2025-04-24)
 
 
