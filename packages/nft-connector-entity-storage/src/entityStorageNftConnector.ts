@@ -183,7 +183,11 @@ export class EntityStorageNftConnector implements INftConnector {
 	): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(controllerIdentity), controllerIdentity);
 		Urn.guard(this.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(this.CLASS_NAME, nameof(recipientIdentity), recipientIdentity);
 		Guards.stringValue(this.CLASS_NAME, nameof(recipientAddress), recipientAddress);
+		if (!Is.undefined(metadata)) {
+			Guards.object(this.CLASS_NAME, nameof(metadata), metadata);
+		}
 
 		const urnParsed = Urn.fromValidString(id);
 		if (urnParsed.namespaceMethod() !== EntityStorageNftConnector.NAMESPACE) {

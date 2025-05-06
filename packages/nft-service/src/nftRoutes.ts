@@ -360,8 +360,8 @@ export async function nftTransfer(
 	const component = ComponentFactory.get<INftComponent>(componentName);
 	await component.transfer(
 		request.pathParams.id,
-		request.body.recipientAddress,
 		request.body.recipientIdentity,
+		request.body.recipientAddress,
 		request.body.metadata,
 		httpRequestContext.userIdentity
 	);
