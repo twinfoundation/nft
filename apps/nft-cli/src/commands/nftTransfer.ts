@@ -3,7 +3,6 @@
 import { CLIDisplay, CLIParam } from "@twin.org/cli-core";
 import { Converter, I18n, Is, StringHelper } from "@twin.org/core";
 import { IotaNftUtils } from "@twin.org/nft-connector-iota";
-import { IotaStardustNftUtils } from "@twin.org/nft-connector-iota-stardust";
 import { VaultConnectorFactory } from "@twin.org/vault-models";
 import { setupWalletConnector } from "@twin.org/wallet-cli";
 import { WalletConnectorFactory } from "@twin.org/wallet-models";
@@ -149,9 +148,7 @@ export async function actionCommandNftTransfer(opts: {
 
 	CLIDisplay.value(
 		I18n.formatMessage("commands.common.labels.explore"),
-		opts.connector === NftConnectorTypes.Iota
-			? `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/object/${IotaNftUtils.nftIdToObjectId(id)}?network=${network}`
-			: `${StringHelper.trimTrailingSlashes(explorerEndpoint)}/addr/${IotaStardustNftUtils.nftIdToAddress(id)}`
+		`${StringHelper.trimTrailingSlashes(explorerEndpoint)}/object/${IotaNftUtils.nftIdToObjectId(id)}?network=${network}`
 	);
 	CLIDisplay.break();
 

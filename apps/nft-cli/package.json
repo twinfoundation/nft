@@ -39,7 +39,6 @@
 		"@twin.org/entity-storage-connector-memory": "next",
 		"@twin.org/nameof": "next",
 		"@twin.org/nft-connector-iota": "0.0.1-next.27",
-		"@twin.org/nft-connector-iota-stardust": "0.0.1-next.27",
 		"@twin.org/vault-connector-entity-storage": "next",
 		"@twin.org/vault-models": "next",
 		"@twin.org/wallet-cli": "next",

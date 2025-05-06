@@ -4,7 +4,6 @@ import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { nameof } from "@twin.org/nameof";
 import { IotaNftConnector } from "@twin.org/nft-connector-iota";
-import { IotaStardustNftConnector } from "@twin.org/nft-connector-iota-stardust";
 import type { INftConnector } from "@twin.org/nft-models";
 import {
 	EntityStorageVaultConnector,
@@ -61,30 +60,14 @@ export function setupNftConnector(
 ): INftConnector {
 	connector ??= NftConnectorTypes.Iota;
 
-	let instance: INftConnector;
-	if (connector === NftConnectorTypes.Iota) {
-		instance = new IotaNftConnector({
-			config: {
-				clientOptions: {
-					url: options.nodeEndpoint
-				},
-				network: options.network ?? "",
-				vaultSeedId: options.vaultSeedId,
-				walletAddressIndex: options.walletAddressIndex ?? 0
-			}
-		});
-	} else {
-		instance = new IotaStardustNftConnector({
-			config: {
-				clientOptions: {
-					nodes: [options.nodeEndpoint],
-					localPow: true
-				},
-				vaultSeedId: options.vaultSeedId,
-				walletAddressIndex: options.walletAddressIndex ?? 0
-			}
-		});
-	}
-
-	return instance;
+	return new IotaNftConnector({
+		config: {
+			clientOptions: {
+				url: options.nodeEndpoint
+			},
+			network: options.network ?? "",
+			vaultSeedId: options.vaultSeedId,
+			walletAddressIndex: options.walletAddressIndex ?? 0
+		}
+	});
 }

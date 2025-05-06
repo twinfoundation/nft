@@ -19,11 +19,6 @@
 			"changelog-path": "docs/changelog.md",
 			"extra-files": ["src/index.ts"]
 		},
-		"packages/nft-connector-iota-stardust": {
-			"package-name": "nft-connector-iota-stardust",
-			"changelog-path": "docs/changelog.md",
-			"extra-files": ["src/index.ts"]
-		},
 		"packages/nft-connector-entity-storage": {
 			"package-name": "nft-connector-entity-storage",
 			"changelog-path": "docs/changelog.md",
@@ -53,7 +48,6 @@
 			"components": [
 				"nft-models",
 				"nft-connector-iota",
-				"nft-connector-iota-stardust",
 				"nft-connector-entity-storage",
 				"nft-service",
 				"nft-rest-client",
