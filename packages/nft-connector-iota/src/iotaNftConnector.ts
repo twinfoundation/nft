@@ -3,12 +3,12 @@
 import type { IotaClient, IotaObjectResponse } from "@iota/iota-sdk/client";
 import { Transaction } from "@iota/iota-sdk/transactions";
 import { BaseError, Converter, GeneralError, Guards, Is, StringHelper, Urn } from "@twin.org/core";
-import { Iota, type IIotaDryRun } from "@twin.org/dlt-iota";
-import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/logging-models";
+import { Iota } from "@twin.org/dlt-iota";
+import { LoggingConnectorFactory, type ILoggingConnector } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
 import type { INftConnector } from "@twin.org/nft-models";
 import { VaultConnectorFactory, type IVaultConnector } from "@twin.org/vault-models";
-import { type IWalletConnector, WalletConnectorFactory } from "@twin.org/wallet-models";
+import { WalletConnectorFactory, type IWalletConnector } from "@twin.org/wallet-models";
 import compiledModulesJson from "./contracts/compiledModules/compiled-modules.json";
 import { IotaNftUtils } from "./iotaNftUtils";
 import type { IIotaNftConnectorConfig } from "./models/IIotaNftConnectorConfig";
@@ -184,22 +184,16 @@ export class IotaNftConnector implements INftConnector {
 			// Transfer the upgrade capability to the controller
 			txb.transferObjects([upgradeCap], txb.pure.address(controllerAddress));
 
-			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
-			if (this._config.enableCostLogging) {
-				await this.dryRunTransaction(txb, nodeIdentity, "deploy");
-			}
-
-			const result = await Iota.prepareAndPostNftTransaction(
+			const result = await Iota.prepareAndPostTransaction(
 				this._config,
 				this._vaultConnector,
+				nodeLogging,
 				nodeIdentity,
 				this._client,
+				controllerAddress,
+				txb,
 				{
-					owner: controllerAddress,
-					transaction: txb,
-					showEffects: true,
-					showEvents: true,
-					showObjectChanges: true
+					dryRunLabel: this._config.enableCostLogging ? "deploy" : undefined
 				}
 			);
 
@@ -294,32 +288,28 @@ export class IotaNftConnector implements INftConnector {
 				]
 			});
 
-			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
-			if (this._config.enableCostLogging) {
-				await this.dryRunTransaction(txb, controllerIdentity, "mint");
-			}
-
-			const result = await Iota.prepareAndPostNftTransaction(
+			const result = await Iota.prepareAndPostTransaction(
 				this._config,
 				this._vaultConnector,
+				this._logging,
 				controllerIdentity,
 				this._client,
+				address,
+				txb,
 				{
-					owner: address,
-					transaction: txb,
-					showEffects: true,
-					showEvents: true,
-					showObjectChanges: true
+					dryRunLabel: this._config.enableCostLogging ? "mint" : undefined
 				}
 			);
 
-			if (!result.createdObject?.objectId) {
+			const createdObjectId = result.effects?.created?.[0]?.reference?.objectId;
+
+			if (!Is.stringValue(createdObjectId)) {
 				throw new GeneralError(this.CLASS_NAME, "failedToGetNftId", undefined);
 			}
 
 			const urn = new Urn(
 				"nft",
-				`${IotaNftConnector.NAMESPACE}:${this._config.network}:${this._packageId}:${result.createdObject.objectId}`
+				`${IotaNftConnector.NAMESPACE}:${this._config.network}:${this._packageId}:${createdObjectId}`
 			);
 
 			return urn.toString();
@@ -433,22 +423,16 @@ export class IotaNftConnector implements INftConnector {
 
 			const ownerAddress = this.getOwnerAddress(id, object);
 
-			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
-			if (this._config.enableCostLogging) {
-				await this.dryRunTransaction(txb, controllerIdentity, "burn");
-			}
-
-			const result = await Iota.prepareAndPostNftTransaction(
+			const result = await Iota.prepareAndPostTransaction(
 				this._config,
 				this._vaultConnector,
+				this._logging,
 				controllerIdentity,
 				this._client,
+				ownerAddress,
+				txb,
 				{
-					owner: ownerAddress,
-					transaction: txb,
-					showEffects: true,
-					showEvents: true,
-					showObjectChanges: true
+					dryRunLabel: this._config.enableCostLogging ? "burn" : undefined
 				}
 			);
 
@@ -546,22 +530,16 @@ export class IotaNftConnector implements INftConnector {
 				});
 			}
 
-			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
-			if (this._config.enableCostLogging) {
-				await this.dryRunTransaction(txb, controller, "transfer");
-			}
-
-			const result = await Iota.prepareAndPostNftTransaction(
+			const result = await Iota.prepareAndPostTransaction(
 				this._config,
 				this._vaultConnector,
+				this._logging,
 				controller,
 				this._client,
+				ownerAddress,
+				txb,
 				{
-					owner: ownerAddress,
-					transaction: txb,
-					showEffects: true,
-					showEvents: true,
-					showObjectChanges: true
+					dryRunLabel: this._config.enableCostLogging ? "transfer" : undefined
 				}
 			);
 
@@ -629,22 +607,16 @@ export class IotaNftConnector implements INftConnector {
 
 			const ownerAddress = this.getOwnerAddress(id, object);
 
-			// Dry run the transaction if cost logging is enabled to get the gas and storage costs
-			if (this._config.enableCostLogging) {
-				await this.dryRunTransaction(txb, controllerIdentity, "update");
-			}
-
-			const result = await Iota.prepareAndPostNftTransaction(
+			const result = await Iota.prepareAndPostTransaction(
 				this._config,
 				this._vaultConnector,
+				this._logging,
 				controllerIdentity,
 				this._client,
+				ownerAddress,
+				txb,
 				{
-					owner: ownerAddress,
-					transaction: txb,
-					showEffects: true,
-					showEvents: true,
-					showObjectChanges: true
+					dryRunLabel: this._config.enableCostLogging ? "update" : undefined
 				}
 			);
 
@@ -667,6 +639,7 @@ export class IotaNftConnector implements INftConnector {
 	 * Get the package controller's address.
 	 * @param identity The identity of the user to access the vault keys.
 	 * @returns The controller's address.
+	 * @internal
 	 */
 	private async getPackageControllerAddress(identity: string): Promise<string> {
 		const addressIndex = this._config.packageControllerAddressIndex ?? 0;
@@ -677,6 +650,7 @@ export class IotaNftConnector implements INftConnector {
 	/**
 	 * Ensure that the connector is bootstrapped.
 	 * @throws GeneralError if the connector is not started.
+	 * @internal
 	 */
 	private ensureStarted(): void {
 		if (!this._packageId) {
@@ -693,31 +667,6 @@ export class IotaNftConnector implements INftConnector {
 	 */
 	private getModuleName(): string {
 		return StringHelper.snakeCase(this._contractName);
-	}
-
-	/**
-	 * Dry run a transaction.
-	 * @param txb The transaction to dry run.
-	 * @param controller The controller of the transaction.
-	 * @param operation The operation to log.
-	 * @returns void.
-	 */
-	private async dryRunTransaction(
-		txb: Transaction,
-		controller: string,
-		operation: string
-	): Promise<IIotaDryRun> {
-		const controllerAddress = await this.getPackageControllerAddress(controller);
-		const dryRunResponse = await Iota.dryRunTransaction(
-			this._client,
-			this._logging,
-			this.CLASS_NAME,
-			txb,
-			controllerAddress,
-			operation
-		);
-
-		return dryRunResponse;
 	}
 
 	/**

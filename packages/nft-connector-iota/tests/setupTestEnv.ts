@@ -62,6 +62,7 @@ export const TEST_USER_IDENTITY_ID_2 = "test-user-identity-2";
 export const TEST_MNEMONIC_NAME = "test-mnemonic";
 export const TEST_NETWORK = process.env.TEST_NETWORK;
 export const TEST_FAUCET_ENDPOINT = process.env.TEST_FAUCET_ENDPOINT ?? "";
+export const TEST_EXPLORER_URL = process.env.TEST_EXPLORER_URL;
 
 initSchema();
 
