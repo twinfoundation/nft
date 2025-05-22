@@ -32,11 +32,14 @@ describe("IotaNftConnector", () => {
 			}
 		});
 		// Deploy the Move contract
-		const componentState: { packageId?: string } = {};
+		const componentState: { contractDeployments?: { [id: string]: string } } = {};
 		await nftConnector.start(TEST_NODE_IDENTITY, undefined, componentState);
+		console.debug("Component State", componentState);
+
+		const keys = Object.keys(componentState.contractDeployments ?? {});
 		console.debug(
 			"Deployed contract",
-			`${TEST_EXPLORER_URL}object/${componentState.packageId}?network=${TEST_NETWORK}`
+			`${TEST_EXPLORER_URL}object/${componentState.contractDeployments?.[keys[0]]}?network=${TEST_NETWORK}`
 		);
 	});
 
