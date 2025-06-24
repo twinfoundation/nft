@@ -17,6 +17,9 @@ jobs:
       TEST_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
       TEST_2_MNEMONIC: ${{ secrets.TEST_2_MNEMONIC }}
       TEST_NODE_MNEMONIC: ${{ secrets.TEST_NODE_MNEMONIC }}
+      TEST_NODE_ENDPOINT: https://api.testnet.iota.cafe
+      TEST_FAUCET_ENDPOINT: https://faucet.testnet.iota.cafe/gas
+      TEST_NETWORK: testnet
 
     steps:
       # Get the code
@@ -31,18 +34,21 @@ jobs:
 
       # Install dependencies
       - name: Install dependencies
-        run: npm ci
+        run: npm ci # Setup test environment (IOTA CLI + Gas Station)
+      - name: Setup NFT Testing Environment
+        uses: ./.github/actions/setup-test-environment
+        with:
+          test-mnemonic: ${{ secrets.TEST_MNEMONIC }}
+          test-node-endpoint: ${{ env.TEST_NODE_ENDPOINT }}
+          test-faucet-endpoint: ${{ env.TEST_FAUCET_ENDPOINT }}
+          gas-station-auth: 'qEyCL6d9BKKFl/tfDGAKeGFkhUlf7FkqiGV7Xw4JUsI='
 
-      # Setup any services required for tests here
-      - name: Download IOTA CLI
+      # Run tests explicitly for better CI feedback
+      - name: Run Tests
         run: |
-          wget https://github.com/iotaledger/iota/releases/download/v1.0.0/iota-v1.0.0-linux-x86_64.tgz -O iota-cli.tgz
-          tar xzf iota-cli.tgz
-          rm iota-cli.tgz
-          chmod +x iota
-          sudo mv iota /usr/local/bin/iota
-          iota --version
-      # End setup for tests
+          # Run tests for packages that have gas station integration
+          cd packages/nft-connector-iota && npm test
+
       # Run Lint and Dist
       - name: Run Lint and Dist
         run: |

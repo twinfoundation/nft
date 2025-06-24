@@ -27,6 +27,11 @@ Guards.stringValue("TestEnv", "TEST_COIN_TYPE", process.env.TEST_COIN_TYPE);
 Guards.stringValue("TestEnv", "TEST_NETWORK", process.env.TEST_NETWORK);
 Guards.stringValue("TestEnv", "TEST_EXPLORER_URL", process.env.TEST_EXPLORER_URL);
 
+export const GAS_STATION_URL = process.env.GAS_STATION_URL ?? "http://localhost:9527";
+export const GAS_STATION_AUTH_TOKEN =
+	process.env.GAS_STATION_AUTH_TOKEN ?? "qEyCL6d9BKKFl/tfDGAKeGFkhUlf7FkqiGV7Xw4JUsI=";
+export const GAS_BUDGET = Number.parseInt(process.env.GAS_BUDGET ?? "50000000", 10);
+
 if (!Is.stringValue(process.env.TEST_MNEMONIC)) {
 	// eslint-disable-next-line no-restricted-syntax
 	throw new Error(
