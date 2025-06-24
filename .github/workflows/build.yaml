@@ -12,11 +12,30 @@ jobs:
   dist-all-packages:
     runs-on: ubuntu-latest
 
+    # Add services for gas station testing
+    services:
+      gas-station:
+        image: twinfoundation/twin-gas-station-test:latest
+        ports:
+          - 6379:6379
+          - 9527:9527
+          - 9184:9184
+        # Health check to ensure gas station is ready
+        options: >-
+          --health-cmd "curl -f http://localhost:9527 || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     # Add env vars for tests
     env:
       TEST_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
       TEST_2_MNEMONIC: ${{ secrets.TEST_2_MNEMONIC }}
       TEST_NODE_MNEMONIC: ${{ secrets.TEST_NODE_MNEMONIC }}
+      # Gas Station configuration
+      GAS_STATION_URL: http://localhost:9527
+      GAS_STATION_AUTH_TOKEN: qEyCL6d9BKKFl/tfDGAKeGFkhUlf7FkqiGV7Xw4JUsI=
+      GAS_BUDGET: 50000000
 
     steps:
       # Get the code
@@ -42,7 +61,14 @@ jobs:
           chmod +x iota
           sudo mv iota /usr/local/bin/iota
           iota --version
-      # End setup for tests
+
+      # Verify gas station is ready
+      - name: Wait for Gas Station
+        run: |
+          echo "Waiting for gas station to be ready..."
+          timeout 60 bash -c 'until curl -f http://localhost:9527; do sleep 2; done'
+          echo "Gas station is ready!"
+
       # Run Lint and Dist
       - name: Run Lint and Dist
         run: |
