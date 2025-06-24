@@ -32,10 +32,6 @@ jobs:
       TEST_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
       TEST_2_MNEMONIC: ${{ secrets.TEST_2_MNEMONIC }}
       TEST_NODE_MNEMONIC: ${{ secrets.TEST_NODE_MNEMONIC }}
-      # Gas Station configuration
-      GAS_STATION_URL: http://localhost:9527
-      GAS_STATION_AUTH_TOKEN: qEyCL6d9BKKFl/tfDGAKeGFkhUlf7FkqiGV7Xw4JUsI=
-      GAS_BUDGET: 50000000
 
     steps:
       # Get the code
@@ -52,22 +48,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Setup any services required for tests here
-      - name: Download IOTA CLI
-        run: |
-          wget https://github.com/iotaledger/iota/releases/download/v1.0.0/iota-v1.0.0-linux-x86_64.tgz -O iota-cli.tgz
-          tar xzf iota-cli.tgz
-          rm iota-cli.tgz
-          chmod +x iota
-          sudo mv iota /usr/local/bin/iota
-          iota --version
+      # Setup test environment (IOTA CLI + Gas Station)
+      - name: Setup Test Environment
+        uses: ./.github/actions/setup-test-environment
 
-      # Verify gas station is ready
-      - name: Wait for Gas Station
+      # Run tests explicitly for better CI feedback
+      - name: Run Tests
         run: |
-          echo "Waiting for gas station to be ready..."
-          timeout 60 bash -c 'until curl -f http://localhost:9527; do sleep 2; done'
-          echo "Gas station is ready!"
+          # Run tests for packages that have gas station integration
+          cd packages/nft-connector-iota && npm test
 
       # Run Lint and Dist
       - name: Run Lint and Dist

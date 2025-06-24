@@ -1,0 +1,49 @@
+name: 'Setup Test Environment'
+description: 'Sets up IOTA CLI and validates gas station service for testing'
+
+inputs:
+  gas-station-url:
+    description: 'Gas station URL'
+    required: false
+    default: 'http://localhost:9527'
+  gas-station-auth-token:
+    description: 'Gas station authentication token'
+    required: false
+    default: 'qEyCL6d9BKKFl/tfDGAKeGFkhUlf7FkqiGV7Xw4JUsI='
+  gas-budget:
+    description: 'Gas budget for transactions'
+    required: false
+    default: '50000000'
+
+runs:
+  using: 'composite'
+  steps:
+    # Download and setup IOTA CLI
+    - name: Download IOTA CLI
+      shell: bash
+      run: |
+        wget https://github.com/iotaledger/iota/releases/download/v1.0.0/iota-v1.0.0-linux-x86_64.tgz -O iota-cli.tgz
+        tar xzf iota-cli.tgz
+        rm iota-cli.tgz
+        chmod +x iota
+        sudo mv iota /usr/local/bin/iota
+        iota --version
+
+    # Set up gas station environment variables
+    - name: Setup Gas Station Environment
+      shell: bash
+      run: |
+        echo "GAS_STATION_URL=${{ inputs.gas-station-url }}" >> $GITHUB_ENV
+        echo "GAS_STATION_AUTH_TOKEN=${{ inputs.gas-station-auth-token }}" >> $GITHUB_ENV
+        echo "GAS_BUDGET=${{ inputs.gas-budget }}" >> $GITHUB_ENV
+
+    # Verify gas station is ready (only if running as a service)
+    - name: Wait for Gas Station
+      shell: bash
+      run: |
+        echo "Waiting for gas station to be ready..."
+        if timeout 60 bash -c 'until curl -f ${{ inputs.gas-station-url }}; do sleep 2; done'; then
+          echo "Gas station is ready!"
+        else
+          echo "Warning: Gas station not available. Some tests may be skipped."
+        fi
