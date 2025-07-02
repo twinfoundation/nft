@@ -12,25 +12,34 @@ npm install @twin.org/nft-connector-iota
 
 The tests developed are functional tests and need the following components to be running:
 
-### Prerequisites
+### Quick Setup (Recommended)
 
-1. **IOTA Testnet Access**: Tests run against the IOTA testnet
-2. **Gas Station Service**: Required for gas station integration tests (20 comprehensive tests)
-3. **Test Mnemonics**: Required for wallet operations
+The simplest way to set up the testing environment using our unified container:
 
-### Gas Station Setup
+```shell
+# Start the unified container with Redis + Gas Station
+docker run -d --name twin-gas-station-test \
+  -p 6379:6379 -p 9527:9527 -p 9184:9184 \
+  twinfoundation/twin-gas-station-test:latest
 
-To run the comprehensive gas station integration tests, you need to start the gas station Docker container:
+# Wait a moment for services to start, then verify
+docker exec twin-gas-station-test redis-cli ping  # Should return: PONG
+curl http://localhost:9527/  # Should return: OK
 
-```sh
-docker run -d --name twin-gas-station-test -p 6379:6379 -p 9527:9527 -p 9184:9184 twinfoundation/twin-gas-station-test:latest
+# Configure your test environment variables (see Environment Configuration below)
+# Then run tests
+npm run test
+
+# When finished, cleanup
+docker stop twin-gas-station-test && docker rm twin-gas-station-test
 ```
 
-This starts:
+That's it! The unified container includes:
 
-- Port 6379: Redis for gas station state
-- Port 9527: Gas Station API endpoint
-- Port 9184: Admin interface
+- Redis server (port 6379)
+- IOTA Gas Station (port 9527, metrics 9184)
+- Pre-configured with test keypair and settings
+- Health checks and proper startup sequencing
 
 ### Environment Configuration
 
@@ -42,20 +51,12 @@ TEST_2_MNEMONIC="second test mnemonic phrase here"
 TEST_NODE_MNEMONIC="node mnemonic phrase here"
 ```
 
-### Running Tests
-
-After setting up the gas station and environment variables, you can run the tests:
-
-```sh
-npm run test
-```
+### Test Coverage
 
 The test suite includes:
 
 - **13 standard NFT tests**: Basic NFT operations (mint, transfer, update, burn)
 - **20 gas station tests**: Comprehensive sponsored transaction testing
-
-### Test Coverage
 
 The gas station integration tests validate:
 
@@ -63,6 +64,62 @@ The gas station integration tests validate:
 - All NFT operations using sponsored transactions
 - Error handling for invalid configurations
 - Complex workflows and metadata operations
+
+### Alternative Setup Methods
+
+For advanced users who prefer alternative setups:
+
+#### Option A: Standalone Docker Images
+
+If you prefer to run services separately:
+
+```shell
+# Pull the required Docker images
+docker pull redis:7-alpine
+docker pull iotaledger/gas-station:latest
+
+# Start Redis
+docker run -d --name gas-station-redis -p 6379:6379 redis:7-alpine
+
+# Create gas station config file
+cat > gas-station-config.yaml << EOF
+signer-config:
+  local:
+    keypair: AKT1Ghtd+yNbI9fFCQin3FpiGx8xoUdJMe7iAhoFUm4f
+rpc-host-ip: 0.0.0.0
+rpc-port: 9527
+metrics-port: 9184
+storage-config:
+  redis:
+    redis_url: "redis://127.0.0.1:6379"
+fullnode-url: "https://api.testnet.iota.cafe"
+coin-init-config:
+  target-init-balance: 100000000
+  refresh-interval-sec: 86400
+daily-gas-usage-cap: 1500000000000
+access-controller:
+  access-policy: disabled
+EOF
+
+# Start IOTA Gas Station
+docker run -d --name gas-station \
+  -p 9527:9527 -p 9184:9184 \
+  -v $(pwd)/gas-station-config.yaml:/config/config.yaml \
+  --network host \
+  iotaledger/gas-station:latest \
+  --config-path /config/config.yaml
+
+# Verify services are running
+redis-cli ping  # Should return: PONG
+curl http://localhost:9527/  # Should return: OK
+
+# Cleanup when finished
+docker stop gas-station gas-station-redis && docker rm gas-station gas-station-redis
+```
+
+#### Option B: Local Installation
+
+For development purposes, you may also install and run services locally. See the [IOTA Gas Station documentation](https://github.com/iotaledger/gas-station) for more details.
 
 ## Examples
 
