@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/nft-service",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "NFT contract implementation and REST endpoint definitions",
 	"repository": {
 		"type": "git",
@@ -35,13 +35,13 @@
 		"@twin.org/core": "^0.0.1",
 		"@twin.org/entity": "^0.0.1",
 		"@twin.org/nameof": "^0.0.1",
-		"@twin.org/nft-models": "^0.0.0",
+		"@twin.org/nft-models": "^0.0.1",
 		"@twin.org/web": "^0.0.1"
 	},
 	"devDependencies": {
 		"@twin.org/nameof-transformer": "^0.0.1",
 		"@twin.org/nameof-vitest-plugin": "^0.0.1",
-		"@twin.org/nft-connector-entity-storage": "^0.0.0",
+		"@twin.org/nft-connector-entity-storage": "^0.0.1",
 		"@twin.org/ts-to-openapi": "^0.0.1",
 		"@vitest/coverage-v8": "3.2.3",
 		"copyfiles": "2.4.1",
