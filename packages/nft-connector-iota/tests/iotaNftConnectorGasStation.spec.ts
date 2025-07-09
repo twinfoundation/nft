@@ -13,9 +13,10 @@ import {
 	TEST_MNEMONIC_NAME,
 	TEST_VAULT_CONNECTOR,
 	TEST_EXPLORER_URL,
-	GAS_STATION_URL,
-	GAS_STATION_AUTH_TOKEN,
-	GAS_BUDGET
+	TEST_NODE_MNEMONIC,
+	TEST_GAS_BUDGET,
+	TEST_GAS_STATION_URL,
+	TEST_GAS_STATION_AUTH_TOKEN
 } from "./setupTestEnv";
 import { IotaNftConnector } from "../src/iotaNftConnector";
 import type { IIotaNftConnectorConfig } from "../src/models/IIotaNftConnectorConfig";
@@ -36,11 +37,11 @@ describe("IotaNftConnector with Gas Station", () => {
 			clientOptions: TEST_CLIENT_OPTIONS,
 			vaultMnemonicId: TEST_MNEMONIC_NAME,
 			network: TEST_NETWORK,
-			gasBudget: GAS_BUDGET,
+			gasBudget: TEST_GAS_BUDGET,
 			enableCostLogging: true,
 			gasStation: {
-				gasStationUrl: GAS_STATION_URL,
-				gasStationAuthToken: GAS_STATION_AUTH_TOKEN
+				gasStationUrl: TEST_GAS_STATION_URL,
+				gasStationAuthToken: TEST_GAS_STATION_AUTH_TOKEN
 			}
 		};
 
@@ -98,10 +99,10 @@ describe("IotaNftConnector with Gas Station", () => {
 				clientOptions: TEST_CLIENT_OPTIONS,
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				network: TEST_NETWORK,
-				gasBudget: GAS_BUDGET * 2, // Double the default gas budget
+				gasBudget: TEST_GAS_BUDGET * 2, // Double the default gas budget
 				gasStation: {
-					gasStationUrl: GAS_STATION_URL,
-					gasStationAuthToken: GAS_STATION_AUTH_TOKEN
+					gasStationUrl: TEST_GAS_STATION_URL,
+					gasStationAuthToken: TEST_GAS_STATION_AUTH_TOKEN
 				}
 			};
 
@@ -116,7 +117,7 @@ describe("IotaNftConnector with Gas Station", () => {
 
 	describe("Gas Station Integration", () => {
 		test("Should test gas station connectivity before attempting NFT operations", async () => {
-			await expect(fetch(GAS_STATION_URL, { method: "GET" })).resolves.toMatchObject({
+			await expect(fetch(TEST_GAS_STATION_URL, { method: "GET" })).resolves.toMatchObject({
 				ok: true
 			});
 		}, 10000);
@@ -416,7 +417,7 @@ describe("IotaNftConnector with Gas Station", () => {
 				network: TEST_NETWORK,
 				gasStation: {
 					gasStationUrl: "http://localhost:9999", // Invalid port
-					gasStationAuthToken: GAS_STATION_AUTH_TOKEN
+					gasStationAuthToken: TEST_GAS_STATION_AUTH_TOKEN
 				}
 			};
 
@@ -439,7 +440,7 @@ describe("IotaNftConnector with Gas Station", () => {
 				vaultMnemonicId: TEST_MNEMONIC_NAME,
 				network: TEST_NETWORK,
 				gasStation: {
-					gasStationUrl: GAS_STATION_URL,
+					gasStationUrl: TEST_GAS_STATION_URL,
 					gasStationAuthToken: "invalid-token"
 				}
 			};
@@ -463,7 +464,7 @@ describe("IotaNftConnector with Gas Station", () => {
 
 			await TEST_VAULT_CONNECTOR.setSecret(
 				`unauthorizedController/${TEST_MNEMONIC_NAME}`,
-				process.env.TEST_NODE_MNEMONIC
+				TEST_NODE_MNEMONIC
 			);
 
 			await expect(

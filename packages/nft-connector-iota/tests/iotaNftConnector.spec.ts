@@ -12,7 +12,8 @@ import {
 	TEST_NETWORK,
 	TEST_MNEMONIC_NAME,
 	TEST_VAULT_CONNECTOR,
-	TEST_EXPLORER_URL
+	TEST_EXPLORER_URL,
+	TEST_NODE_MNEMONIC
 } from "./setupTestEnv";
 import { IotaNftConnector } from "../src/iotaNftConnector";
 
@@ -204,7 +205,7 @@ describe("IotaNftConnector", () => {
 	test("Throws error when unauthorized user attempts to transfer NFT", async () => {
 		await TEST_VAULT_CONNECTOR.setSecret(
 			`unauthorizedController/${TEST_MNEMONIC_NAME}`,
-			process.env.TEST_NODE_MNEMONIC
+			TEST_NODE_MNEMONIC
 		);
 
 		await expect(
