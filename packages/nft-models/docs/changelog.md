@@ -1,5 +1,12 @@
 # @twin.org/nft-models - Changelog
 
+## 0.0.1 (2025-07-09)
+
+
+### Features
+
+* release to production ([4d338b3](https://github.com/twinfoundation/nft/commit/4d338b3e8a4dbccc61a1d1da3c470ba86cefe535))
+
 ## [0.0.1-next.32](https://github.com/twinfoundation/nft/compare/nft-models-v0.0.1-next.31...nft-models-v0.0.1-next.32) (2025-06-24)
 
 
