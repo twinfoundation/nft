@@ -1,5 +1,19 @@
 # @twin.org/nft-rest-client - Changelog
 
+## 0.0.1 (2025-07-09)
+
+
+### Features
+
+* release to production ([4d338b3](https://github.com/twinfoundation/nft/commit/4d338b3e8a4dbccc61a1d1da3c470ba86cefe535))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/nft-models bumped from ^0.0.0 to ^0.0.1
+
 ## [0.0.1-next.32](https://github.com/twinfoundation/nft/compare/nft-rest-client-v0.0.1-next.31...nft-rest-client-v0.0.1-next.32) (2025-06-24)
 
 
