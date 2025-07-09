@@ -1,0 +1,17 @@
+{
+	"error": {
+		"entityStorageNftConnector": {
+			"nftNotFound": "The NFT with the ID \"{notFoundId}\" was not found",
+			"notControllerTransfer": "The NFT can only be transferred by the controller",
+			"notControllerBurn": "The NFT can only be burned by the controller",
+			"notControllerUpdate": "The NFT can only be updated by the controller",
+			"signatureFailed": "The signature verification failed",
+			"mintingFailed": "Minting the NFT failed",
+			"resolvingFailed": "Resolving the NFT failed",
+			"burningFailed": "Burning the NFT failed",
+			"transferFailed": "Transferring the NFT failed",
+			"updatingFailed": "Updating the NFT failed",
+			"namespaceMismatch": "The namespace in the urn \"{id}\" does not match the namespace of the IOTA NFT connector \"{namespace}\""
+		}
+	}
+}

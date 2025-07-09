@@ -1,0 +1,139 @@
+{
+	"commands": {
+		"nft-mint": {
+			"summary": "Mint an NFT.",
+			"description": "Mint an NFT.",
+			"options": {
+				"seed": {
+					"param": "--seed '<'seed'>'",
+					"description": "The seed for the issuer address in hex or base64 used to fund the minting, or start with ! to read environment variable."
+				},
+				"issuer": {
+					"param": "--issuer '<'issuer'>'",
+					"description": "The identity of the NFT issuer, or start with ! to read environment variable."
+				},
+				"wallet-address-index": {
+					"param": "--wallet-address-index '<'wallet-address-index'>'",
+					"description": "The wallet address index to use for storing the NFT."
+				},
+				"tag": {
+					"param": "--tag '<'tag'>'",
+					"description": "The tag for the NFT."
+				},
+				"immutable-json": {
+					"param": "--immutable-json '<'immutable-json'>'",
+					"description": "A JSON file to read which includes the immutable data for the NFT."
+				},
+				"mutable-json": {
+					"param": "--mutable-json '<'mutable-json'>'",
+					"description": "A JSON file to read which includes the mutable data for the NFT."
+				}
+			},
+			"progress": {
+				"mintingNft": "Minting NFT"
+			},
+			"labels": {
+				"issuer": "Issuer",
+				"tag": "Tag",
+				"walletAddressIndex": "Wallet Address Index",
+				"immutableJsonFilename": "Immutable JSON Filename",
+				"mutableJsonFilename": "Mutable JSON Filename",
+				"immutableJson": "Immutable JSON",
+				"mutableJson": "Mutable JSON",
+				"nftId": "NFT Id"
+			}
+		},
+		"nft-resolve": {
+			"summary": "Resolve an NFT.",
+			"description": "Resolve an NFT.",
+			"options": {
+				"id": {
+					"param": "--id '<'id'>'",
+					"description": "The id for the NFT in urn format."
+				}
+			},
+			"progress": {
+				"resolvingNft": "Resolving NFT"
+			},
+			"labels": {
+				"nft": "NFT",
+				"nftId": "NFT Id"
+			}
+		},
+		"nft-burn": {
+			"summary": "Burn an NFT.",
+			"description": "Burn an NFT.",
+			"options": {
+				"seed": {
+					"param": "--seed '<'seed'>'",
+					"description": "The seed for the issuer address in hex or base64 used to fund the burning, or start with ! to read environment variable."
+				},
+				"id": {
+					"param": "--id '<'id'>'",
+					"description": "The id for the NFT in urn format."
+				}
+			},
+			"progress": {
+				"burningNft": "Burning NFT"
+			},
+			"labels": {
+				"issuer": "Issuer",
+				"nftId": "NFT Id"
+			}
+		},
+		"nft-transfer": {
+			"summary": "Transfer an NFT.",
+			"description": "Transfer an NFT.",
+			"options": {
+				"seed": {
+					"param": "--seed '<'seed'>'",
+					"description": "The seed for the issuer address in hex or base64 used to fund the transfer, or start with ! to read environment variable."
+				},
+				"id": {
+					"param": "--id '<'id'>'",
+					"description": "The id for the NFT in urn format."
+				},
+				"recipient-identity": {
+					"param": "--recipient-identity '<'recipient-identity'>'",
+					"description": "The identity of the NFT issuer, or start with ! to read environment variable."
+				},
+				"recipient-address": {
+					"param": "--recipient-address '<'recipient-address'>'",
+					"description": "The address of the NFT recipient, or start with ! to read environment variable."
+				}
+			},
+			"progress": {
+				"transferringNft": "Transferring NFT"
+			},
+			"labels": {
+				"recipientAddress": "Recipient Address",
+				"recipientIdentity": "Recipient Identity",
+				"nftId": "NFT Id"
+			}
+		},
+		"common": {
+			"options": {
+				"connector": {
+					"param": "--connector '<'connector'>'",
+					"description": "The connector to use for the NFT operation."
+				},
+				"network": {
+					"param": "--network '<'network'>'",
+					"description": "The network to use for the NFT operation."
+				},
+				"node": {
+					"param": "--node '<'url'>'",
+					"description": "The url for the node endpoint, or an environment variable name containing the url."
+				}
+			},
+			"labels": {
+				"did": "DID",
+				"node": "Node",
+				"explorer": "Explorer",
+				"explore": "Explore",
+				"connector": "Connector",
+				"network": "Network"
+			}
+		}
+	}
+}
